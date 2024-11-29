@@ -65,17 +65,15 @@ def get_excluded_datetimes(
         | ~(df.index.year.isin(year_filters))
     ]
     dates_to_exclude.extend(dates_to_exclude_series.to_list())
-    
+
     # for idx, datetimes in enumerate(dates_to_exclude):
     #     dates_to_exclude[idx] = datetimes.to_datetime64()
 
     # print(dates_to_exclude)
 
-
-
     dates_to_exclude = sorted(list(set(dates_to_exclude)))
     return dates_to_exclude
 
+
 def get_feature_units(feature_name):
     return feature_units_dict[feature_name]
-    

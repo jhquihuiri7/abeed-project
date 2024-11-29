@@ -60,10 +60,10 @@ class Ops:
         # this is incase the user tries to make a graph with features that haven't been requested,
         # in reality this would not be possible because the user selects the features for new graphs
         # from the features that have been selected
-        for feature in features_list:
-            if not feature in self.data_features:
-                print(f"{feature} has not been requested")
-                return None
+        # for feature in features_list:
+        # if not feature in self.data_features:
+        #    print(f"{feature} has not been requested")
+        #    return None
 
         new_graph = {
             "graph_uid": str(uuid.uuid4()),
@@ -96,11 +96,13 @@ class Ops:
         if not self.df.empty:
             self.update_datetimes_to_exclude()
 
-    def add_feature_filter(self, feature_name: str, lower_bound: float, upper_bound: float):
+    def add_feature_filter(
+        self, feature_name: str, lower_bound: float, upper_bound: float
+    ):
         # TODO only allow user to select features from the data_features list to filter by
         if feature_name not in self.df.columns.to_list():
-            print(f'Feature has not been requested yet')
-        
+            print(f"Feature has not been requested yet")
+
         elif not any(d["feature_name"] == feature_name for d in self.feature_filters):
             new_feature_filter = {
                 "filter_uid": str(uuid.uuid4()),
@@ -112,7 +114,7 @@ class Ops:
             if not self.df.empty:
                 self.update_datetimes_to_exclude()
         else:
-            print(f'A filter already exists for the {feature_name} feature')
+            print(f"A filter already exists for the {feature_name} feature")
 
     def remove_feature_filter(self, target_uuid: str):
         self.feature_filters = [
@@ -143,7 +145,7 @@ class Ops:
 
     #         elif features["Operation"] == '-':
     #             custom_feature_series = custom_feature_series - self.df[features["Feature"]]
-            
+
     #     if cumulative:
     #         custom_feature_series = custom_feature_series.cumsum()
 
@@ -151,7 +153,7 @@ class Ops:
     #         for idx, features in enumerate(feature_operation_list):
     #             if idx == 0:
     #                 custom_name = features["Feature"]
-                
+
     #             else:
     #                 custom_name = custom_name + " " + features["Operation"] + " " + features["Feature"]
 
