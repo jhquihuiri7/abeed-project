@@ -34,7 +34,7 @@ def multi_chart(client):
                         id=graph["graph_uid"],
                         figure=bar_chart(client, graph["graph_data_features"])
                         ),
-                    button(text="Remove Graph", id=f"remove_{graph["graph_uid"]}"),
+                    button(text="Remove Graph", id={"type": "remove_button", "index": graph["graph_uid"]}),
                     ],
                 className="w-1/2 rounded-lg border mt-10 p-4"
             )
