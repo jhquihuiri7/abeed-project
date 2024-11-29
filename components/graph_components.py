@@ -3,7 +3,6 @@ from components.button_components import button
 from dash import dcc, html
 
 
-
 def bar_chart(client, cols=None):
     fig = go.Figure()
 
@@ -19,9 +18,13 @@ def bar_chart(client, cols=None):
             )
         )
     fig.update_layout(
-        xaxis_title="datetime", yaxis_title="Dolars", legend_title="Features",
+        xaxis_title="datetime",
+        yaxis_title="Dolars",
+        legend_title="Features",
         hovermode="x unified",
-        xaxis=dict(showspikes=True, spikemode="across", spikedash="dash", spikesnap="cursor")
+        xaxis=dict(
+            showspikes=True, spikemode="across", spikedash="dash", spikesnap="cursor"
+        ),
     )
     return fig
 
@@ -34,11 +37,14 @@ def multi_chart(client):
                 children=[
                     dcc.Graph(
                         id=graph["graph_uid"],
-                        figure=bar_chart(client, graph["graph_data_features"])
-                        ),
-                    button(text="Remove Graph", id={"type": "remove_button", "index": graph["graph_uid"]}),
-                    ],
-                className="w-1/2 rounded-lg border mt-10 p-4"
+                        figure=bar_chart(client, graph["graph_data_features"]),
+                    ),
+                    button(
+                        text="Remove Graph",
+                        id={"type": "remove_button", "index": graph["graph_uid"]},
+                    ),
+                ],
+                className="w-1/2 rounded-lg border mt-10 p-4",
             )
         )
     if list != []:

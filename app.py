@@ -11,7 +11,6 @@ import plotly.graph_objects as go
 from backend.Class import Ops
 
 
-
 # init client
 client = Ops()
 fig = go.Figure()
@@ -68,24 +67,26 @@ def update_render(
     triggered_id = ctx.triggered[0]["prop_id"].split(".")[0] if ctx.triggered else None
 
     try:
-        triggered_id = eval(triggered_id)  # Convert to dictionary if dynamic
+        # try to convert to dictionary if dynamic
+        triggered_id = eval(triggered_id)
     except:
         pass
-    
+
     # Update graph when update button is clicked
     if triggered_id == "update_graph_button":
-        fig = update_graph(client,features, start_date=start_date, end_date=end_date)
+        fig = update_graph(client, features, start_date=start_date, end_date=end_date)
         return fig, currentChildren
 
     # Add graph when add button is clicked
     elif triggered_id == "add_graph_button":
         currentChildren = add_graph(client, currentFigure)
         return currentFigure, currentChildren
-    
+
+    # Remove graph when add button is clicked
     elif isinstance(triggered_id, dict) and triggered_id.get("type") == "remove_button":
         currentChildren = remove_graph(client, triggered_id.get("index"))
         return currentFigure, currentChildren
-        
+
     # If no figure, return initial empty state
     if not currentFigure:
         return fig, currentChildren
