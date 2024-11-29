@@ -19,7 +19,9 @@ def bar_chart(client, cols=None):
             )
         )
     fig.update_layout(
-        xaxis_title="datetime", yaxis_title="Dolars", legend_title="Features"
+        xaxis_title="datetime", yaxis_title="Dolars", legend_title="Features",
+        hovermode="x unified",
+        xaxis=dict(showspikes=True, spikemode="across", spikedash="dash", spikesnap="cursor")
     )
     return fig
 
