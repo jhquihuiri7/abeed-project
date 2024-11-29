@@ -20,3 +20,7 @@ def remove_graph(client, index):
     client.remove_graph(target_uuid=index)
     return multi_chart(client)
 #
+
+        
+    
+        
