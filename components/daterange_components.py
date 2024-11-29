@@ -1,5 +1,5 @@
 from dash import html, dcc
-from datetime import date
+from datetime import date, datetime, timedelta
 
 
 def main_daterange():
@@ -12,9 +12,8 @@ def main_daterange():
                 id="main-date-picker-range",
                 min_date_allowed=date(2015, 8, 5),
                 max_date_allowed=date(2027, 9, 19),
-                initial_visible_month=date(2024, 8, 5),
-                start_date=date(2024, 10, 20),
-                end_date=date(2027, 8, 25),
+                start_date= datetime.now().date() - timedelta(days=5),
+                end_date=datetime.now().date(),
             )
         ],
     )

@@ -3,6 +3,7 @@ import dash
 from dash import dcc, html, Input, Output, State, callback, callback_context, ALL
 from components.checkbox_components import main_checkbox
 from components.daterange_components import main_daterange
+from components.tabs_components import main_tabs
 from components.button_components import button
 from utils.functions import update_graph, add_graph, remove_graph
 from components.graph_components import bar_chart, multi_chart
@@ -31,6 +32,7 @@ app.layout = html.Div(
     children=[
         main_checkbox(),
         main_daterange(),
+        main_tabs(),
         button(text="Update Graph", id="update_graph_button"),
         dcc.Graph(id="main_graph"),
         button(text="Add Graph", id="add_graph_button"),
