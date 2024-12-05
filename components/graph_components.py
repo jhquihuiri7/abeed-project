@@ -55,7 +55,7 @@ def bar_chart(client, cols=None):
 
 def multi_chart(client):
     list = []
-    for graph in client.graphs[::-1]:
+    for index, graph in enumerate(client.graphs[::-1]):
         list.append(
             html.Div(
                 children=[
@@ -68,7 +68,8 @@ def multi_chart(client):
                         id={"type": "remove_button", "index": graph["graph_uid"]},
                     ),
                 ],
-                className="w-1/2 rounded-lg border mt-10 p-4",
+                className=f"w-[49%] rounded-lg border mt-10 p-4 {'ml-[1%]' if index % 2 != 0 else 'mr-[1%]'}"
+
             )
         )
     if list != []:

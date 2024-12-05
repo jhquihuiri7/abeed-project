@@ -35,7 +35,7 @@ app.layout = html.Div(
         button(text="Update Graph", id="update_graph_button"),
         dcc.Graph(id="main_graph"),
         button(text="Add Graph", id="add_graph_button"),
-        html.Div(id="dynamic_div", children=[]),
+        html.Div(id="dynamic_div", children=[], className="flex flex-wrap"),
     ],
 )
 
