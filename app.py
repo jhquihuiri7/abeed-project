@@ -75,6 +75,7 @@ def update_render(
     # Update graph when update button is clicked
     if triggered_id == "update_graph_button":
         fig = update_graph(client, features, start_date=start_date, end_date=end_date)
+        currentChildren = multi_chart(client)
         return fig, currentChildren
 
     # Add graph when add button is clicked
