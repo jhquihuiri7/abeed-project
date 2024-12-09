@@ -14,17 +14,16 @@ from backend.Class import Ops
 from styles.styles import button_style
 from backend.db_dictionaries import feature_units_dict
 
-
-# Initialize the client and global variables
+# Initialize client
 client = Ops()
 fig = go.Figure()
 custom_feature = []
 features_selected = []
 
-# External scripts (e.g., TailwindCSS)
+# External scripts
 external_scripts = [{"src": "https://cdn.tailwindcss.com"}]
 
-# Initialize the Dash app
+# Initialize Dash app
 app = dash.Dash(
     __name__,
     external_scripts=external_scripts,
@@ -32,28 +31,37 @@ app = dash.Dash(
 )
 app.title = "Abeed project"
 # app._favicon = "favicon.ico"
+
 app.layout = html.Div(
     className="m-10",
     children=[
-        main_checkbox(),  # Checkbox component for feature selection
-        main_daterange(),  # Date range component
-        button(text="Update Graph", id="update_graph_button", style=button_style),  # Button to update graph
-        main_tabs(),  # Tabs component for layout
-        custom_features_head(),  # Heading for custom features
-        html.Div(id="custom_dropdown", children=[], className="w-full"),  # Dropdown for custom features
-        button(text="Add Custom Feature", id="add_custom_feature", style=button_style),  # Button to add custom feature
-        dcc.Graph(id="main_graph"),  # Graph for displaying data
-        button(text="Add Graph", id="add_graph_button", style=button_style),  # Button to add new graph
-        html.Div(id="dynamic_div", children=[], className="flex flex-wrap"),  # Dynamic div for additional content
+        main_checkbox(),
+        main_daterange(),
+        button(text="Update Graph", id="update_graph_button", style=button_style),
+        main_tabs(),
+        custom_features_head(),
+        html.Div(id="custom_dropdown", children=[], className="w-full"),
+        button(text="Add Custom Feature", id="add_custom_feature", style=button_style),
+        dcc.Graph(id="main_graph"),
+        button(text="Add Graph", id="add_graph_button", style=button_style),
+        html.Div(id="dynamic_div", children=[], className="flex flex-wrap"),
     ],
 )
 
+# Helper function to handle update actions
+def handle_update_graph(client, features, start_date, end_date, action_type):
+    """Handles updating the graph based on the given action type."""
+    if action_type == 1:
+        return update_graph(client, features, start_date, end_date, update_action=3)
+    elif action_type == 2:
+        return update_graph(client, features, start_date, end_date, update_action=2)
+    return go.Figure()
 
+# Callback to handle various user actions
 @callback(
     Output("main_graph", "figure"),
     Output("dynamic_div", "children"),
     Output("custom_dropdown", "children"),
-    # Inputs and states for callback
     Input("update_graph_button", "n_clicks"),
     Input("add_graph_button", "n_clicks"),
     Input({"type": "remove_button", "index": ALL}, "n_clicks"),
@@ -70,7 +78,7 @@ app.layout = html.Div(
     State("custom_dropdown", "children"),
     State("custon_name", "value"),
     State("custom_cumulative", "value"),
-    prevent_initial_call=True,  # Prevent initial callback call
+    prevent_initial_call=True,
 )
 def update_render(
     update_button,
@@ -90,33 +98,18 @@ def update_render(
     custom_name,
     custom_cumulative,
 ):
-    global fig
-    global custom_feature
-    global features_selected
-
-    # Context to determine which input triggered the callback
     ctx = callback_context
     triggered_id = ctx.triggered[0]["prop_id"].split(".")[0] if ctx.triggered else None
-    
+
+    # Handle dynamic features update
     if custom_feature != []:
-        # Update custom features if any
         custom_feature = update_custom_feature(
             dynamic_dropdown, custom_feature, operation_custom_feature_op
         )
 
-    try:
-        # Try to convert dynamic trigger ID to dictionary if possible
-        if "type" in triggered_id:
-            triggered_id = eval(triggered_id)
-    except:
-        pass
-
     # Update graph when update button is clicked
     if triggered_id == "update_graph_button":
-        if client.df.empty:
-            fig = update_graph(client, features, start_date=start_date, end_date=end_date, update_action=3)
-        else:
-            fig = update_graph(client, features, start_date=start_date, end_date=end_date, update_action=2)
+        fig = handle_update_graph(client, features, start_date, end_date, update_action=3)
         currentChildren = multi_chart(client)
         features_selected = features
         dynamic_dropdown = [features_selected[0]]
@@ -124,7 +117,7 @@ def update_render(
         custom_dropdow_children = custom_dropdow(features_selected, dynamic_dropdown, ["Add"], custom_feature)
         return fig, currentChildren, custom_dropdow_children
 
-    # Add graph when add button is clicked
+    # Add new graph when add button is clicked
     elif triggered_id == "add_graph_button":
         currentChildren = add_graph(client, currentFigure)
         return currentFigure, currentChildren, currentDropdownChildren
@@ -135,7 +128,7 @@ def update_render(
         features.extend([feature["feature_name"] for feature in client.created_features])
         feature_units_dict[features[-1]] = "dollars"
 
-        fig = update_graph(client, features, start_date=start_date, end_date=end_date, update_action=1)
+        fig = handle_update_graph(client, features, start_date, end_date, update_action=1)
         custom_dropdow_children = custom_dropdow(features_selected, [features_selected[0]], ["Add"], custom_feature)
         return fig, currentChildren, custom_dropdow_children
 
@@ -144,7 +137,7 @@ def update_render(
         currentChildren = remove_graph(client, triggered_id.get("index"))
         return currentFigure, currentChildren, currentDropdownChildren
 
-    # Add new custom feature operation
+    # Handle custom feature operation addition
     elif isinstance(triggered_id, dict) and triggered_id.get("type") == "operation_custom_feature_add":
         custom_feature.append({"Operation": "+", "Feature": features[0]})
         dynamic_dropdown.append(features[0])
@@ -152,7 +145,7 @@ def update_render(
         custom_dropdow_children = custom_dropdow(features_selected, dynamic_dropdown, operation_custom_feature_op, custom_feature)
         return currentFigure, currentChildren, custom_dropdow_children
 
-    # Remove custom feature operation
+    # Handle custom feature operation removal
     elif isinstance(triggered_id, dict) and triggered_id.get("type") == "operation_custom_feature_remove":
         index = triggered_id.get("index")
         del custom_feature[index]
@@ -168,6 +161,6 @@ def update_render(
     return currentFigure, currentChildren, currentDropdownChildren
 
 
-# Serve and render the app
+# Serve and render app
 if __name__ == "__main__":
     app.run_server(debug=True)

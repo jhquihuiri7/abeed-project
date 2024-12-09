@@ -17,6 +17,16 @@ import pdb
 class Ops:
     def __init__(self) -> None:
 
+        # Start date for the range of dates the user wants data for
+        self.start_date = date(2024, 10, 20)
+
+        # End date for the range of dates the user wants data for
+        self.end_date = date(2024, 10, 25)
+
+        # Fetures the user would like to see and make graphs with:
+        self.data_features = []
+        # ex. ["MISO pjm RT", "MISO pjm DA", "PJM miso RT", "PJM miso DA",  "Meteologica PJM Load forcast","Meteologica MISO Load forcast"]
+
         # Dataframe to hold all the requested data based on self.start_date, self.end_date, and self.data_features
         self.df = pd.DataFrame()
 
@@ -47,6 +57,27 @@ class Ops:
         # A toggle to switch bettween viewing the filtered data and the un filtered data
         self.apply_filters_toggle = False
 
+        self.created_features = []
+        # example
+        # [
+        #     {
+        #     "feature name": "MISO pjm spread"
+        #     "feature id": str(uuid.uuid4())
+        #     "Equation" : [
+        #         {"Feature": "MISO pjm RT"},
+        #         {"Feature": "MISO pjm DA", "Operation": "-"},
+        #     ]
+        #     },
+        #     {
+        #     "feature name": "PJM miso spread"
+        #     "feature id": str(uuid.uuid4())
+        #     "Equation" : [
+        #         {"Feature": "PJM miso RT"},
+        #         {"Feature": "PJM miso DA", "Operation": "-"},
+        #     ]
+        #     }
+        # ]
+
     def update_df(self, new_features_list: list[str], start_date, end_date):
         if new_features_list and start_date and end_date:
             db_names = []
@@ -55,16 +86,20 @@ class Ops:
             self.df = simple_request(start_date, end_date, db_names)[0]
             self.df.rename(columns=feature_db_name_to_read_name_dict, inplace=True)
 
+    def update_date_range(self, new_start, new_end):
+        self.start_date = new_start
+        self.end_date = new_end
+
+        if self.data_features:
+            self.update_df()
+
+    def update_data_features(self, new_data_features: list[str]):
+        self.data_features = new_data_features
+
+        if self.start_date and self.end_date:
+            self.update_df()
+
     def add_graph(self, features_list: list[str]):
-
-        # this is incase the user tries to make a graph with features that haven't been requested,
-        # in reality this would not be possible because the user selects the features for new graphs
-        # from the features that have been selected
-        # for feature in features_list:
-        # if not feature in self.data_features:
-        #    print(f"{feature} has not been requested")
-        #    return None
-
         new_graph = {
             "graph_uid": str(uuid.uuid4()),
             "graph_data_features": features_list,
@@ -81,17 +116,14 @@ class Ops:
         if not self.df.empty:
             self.update_datetimes_to_exclude()
 
-    def update_days_of_week_filters(self, days_of_week_to_include: list[int]):
+    def update_date_filters(
+        self,
+        days_of_week_to_include: list[int],
+        months_to_include: list[int],
+        years_to_include: list[int],
+    ):
         self.day_of_week_filters = days_of_week_to_include
-        if not self.df.empty:
-            self.update_datetimes_to_exclude()
-
-    def update_month_filters(self, months_to_include: list[int]):
-        self.hour_filters = months_to_include
-        if not self.df.empty:
-            self.update_datetimes_to_exclude()
-
-    def update_year_filters(self, years_to_include: list[int]):
+        self.month_filters = months_to_include
         self.year_filters = years_to_include
         if not self.df.empty:
             self.update_datetimes_to_exclude()
@@ -100,7 +132,7 @@ class Ops:
         self, feature_name: str, lower_bound: float, upper_bound: float
     ):
         # TODO only allow user to select features from the data_features list to filter by
-        if feature_name not in self.df.columns.to_list():
+        if feature_name not in self.data_features:
             print(f"Feature has not been requested yet")
 
         elif not any(d["feature_name"] == feature_name for d in self.feature_filters):
@@ -134,28 +166,62 @@ class Ops:
                 self.feature_filters,
             )
 
-    # def create_feature(self, feature_operation_list: list, cumulative: bool = False, custom_name:str = None ):
-    #     custom_feature_series = pd.Series
-    #     for idx, features in enumerate(feature_operation_list):
-    #         if idx == 0:
-    #             custom_feature_series = self.df[features["Feature"]]
+    # def update_filter_df(self):
+    #     self.filter_df = self.df
 
-    #         elif features["Operation"] == '+':
-    #             custom_feature_series = custom_feature_series + self.df[features["Feature"]]
+    #     # drop cumulative created features so cumulative values can be recalculated with filters
+    #     for custom_feature in self.created_features:
+    #         if custom_feature["cumulative?"] == True:
+    #             self.filter_df = self.filter_df.drop(custom_feature["feature_name"], axis=1)
 
-    #         elif features["Operation"] == '-':
-    #             custom_feature_series = custom_feature_series - self.df[features["Feature"]]
+    #     for datetimes in self.datetimes_to_exclude:
+    #         self.filter_df = self.filter_df.drop(datetimes)
 
-    #     if cumulative:
-    #         custom_feature_series = custom_feature_series.cumsum()
+    #     for feature in self.created_features:
+    #         if feature["feature_name"] not in self.filter_df.columns.to_list():
+    #             self.filter_df = add_custom_feature_column(self.df, feature)
 
-    #     if not custom_name:
-    #         for idx, features in enumerate(feature_operation_list):
-    #             if idx == 0:
-    #                 custom_name = features["Feature"]
+    def create_feature(
+        self,
+        feature_operation_list: list,
+        cumulative: bool = False,
+        custom_name: str = None,
+    ):
+        # feature_operation_list example
+        # [
+        #     {"Feature": "MISO pjm RT"},                       (first feature has no operation as it is the column we are starting with)
+        #     {"Feature": "MISO pjm DA", "Operation": "-"},     (all subsequent features have a plus or minus operation value. there can be as many subsequent features as the user wants)
+        #      {"Feature": "PJM miso DA", "Operatiion": "+"}
+        # ]
 
-    #             else:
-    #                 custom_name = custom_name + " " + features["Operation"] + " " + features["Feature"]
+        if not custom_name:
+            for idx, features in enumerate(feature_operation_list):
+                if idx == 0:
+                    custom_name = features["Feature"]
 
-    #     self.df[custom_name] = custom_feature_series
-    #     self.data_features.append(custom_name)
+                else:
+                    custom_name = (
+                        custom_name
+                        + " "
+                        + features["Operation"]
+                        + " "
+                        + features["Feature"]
+                    )
+
+        self.created_features.append(
+            {
+                "feature_name": custom_name,
+                "feature_id": str(uuid.uuid4()),
+                "cumulative?": cumulative,
+                "equation": feature_operation_list,
+            }
+        )
+        self.add_created_features_to_df()
+
+    def add_created_features_to_df(self):
+        for feature in self.created_features:
+            if feature["feature_name"] not in self.df.columns.to_list():
+                self.df = add_custom_feature_column(self.df, feature)
+
+    def download_df(self):
+        self.df.to_csv("C:\\Users\\achowdhury\\Downloads\\test_df.csv")

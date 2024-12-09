@@ -77,3 +77,29 @@ def get_excluded_datetimes(
 
 def get_feature_units(feature_name):
     return feature_units_dict[feature_name]
+
+
+def add_custom_feature_column(df: pd.DataFrame, custom_feature):
+    available_features = df.columns.to_list()
+    for features in custom_feature["equation"]:
+        feature_name = features["Feature"]
+        if feature_name not in available_features:
+            return df
+
+    custom_feature_series = pd.Series
+    for idx, features in enumerate(custom_feature["equation"]):
+        if idx == 0:
+            custom_feature_series = df[features["Feature"]]
+
+        elif features["Operation"] == "+":
+            custom_feature_series = custom_feature_series + df[features["Feature"]]
+
+        elif features["Operation"] == "-":
+            custom_feature_series = custom_feature_series - df[features["Feature"]]
+
+    if custom_feature["cumulative?"]:
+        custom_feature_series = custom_feature_series.cumsum()
+
+    df[custom_feature["feature_name"]] = custom_feature_series
+
+    return df
