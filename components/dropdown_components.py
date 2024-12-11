@@ -1,6 +1,7 @@
 from dash import dcc, html, Input, Output, State, callback, callback_context, ALL
 from styles.styles import button_dropdown_style
 from components.button_components import button
+from utils.functions import list_custom_filter_children
 
 # Function to create the header for the custom features section
 def custom_features_head():
@@ -89,3 +90,10 @@ def custom_dropdow(options, dropdown_values, radio_values, list):
             zip(list, dropdown_values, radio_values)
         )  # Iterate through the input lists to generate components
     ]
+
+def list_custom_features(client):
+    return html.Div(
+        id="list_custom_features",
+        children=list_custom_filter_children(client)
+    )
+    

@@ -16,7 +16,9 @@ import pdb
 
 class Ops:
     def __init__(self) -> None:
-
+        
+        self.filter_df = pd.DataFrame()
+        
         # Start date for the range of dates the user wants data for
         self.start_date = date(2024, 10, 20)
 
@@ -217,6 +219,19 @@ class Ops:
             }
         )
         self.add_created_features_to_df()
+    
+    def remove_custom_feature(self, target_uid: str):
+        # Don't let the user remove a created feature if there is a feature filter that is dependent on it (tell user to delete the filter first)
+        removed_feature_name = ""
+        for features in self.created_features:
+            if features['feature_id'] == target_uid:
+                removed_feature_name = features["feature_name"]
+        self.created_features = [
+            features for features in self.created_features if features['feature_id'] != target_uid
+        ]
+        self.df = self.df.drop(removed_feature_name, axis=1)
+        
+        #self.filter_df = self.filter_df.drop(removed_feature_name, axis=1)
 
     def add_created_features_to_df(self):
         for feature in self.created_features:

@@ -1,4 +1,8 @@
 from components.graph_components import bar_chart, multi_chart
+from components.button_components import button
+from styles.styles import button_dropdown_style
+from dash import dcc, html, Input, Output, State, callback, callback_context, ALL
+
 
 # Function to update the graph when a button is clicked
 def update_graph(client, features, start_date, end_date, update_action=1):
@@ -69,6 +73,13 @@ def add_graph(client, currentFigure):
         # Return the updated list of graphs
         return multi_chart(client)
 
+def remove_custom_feature_from_graphs(client, custom_feature):
+    for i in range(0,len(client.graphs)):
+        try:
+            client.graphs[i]["graph_data_features"].remove(custom_feature)
+        except:
+            pass
+    return multi_chart(client)
 
 # Function to remove a graph when a button is clicked
 def remove_graph(client, index):
@@ -87,3 +98,18 @@ def remove_graph(client, index):
 
     # Return the updated list of graphs
     return multi_chart(client)
+
+def list_custom_filter_children(client):
+    return [
+            html.Div(
+               children=[
+                   html.H4(feature["feature_name"], className="mr-4 text-base font-bold text-slate-500",style={"white-space": "nowrap", "overflow": "hidden", "text-overflow": "ellipsis"}),
+                   button(
+                        text="X",
+                        id={"type": "custom_feature_remove", "index": feature["feature_id"]},
+                        style=button_dropdown_style,
+                    )
+               ],
+               className="flex flex-row py-2 items-center justify-between"
+            ) for feature in client.created_features
+        ]
