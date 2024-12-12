@@ -216,6 +216,7 @@ class Ops:
                 "feature_id": str(uuid.uuid4()),
                 "cumulative?": cumulative,
                 "equation": feature_operation_list,
+                "unit": get_feature_units(feature_operation_list[0]["Feature"])
             }
         )
         self.add_created_features_to_df()

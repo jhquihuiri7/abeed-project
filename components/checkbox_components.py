@@ -19,7 +19,7 @@ def main_checkbox():
             # Extracts the keys (features) from the feature_units_dict
             options=[item[0] for item in feature_units_dict.items()],
             value=[],  # Default selected values (none selected initially)
-            className="w-full flex flex-row flex-wrap",  # CSS classes for layout styling
+            className="flex flex-row flex-wrap",  # CSS classes for layout styling
             labelClassName="pr-10",  # CSS class for styling the labels of each checkbox
             id="main_checkbox",  # Unique identifier for the checklist component
         ),

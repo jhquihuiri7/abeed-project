@@ -33,7 +33,7 @@ app = dash.Dash(
 app.title = "Abeed project"
 # app._favicon = "favicon.ico"
 app.layout = html.Div(
-    className="m-10 w-full",
+    className="p-10 w-full",
     children=[
         html.Div(
             children=[
@@ -146,7 +146,7 @@ def update_render(
     elif triggered_id == "add_custom_feature":
         client.create_feature(custom_feature, False if custom_cumulative[-1] == "" else True, custom_name)
         features.extend([feature["feature_name"] for feature in client.created_features])
-        feature_units_dict[features[-1]] = "dollars"
+        feature_units_dict[features[-1]] = client.created_features[-1]["unit"]
 
         fig = update_graph(client, features, start_date=start_date, end_date=end_date, update_action=1)
         custom_dropdow_children = custom_dropdow(features_selected, [""], ["Add"], custom_feature)
@@ -180,7 +180,6 @@ def update_render(
         feature_to_remove = next((feature["feature_name"] for feature in client.created_features if feature["feature_id"] == index), None)
         client.remove_custom_feature(index)
         features.extend([feature["feature_name"] for feature in client.created_features])
-        feature_units_dict[features[-1]] = "dollars"
         currentChildren = remove_custom_feature_from_graphs(client, feature_to_remove)
         fig = update_graph(client, features, start_date=start_date, end_date=end_date, update_action=1)
         
