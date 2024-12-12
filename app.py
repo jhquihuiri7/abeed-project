@@ -8,7 +8,7 @@ from components.button_components import button
 from utils.functions import update_graph, add_graph, remove_graph, list_custom_filter_children, remove_custom_feature_from_graphs
 from utils.logic_functions import update_custom_feature
 from components.graph_components import multi_chart
-from components.dropdown_components import custom_features_head, custom_dropdow
+from components.dropdown_components import custom_features_head, custom_dropdow, main_dropdown
 import plotly.graph_objects as go
 from backend.Class import Ops
 from styles.styles import button_style
@@ -33,9 +33,15 @@ app = dash.Dash(
 app.title = "Abeed project"
 # app._favicon = "favicon.ico"
 app.layout = html.Div(
-    className="m-10",
+    className="m-10 w-full",
     children=[
-        main_checkbox(),  # Checkbox component for feature selection
+        html.Div(
+            children=[
+                    main_dropdown(),
+                    main_checkbox(),# Checkbox component for feature selection
+                ],
+            className="flex flex-row w-full justify-between"
+            ),
         main_daterange(),  # Date range component
         button(text="Update Graph", id="update_graph_button", style=button_style),  # Button to update graph
         main_tabs(client),  # Tabs component for layout
@@ -47,12 +53,15 @@ app.layout = html.Div(
 
 
 @callback(
+    Output("main_dropdown", "value"),
+    Output("main_checkbox", "value"),
     Output("main_graph", "figure"),
     Output("dynamic_div", "children"),
     Output("custom_dropdown", "children"),
     Output("custon_name", "value"),
     Output("list_custom_features", "children"),
     # Inputs and states for callback
+    Input("main_dropdown", "value"),
     Input("update_graph_button", "n_clicks"),
     Input("add_graph_button", "n_clicks"),
     Input({"type": "remove_button", "index": ALL}, "n_clicks"),
@@ -74,6 +83,7 @@ app.layout = html.Div(
     prevent_initial_call=True,  # Prevent initial callback call
 )
 def update_render(
+    main_dropdown,
     update_button,
     add_button,
     remove_button,
@@ -125,12 +135,12 @@ def update_render(
         dynamic_dropdown = [features_selected[0]]
         custom_feature = [{"Feature": features_selected[0]}]
         custom_dropdow_children = custom_dropdow(features_selected, [""], ["Add"], custom_feature)
-        return fig, currentChildren, custom_dropdow_children, custom_name, list_custom_features
+        return "",features,fig, currentChildren, custom_dropdow_children, custom_name, list_custom_features
 
     # Add graph when add button is clicked
     elif triggered_id == "add_graph_button":
         currentChildren = add_graph(client, currentFigure)
-        return currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features
+        return "",features,currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features
 
     # Add custom feature when button is clicked
     elif triggered_id == "add_custom_feature":
@@ -140,12 +150,12 @@ def update_render(
 
         fig = update_graph(client, features, start_date=start_date, end_date=end_date, update_action=1)
         custom_dropdow_children = custom_dropdow(features_selected, [""], ["Add"], custom_feature)
-        return fig, currentChildren, custom_dropdow_children,"",list_custom_filter_children(client)
+        return "",features,fig, currentChildren, custom_dropdow_children,"",list_custom_filter_children(client)
 
     # Remove graph when remove button is clicked
     elif isinstance(triggered_id, dict) and triggered_id.get("type") == "remove_button":
         currentChildren = remove_graph(client, triggered_id.get("index"))
-        return currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features
+        return "",features,currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features
 
     # Add new custom feature operation
     elif isinstance(triggered_id, dict) and triggered_id.get("type") == "operation_custom_feature_add":
@@ -153,7 +163,7 @@ def update_render(
         dynamic_dropdown.append("")
         operation_custom_feature_op.append("Add")
         custom_dropdow_children = custom_dropdow(features_selected, dynamic_dropdown, operation_custom_feature_op, custom_feature)
-        return currentFigure, currentChildren, custom_dropdow_children, custom_name, list_custom_features
+        return "",features,currentFigure, currentChildren, custom_dropdow_children, custom_name, list_custom_features
 
     # Remove custom feature operation
     elif isinstance(triggered_id, dict) and triggered_id.get("type") == "operation_custom_feature_remove":
@@ -162,7 +172,7 @@ def update_render(
         del dynamic_dropdown[index]
         del operation_custom_feature_op[index]
         custom_dropdow_children = custom_dropdow(features_selected, dynamic_dropdown, operation_custom_feature_op, custom_feature)
-        return currentFigure, currentChildren, custom_dropdow_children, custom_name, list_custom_features
+        return "",features,currentFigure, currentChildren, custom_dropdow_children, custom_name, list_custom_features
     
     # Remove custom feature
     elif isinstance(triggered_id, dict) and triggered_id.get("type") == "custom_feature_remove":
@@ -174,13 +184,16 @@ def update_render(
         currentChildren = remove_custom_feature_from_graphs(client, feature_to_remove)
         fig = update_graph(client, features, start_date=start_date, end_date=end_date, update_action=1)
         
-        return fig, currentChildren, currentDropdownChildren, custom_name,list_custom_filter_children(client)
-
+        return "",features,fig, currentChildren, currentDropdownChildren, custom_name,list_custom_filter_children(client)
+    
+    if main_dropdown != "":
+        features.append(main_dropdown)
+        
     # If no figure, return initial empty state
     if not currentFigure:
-        return fig, currentChildren, currentDropdownChildren,custom_name,list_custom_features
+        return "",features,fig, currentChildren, currentDropdownChildren,custom_name,list_custom_features
 
-    return currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features
+    return "",features, currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features
 
 
 # Serve and render the app

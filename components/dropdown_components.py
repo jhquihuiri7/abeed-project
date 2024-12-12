@@ -3,6 +3,31 @@ from styles.styles import button_dropdown_style
 from components.button_components import button
 from utils.functions import list_custom_filter_children
 
+# Import a dictionary of feature units from the backend module
+from backend.db_dictionaries import feature_units_dict
+
+
+def main_dropdown():
+    """
+    Creates a checklist (checkbox group) for selecting features.
+
+    Returns:
+        html.Div: A Dash HTML Div containing a Checklist component for feature selection.
+    """
+    return html.Div(
+        # Create a Checklist component
+        dcc.Dropdown(
+            # Generate the options for the checklist dynamically
+            # Extracts the keys (features) from the feature_units_dict
+            options=[item[0] for item in feature_units_dict.items()],
+            value="",  # Default selected values (none selected initially)
+            className="w-full flex flex row flex-wrap",  # CSS classes for layout styling
+            id="main_dropdown",  # Unique identifier for the checklist component
+        ),
+        className="w-[28%]"
+    )
+
+
 # Function to create the header for the custom features section
 def custom_features_head():
     """
