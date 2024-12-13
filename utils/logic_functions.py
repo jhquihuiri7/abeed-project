@@ -51,12 +51,12 @@ def update_custom_feature(features, custom_features, values):
         list: Updated list of custom feature dictionaries with updated operations and names.
     """
     updated_features = []  # Initialize a list to hold the updated features
-
     # Iterate through the features, custom features, and values together
     for index, (f, feature, value) in enumerate(zip(features, custom_features, values)):
         if index > 0:
             # For features after the first one, set the operation based on the value
             feature["Operation"] = "+" if value == "Add" else "-"
+        
         feature["Feature"] = f  # Assign the feature name to the "Feature" key
         updated_features.append(feature)  # Add the updated feature to the list
 

@@ -28,7 +28,7 @@ def update_graph(client, features, start_date, end_date, update_action=1):
 
     if update_action == 2:
         # Update the client's data frame with the new features and date range
-        client.update_df(features, start_date=start_date, end_date=end_date)
+        client.update_df()
         
         # Store and reset created features
         custom_features = client.created_features
@@ -44,7 +44,7 @@ def update_graph(client, features, start_date, end_date, update_action=1):
 
     if update_action == 3:
         # Update the client's data frame with the selected features and date range
-        client.update_df(features, start_date=start_date, end_date=end_date)
+        client.update_df()
 
     # Return the updated bar chart
     return bar_chart(client)
@@ -100,6 +100,7 @@ def remove_graph(client, index):
     return multi_chart(client)
 
 def list_custom_filter_children(client):
+    created_features = client.created_features
     return [
             html.Div(
                children=[
@@ -111,5 +112,5 @@ def list_custom_filter_children(client):
                     )
                ],
                className="flex flex-row py-2 items-center justify-between"
-            ) for feature in client.created_features
+            ) for feature in created_features
         ]

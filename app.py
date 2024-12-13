@@ -110,12 +110,14 @@ def update_render(
     # Context to determine which input triggered the callback
     ctx = callback_context
     triggered_id = ctx.triggered[0]["prop_id"].split(".")[0] if ctx.triggered else None
+
     
-    if custom_feature != []:
+    #if custom_feature != []:
         # Update custom features if any
-        custom_feature = update_custom_feature(
-            dynamic_dropdown, custom_feature, operation_custom_feature_op
-        )
+        #custom_feature = update_custom_feature(
+        #    dynamic_dropdown, custom_feature, operation_custom_feature_op
+        #)
+
 
     try:
         # Try to convert dynamic trigger ID to dictionary if possible
@@ -123,9 +125,20 @@ def update_render(
             triggered_id = eval(triggered_id)
     except:
         pass
-
+    
+    
+    if isinstance(triggered_id, dict) and (triggered_id.get("type") == "dynamic-dropdown" or triggered_id.get("type") == "operation_custom_feature_op"):
+        custom_feature = update_custom_feature(
+            dynamic_dropdown, custom_feature, operation_custom_feature_op
+        )
+    
+    client.start_date = start_date
+    client.end_date = end_date
+    client.data_features = features
+            
     # Update graph when update button is clicked
     if triggered_id == "update_graph_button":
+        features_selected = features
         if client.df.empty:
             fig = update_graph(client, features, start_date=start_date, end_date=end_date, update_action=3)
         else:
@@ -135,7 +148,7 @@ def update_render(
         dynamic_dropdown = [features_selected[0]]
         custom_feature = [{"Feature": features_selected[0]}]
         custom_dropdow_children = custom_dropdow(features_selected, [""], ["Add"], custom_feature)
-        return "",features,fig, currentChildren, custom_dropdow_children, custom_name, list_custom_features
+        return "",features,fig, currentChildren, custom_dropdow_children, custom_name, list_custom_filter_children(client)
 
     # Add graph when add button is clicked
     elif triggered_id == "add_graph_button":
@@ -147,11 +160,11 @@ def update_render(
         client.create_feature(custom_feature, False if custom_cumulative[-1] == "" else True, custom_name)
         features.extend([feature["feature_name"] for feature in client.created_features])
         feature_units_dict[features[-1]] = client.created_features[-1]["unit"]
-
         fig = update_graph(client, features, start_date=start_date, end_date=end_date, update_action=1)
         custom_dropdow_children = custom_dropdow(features_selected, [""], ["Add"], custom_feature)
+        
         return "",features,fig, currentChildren, custom_dropdow_children,"",list_custom_filter_children(client)
-
+    
     # Remove graph when remove button is clicked
     elif isinstance(triggered_id, dict) and triggered_id.get("type") == "remove_button":
         currentChildren = remove_graph(client, triggered_id.get("index"))
@@ -171,6 +184,7 @@ def update_render(
         del custom_feature[index]
         del dynamic_dropdown[index]
         del operation_custom_feature_op[index]
+        
         custom_dropdow_children = custom_dropdow(features_selected, dynamic_dropdown, operation_custom_feature_op, custom_feature)
         return "",features,currentFigure, currentChildren, custom_dropdow_children, custom_name, list_custom_features
     
@@ -179,7 +193,7 @@ def update_render(
         index = triggered_id.get("index")
         feature_to_remove = next((feature["feature_name"] for feature in client.created_features if feature["feature_id"] == index), None)
         client.remove_custom_feature(index)
-        features.extend([feature["feature_name"] for feature in client.created_features])
+        features= [feature for feature in features if feature != feature_to_remove]
         currentChildren = remove_custom_feature_from_graphs(client, feature_to_remove)
         fig = update_graph(client, features, start_date=start_date, end_date=end_date, update_action=1)
         
@@ -187,7 +201,8 @@ def update_render(
     
     if main_dropdown != "":
         features.append(main_dropdown)
-        
+
+    
     # If no figure, return initial empty state
     if not currentFigure:
         return "",features,fig, currentChildren, currentDropdownChildren,custom_name,list_custom_features
