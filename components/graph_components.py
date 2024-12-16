@@ -51,9 +51,11 @@ def bar_chart(client, cols=None):
                 x=client.df.index,  # X-axis data (index of the dataframe)
                 y=client.df[column],  # Y-axis data (column values)
                 mode="lines",  # Line chart
+                line_shape="hv",
                 name=column,  # Legend label
                 visible=True,  # Initial visibility
                 showlegend=True,  # Show legend entry
+                
             ),
             secondary_y=(
                 True if double_axis and feature_units_dict[column] == "mw" else False
