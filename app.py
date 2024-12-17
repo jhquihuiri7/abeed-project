@@ -51,6 +51,37 @@ app.layout = html.Div(
     ],
 )
 
+@callback(
+    Output({"type": "hour_button", "index": ALL}, "style"),
+    Input({"type": "hour_button", "index": ALL}, "n_clicks"),
+    Input("apply_hour_range","n_clicks"),
+    State({"type": "hour_button", "index": ALL}, "style"),
+    State("hour-filter-slider", "value"),
+    prevent_initial_call=True,  # Prevent initial callback call
+)
+def update_hour_button_style(hour_button, apply_hour_range, hour_button_style, hour_filter_slider):
+    # Context to determine which input triggered the callback
+    ctx = callback_context
+    triggered_id = ctx.triggered[0]["prop_id"].split(".")[0] if ctx.triggered else None
+    if not triggered_id:
+        return hour_button_style  # No changes
+    try:
+        # Try to convert dynamic trigger ID to dictionary if possible
+        if "type" in triggered_id:
+            triggered_id = eval(triggered_id)
+    except:
+        pass
+    
+    if isinstance(triggered_id, dict) and triggered_id.get("type") == "hour_button":
+        index = triggered_id.get("index")
+        # Toggle the background color when the hour button is clicked
+        hour_button_style[index]["backgroundColor"] = "white" if hour_button_style[index]["backgroundColor"] == "#d9d9d9" else "#d9d9d9"
+    
+    if triggered_id == "apply_hour_range":
+        for index in range(hour_filter_slider[0],hour_filter_slider[1]+1):
+            hour_button_style[index]["backgroundColor"] = "#d9d9d9"# Toggle the background color when the hour button is clicked
+    
+    return hour_button_style
 
 @callback(
     Output("main_dropdown", "value"),
@@ -60,6 +91,7 @@ app.layout = html.Div(
     Output("custom_dropdown", "children"),
     Output("custon_name", "value"),
     Output("list_custom_features", "children"),
+    #Output({"type": "hour_button", "index": ALL}, "style"),
     # Inputs and states for callback
     Input("main_dropdown", "value"),
     Input("update_graph_button", "n_clicks"),
@@ -71,6 +103,7 @@ app.layout = html.Div(
     Input({"type": "dynamic-dropdown", "index": ALL}, "value"),
     Input({"type": "custom_feature_remove", "index": ALL}, "n_clicks"),
     Input("add_custom_feature", "n_clicks"),
+    #Input({"type": "hour_button", "index": ALL}, "n_clicks"),
     State("main_checkbox", "value"),
     State("main-date-picker-range", "start_date"),
     State("main-date-picker-range", "end_date"),
@@ -80,6 +113,7 @@ app.layout = html.Div(
     State("custon_name", "value"),
     State("custom_cumulative", "value"),
     State("list_custom_features", "children"),
+    #State({"type": "hour_button", "index": ALL}, "style"),
     prevent_initial_call=True,  # Prevent initial callback call
 )
 def update_render(
@@ -93,6 +127,7 @@ def update_render(
     dynamic_dropdown,
     custom_feature_remove,
     add_custom_feature,
+    #hour_button,
     features,
     start_date,
     end_date,
@@ -101,7 +136,8 @@ def update_render(
     currentDropdownChildren,
     custom_name,
     custom_cumulative,
-    list_custom_features
+    list_custom_features,
+    #hour_button_style,
 ):
     global fig
     global custom_feature
@@ -148,12 +184,12 @@ def update_render(
         dynamic_dropdown = [features_selected[0]]
         custom_feature = [{"Feature": features_selected[0]}]
         custom_dropdow_children = custom_dropdow(features_selected, [""], ["Add"], custom_feature)
-        return "",features,fig, currentChildren, custom_dropdow_children, custom_name, list_custom_filter_children(client)
+        return "",features,fig, currentChildren, custom_dropdow_children, custom_name, list_custom_filter_children(client),hour_button_style
 
     # Add graph when add button is clicked
     elif triggered_id == "add_graph_button":
         currentChildren = add_graph(client, currentFigure)
-        return "",features,currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features
+        return "",features,currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features,hour_button_style
 
     # Add custom feature when button is clicked
     elif triggered_id == "add_custom_feature":
@@ -163,12 +199,12 @@ def update_render(
         fig = update_graph(client, features, start_date=start_date, end_date=end_date, update_action=1)
         custom_dropdow_children = custom_dropdow(features_selected, [""], ["Add"], custom_feature)
         
-        return "",features,fig, currentChildren, custom_dropdow_children,"",list_custom_filter_children(client)
+        return "",features,fig, currentChildren, custom_dropdow_children,"",list_custom_filter_children(client),hour_button_style
     
     # Remove graph when remove button is clicked
     elif isinstance(triggered_id, dict) and triggered_id.get("type") == "remove_button":
         currentChildren = remove_graph(client, triggered_id.get("index"))
-        return "",features,currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features
+        return "",features,currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features,hour_button_style
 
     # Add new custom feature operation
     elif isinstance(triggered_id, dict) and triggered_id.get("type") == "operation_custom_feature_add":
@@ -176,7 +212,7 @@ def update_render(
         dynamic_dropdown.append("")
         operation_custom_feature_op.append("Add")
         custom_dropdow_children = custom_dropdow(features_selected, dynamic_dropdown, operation_custom_feature_op, custom_feature)
-        return "",features,currentFigure, currentChildren, custom_dropdow_children, custom_name, list_custom_features
+        return "",features,currentFigure, currentChildren, custom_dropdow_children, custom_name, list_custom_features,hour_button_style
 
     # Remove custom feature operation
     elif isinstance(triggered_id, dict) and triggered_id.get("type") == "operation_custom_feature_remove":
@@ -186,7 +222,7 @@ def update_render(
         del operation_custom_feature_op[index]
         
         custom_dropdow_children = custom_dropdow(features_selected, dynamic_dropdown, operation_custom_feature_op, custom_feature)
-        return "",features,currentFigure, currentChildren, custom_dropdow_children, custom_name, list_custom_features
+        return "",features,currentFigure, currentChildren, custom_dropdow_children, custom_name, list_custom_features,hour_button_style
     
     # Remove custom feature
     elif isinstance(triggered_id, dict) and triggered_id.get("type") == "custom_feature_remove":
@@ -197,7 +233,12 @@ def update_render(
         currentChildren = remove_custom_feature_from_graphs(client, feature_to_remove)
         fig = update_graph(client, features, start_date=start_date, end_date=end_date, update_action=1)
         
-        return "",features,fig, currentChildren, currentDropdownChildren, custom_name,list_custom_filter_children(client)
+        return "",features,fig, currentChildren, currentDropdownChildren, custom_name,list_custom_filter_children(client),hour_button_style
+    
+    #elif isinstance(triggered_id, dict) and triggered_id.get("type") == "hour_button":
+    #    index = triggered_id.get("index")
+    #    hour_button_style[index]["backgroundColor"] = "white" if hour_button_style[index]["backgroundColor"] == "#d9d9d9" else "#d9d9d9"
+    #    return "",features,currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features,hour_button_style
     
     if main_dropdown != "":
         features.append(main_dropdown)
@@ -205,9 +246,9 @@ def update_render(
     
     # If no figure, return initial empty state
     if not currentFigure:
-        return "",features,fig, currentChildren, currentDropdownChildren,custom_name,list_custom_features
+        return "",features,fig, currentChildren, currentDropdownChildren,custom_name,list_custom_features,hour_button_style
 
-    return "",features, currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features
+    return "",features, currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features,hour_button_style
 
 
 # Serve and render the app

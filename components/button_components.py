@@ -1,5 +1,5 @@
 # Import custom styles from the styles module
-from styles.styles import button_style
+from styles.styles import button_style, hourButtonStyle
 
 # Import the HTML module from Dash
 from dash import html
@@ -23,4 +23,17 @@ def button(text, id, style):
         id=id,       # Unique ID for the button
         n_clicks=0,  # Initial click count set to 0
         className=style  # CSS class for styling the button
+    )
+
+def hourButton(hours):
+    return html.Div(
+        children=[
+        html.Button(
+        hour,        # Text displayed on the button
+        id={"type": "hour_button", "index": hour},       # Unique ID for the button
+        n_clicks=0,  # Initial click count set to 0
+        style={"backgroundColor": "white"},
+        className=hourButtonStyle  # CSS class for styling the button
+    ) for hour in hours
+    ]
     )

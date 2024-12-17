@@ -62,5 +62,8 @@ def update_custom_feature(features, custom_features, values):
 
     return updated_features  # Return the list of updated features
 
+def updateHourButton(buttons, index_to_color):
+        for button in buttons:
+            print(button)
 
 
