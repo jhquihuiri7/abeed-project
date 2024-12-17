@@ -45,7 +45,7 @@ def main_tabs(client):
                         className="w-full mt-5"
                     )    
                 ]),    # Tab for hour-based filtering
-                dcc.Tab(label="Day Filter", value="date-filter-tab", children=[
+                dcc.Tab(label="Date Filter", value="date-filter-tab", children=[
                         date_filter_dropdown()
                     ]),     # Tab for day-based filtering
             ],
