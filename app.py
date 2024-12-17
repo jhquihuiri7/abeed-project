@@ -8,7 +8,7 @@ from components.button_components import button
 from utils.functions import update_graph, add_graph, remove_graph, list_custom_filter_children, remove_custom_feature_from_graphs
 from utils.logic_functions import update_custom_feature
 from components.graph_components import multi_chart
-from components.dropdown_components import custom_features_head, custom_dropdow, main_dropdown
+from components.dropdown_components import custom_features_head, custom_dropdow, main_dropdown, date_filter_dropdown
 import plotly.graph_objects as go
 from backend.Class import Ops
 from styles.styles import button_style

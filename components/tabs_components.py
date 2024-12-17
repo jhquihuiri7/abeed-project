@@ -1,7 +1,7 @@
 
 # Import necessary modules from Dash
 from dash import Dash, dcc, html, Input, Output, callback
-from components.dropdown_components import custom_features_head, list_custom_features
+from components.dropdown_components import custom_features_head, list_custom_features, date_filter_dropdown
 from components.button_components import button, hourButton
 from styles.styles import button_style
 
@@ -45,7 +45,9 @@ def main_tabs(client):
                         className="w-full mt-5"
                     )    
                 ]),    # Tab for hour-based filtering
-                dcc.Tab(label="Day Filter", value="tab-3-example-graph", children=[html.H1("Tab 4")]),     # Tab for day-based filtering
+                dcc.Tab(label="Day Filter", value="date-filter-tab", children=[
+                        date_filter_dropdown()
+                    ]),     # Tab for day-based filtering
             ],
         ),
         className="my-10",  # CSS class to apply margin or styling

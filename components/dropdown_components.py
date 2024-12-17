@@ -3,6 +3,7 @@ from styles.styles import button_dropdown_style
 from components.button_components import button
 from utils.functions import list_custom_filter_children
 from backend.helper_functions import get_feature_units
+import calendar
 
 # Import a dictionary of feature units from the backend module
 from backend.db_dictionaries import feature_units_dict
@@ -132,4 +133,42 @@ def list_custom_features(client):
         id="list_custom_features",
         children=list_custom_filter_children(client)
     )
+
+def date_filter_dropdown():
+    years = [2020,2025]
+    months = [1,12]
+    days = [0,7]
+    month_names = [
+    {'label': calendar.month_name[month], 'value': month}
+    for month in range(months[0], months[1] + 1)
+    ]
+    day_options = [
+    {'label': calendar.day_name[day], 'value': day}
+    for day in range(days[0], days[1])
+    ]
+    
+    return html.Div(
+        children=[
+            dcc.Dropdown(
+                [year for year in range(years[0], years[1]+1)],
+                [],
+                multi=True,
+                className="w-[400px]",
+            ),
+            dcc.Dropdown(
+                month_names,
+                [],
+                multi=True,
+                className="w-[400px]",
+            ),
+            dcc.Dropdown(
+                day_options,
+                [],
+                multi=True,
+                className="w-[400px]",
+            ),
+        ],
+        className="flex flex-row justify-around mt-10"
+    )
+    
     
