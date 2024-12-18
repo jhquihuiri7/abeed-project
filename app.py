@@ -52,6 +52,32 @@ app.layout = html.Div(
     ],
 )
 
+
+@callback(
+    Output("date_filter_dropdown","children"),
+    Input("select_all_datefilter","n_clicks"),
+    State("date_filter_dropdown","children"),
+    prevent_initial_call=True,  # Prevent initial callback call
+)
+def update_date_filter(select_all_datefilter, datefilter_dropdown):
+    
+    ctx = callback_context
+    triggered_id = ctx.triggered[0]["prop_id"].split(".")[0] if ctx.triggered else None
+    if not triggered_id:
+        return datefilter_dropdown  # No changes
+    try:
+        # Try to convert dynamic trigger ID to dictionary if possible
+        if "type" in triggered_id:
+            triggered_id = eval(triggered_id)
+    except:
+        pass
+    
+    if triggered_id == "select_all_datefilter":
+        
+        return date_filter_dropdown()
+    
+    return datefilter_dropdown
+
 @callback(
     Output({"type": "hour_button", "index": ALL}, "style"),
     Output("feature_filter_dropdown", "value"),
@@ -86,7 +112,7 @@ def update_hour_button_style(
     ctx = callback_context
     triggered_id = ctx.triggered[0]["prop_id"].split(".")[0] if ctx.triggered else None
     if not triggered_id:
-        return hour_button_style  # No changes
+        return hour_button_style, [],"","",feature_filter_list  # No changes
     try:
         # Try to convert dynamic trigger ID to dictionary if possible
         if "type" in triggered_id:
@@ -131,6 +157,7 @@ def update_hour_button_style(
         return hour_button_style, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list   
          
     return hour_button_style, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list
+
 @callback(
     Output("main_dropdown", "value"),
     Output("main_checkbox", "value"),

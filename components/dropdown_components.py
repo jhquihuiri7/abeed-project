@@ -150,8 +150,7 @@ def date_filter_dropdown():
     year_range =[year for year in range(years[0], years[1]+1)] 
     month_range = [month["value"] for month in month_names] 
     day_range = [day["value"] for day in day_options]
-    return html.Div(
-        children=[
+    return [
             html.Div(
                 children=[
                     html.H2("Year", className="font-bold text-xl"),
@@ -159,6 +158,7 @@ def date_filter_dropdown():
                         year_range,
                         year_range,
                         multi=True,
+                        id="year_dropdown_date_filter",
                         className="w-full mt-2",
                     ),
                 ],
@@ -171,6 +171,7 @@ def date_filter_dropdown():
                         month_names,
                         month_range,
                         multi=True,
+                        id="month_dropdown_date_filter",
                         className="w-full mt-2",
                     ),
                 ],
@@ -183,14 +184,13 @@ def date_filter_dropdown():
                         day_options,
                         day_range,
                         multi=True,
+                        id="day_dropdown_date_filter",
                         className="w-full mt-2",
                     ),
                 ],
                 className="w-[400px]"    
             )
-        ],
-        className="flex flex-row justify-around mt-10"
-    )
+        ]
     
 def feature_filter_dropdown(client):
     return html.Div(

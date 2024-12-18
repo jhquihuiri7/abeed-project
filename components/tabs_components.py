@@ -48,7 +48,18 @@ def main_tabs(client):
                     )    
                 ]),    # Tab for hour-based filtering
                 dcc.Tab(label="Date Filter", value="date-filter-tab", children=[
-                        date_filter_dropdown()
+                        html.Div(
+                            children=date_filter_dropdown(),
+                            id= "date_filter_dropdown",
+                            className="flex flex-row justify-around mt-10"
+                        ),
+                        html.Div(
+                            children=[
+                                button(text="Select all", id="select_all_datefilter", style=button_style),  # Button to add custom feature,
+                                button(text="Apply selection", id="apply_selection_datefilter", style=f"{button_style} ml-4"),  # Button to add custom feature
+                            ],
+                            className="flex flex-row"
+                        )
                     ]),     # Tab for day-based filtering
             ],
         ),
