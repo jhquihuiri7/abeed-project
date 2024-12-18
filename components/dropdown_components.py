@@ -171,4 +171,45 @@ def date_filter_dropdown():
         className="flex flex-row justify-around mt-10"
     )
     
+def feature_filter_dropdown(client):
+    return html.Div(
+        className="w-full flex flex-row justify-between",
+        children=[
+            html.Div(
+                children=[
+                    dcc.Dropdown(
+                        options = [feature for feature in client.data_features],
+                        value = [], 
+                        id="feature_filter_dropdown", 
+                        multi=False, 
+                        className="w-[400px] mr-5"),
+                    dcc.Input(
+                        id="feature_filter_min_range",
+                        type="text",
+                        placeholder="- Infinity",
+                        className="mx-5",
+                    ),
+                    dcc.Input(
+                        id="feature_filter_max_range",
+                        type="text",
+                        placeholder="+ Infinity",
+                        className="mx-5",
+                    ),
+                    button(
+                        text="ADD",
+                        id="feature_filter_add",
+                        style=button_dropdown_style,
+                    )
+                ],
+                className="w-[70%] flex flex-row justify my-10"
+            ),
+            html.Div(
+                children=[
+                    
+                ],
+                id="feature_filter_list",
+                className="w-[30%] my-10 flex flex-col items-end"
+            )
+        ]
+    )
     

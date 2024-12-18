@@ -11,8 +11,9 @@ from components.graph_components import multi_chart
 from components.dropdown_components import custom_features_head, custom_dropdow, main_dropdown, date_filter_dropdown
 import plotly.graph_objects as go
 from backend.Class import Ops
-from styles.styles import button_style
+from styles.styles import button_style, button_dropdown_style
 from backend.db_dictionaries import feature_units_dict
+import math
 
 
 # Initialize the client and global variables
@@ -53,13 +54,34 @@ app.layout = html.Div(
 
 @callback(
     Output({"type": "hour_button", "index": ALL}, "style"),
+    Output("feature_filter_dropdown", "value"),
+    Output("feature_filter_min_range", "value"),
+    Output("feature_filter_max_range", "value"),
+    Output("feature_filter_list", "children"),
     Input({"type": "hour_button", "index": ALL}, "n_clicks"),
     Input("apply_hour_range","n_clicks"),
+    Input("feature_filter_add","n_clicks"),
+    Input({"type": "feature_filter_remove", "index":ALL}, "n_clicks"),
     State({"type": "hour_button", "index": ALL}, "style"),
     State("hour-filter-slider", "value"),
+    State("feature_filter_dropdown", "value"),
+    State("feature_filter_min_range", "value"),
+    State("feature_filter_max_range", "value"),
+    State("feature_filter_list", "children"),
     prevent_initial_call=True,  # Prevent initial callback call
 )
-def update_hour_button_style(hour_button, apply_hour_range, hour_button_style, hour_filter_slider):
+def update_hour_button_style(
+    hour_button, 
+    apply_hour_range,
+    feature_filter_add, 
+    feature_filter_remove,
+    hour_button_style, 
+    hour_filter_slider,
+    feature_filter_dropdown,
+    feature_filter_min_range,
+    feature_filter_max_range,
+    feature_filter_list
+    ):
     # Context to determine which input triggered the callback
     ctx = callback_context
     triggered_id = ctx.triggered[0]["prop_id"].split(".")[0] if ctx.triggered else None
@@ -80,9 +102,35 @@ def update_hour_button_style(hour_button, apply_hour_range, hour_button_style, h
     if triggered_id == "apply_hour_range":
         for index in range(hour_filter_slider[0],hour_filter_slider[1]+1):
             hour_button_style[index]["backgroundColor"] = "#d9d9d9"# Toggle the background color when the hour button is clicked
+        return hour_button_style, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list
     
-    return hour_button_style
-
+    if triggered_id == "feature_filter_add":
+        try:
+            feature_filter_min_range = float(feature_filter_min_range)
+            feature_filter_max_range = float(feature_filter_max_range) 
+        except:
+            feature_filter_min_range = -math.inf
+            feature_filter_max_range = math.inf
+        client.add_feature_filter(feature_filter_dropdown,feature_filter_min_range, feature_filter_min_range)
+        feature_filter_list = [html.Div([f"{feature_filter["feature_name"]}, Range: ({feature_filter_min_range} → {feature_filter_max_range})", button(
+                            text="REMOVE",
+                            id={"type": "feature_filter_remove", "index": feature_filter["filter_uid"]},
+                            style=button_dropdown_style,
+                        )]) for feature_filter in client.feature_filters]
+        return hour_button_style, [],"","",feature_filter_list
+    
+    
+    if isinstance(triggered_id, dict) and triggered_id.get("type") == "feature_filter_remove":
+        index = triggered_id.get("index")
+        client.remove_feature_filter(index)
+        feature_filter_list = [html.Div([feature_filter["feature_name"], button(
+                            text="REMOVE",
+                            id={"type": "feature_filter_remove", "index": feature_filter["filter_uid"]},
+                            style=button_dropdown_style,
+                        )]) for feature_filter in client.feature_filters]
+        return hour_button_style, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list   
+         
+    return hour_button_style, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list
 @callback(
     Output("main_dropdown", "value"),
     Output("main_checkbox", "value"),
@@ -91,7 +139,7 @@ def update_hour_button_style(hour_button, apply_hour_range, hour_button_style, h
     Output("custom_dropdown", "children"),
     Output("custon_name", "value"),
     Output("list_custom_features", "children"),
-    #Output({"type": "hour_button", "index": ALL}, "style"),
+    Output("feature_filter_dropdown", "options"),
     # Inputs and states for callback
     Input("main_dropdown", "value"),
     Input("update_graph_button", "n_clicks"),
@@ -184,12 +232,12 @@ def update_render(
         dynamic_dropdown = [features_selected[0]]
         custom_feature = [{"Feature": features_selected[0]}]
         custom_dropdow_children = custom_dropdow(features_selected, [""], ["Add"], custom_feature)
-        return "",features,fig, currentChildren, custom_dropdow_children, custom_name, list_custom_filter_children(client),hour_button_style
+        return "",features,fig, currentChildren, custom_dropdow_children, custom_name, list_custom_filter_children(client), client.data_features
 
     # Add graph when add button is clicked
     elif triggered_id == "add_graph_button":
         currentChildren = add_graph(client, currentFigure)
-        return "",features,currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features,hour_button_style
+        return "",features,currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features, client.data_features
 
     # Add custom feature when button is clicked
     elif triggered_id == "add_custom_feature":
@@ -199,21 +247,19 @@ def update_render(
         fig = update_graph(client, features, start_date=start_date, end_date=end_date, update_action=1)
         custom_dropdow_children = custom_dropdow(features_selected, [""], ["Add"], custom_feature)
         
-        return "",features,fig, currentChildren, custom_dropdow_children,"",list_custom_filter_children(client),hour_button_style
+        return "",features,fig, currentChildren, custom_dropdow_children,"",list_custom_filter_children(client), client.data_features
     
     # Remove graph when remove button is clicked
     elif isinstance(triggered_id, dict) and triggered_id.get("type") == "remove_button":
         currentChildren = remove_graph(client, triggered_id.get("index"))
-        return "",features,currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features,hour_button_style
-
+        return "",features,currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features, client.data_features
     # Add new custom feature operation
     elif isinstance(triggered_id, dict) and triggered_id.get("type") == "operation_custom_feature_add":
         custom_feature.append({"Operation": "+", "Feature": features[0]})
         dynamic_dropdown.append("")
         operation_custom_feature_op.append("Add")
         custom_dropdow_children = custom_dropdow(features_selected, dynamic_dropdown, operation_custom_feature_op, custom_feature)
-        return "",features,currentFigure, currentChildren, custom_dropdow_children, custom_name, list_custom_features,hour_button_style
-
+        return "",features,currentFigure, currentChildren, custom_dropdow_children, custom_name, list_custom_features, client.data_features
     # Remove custom feature operation
     elif isinstance(triggered_id, dict) and triggered_id.get("type") == "operation_custom_feature_remove":
         index = triggered_id.get("index")
@@ -222,7 +268,7 @@ def update_render(
         del operation_custom_feature_op[index]
         
         custom_dropdow_children = custom_dropdow(features_selected, dynamic_dropdown, operation_custom_feature_op, custom_feature)
-        return "",features,currentFigure, currentChildren, custom_dropdow_children, custom_name, list_custom_features,hour_button_style
+        return "",features,currentFigure, currentChildren, custom_dropdow_children, custom_name, list_custom_features, client.data_features
     
     # Remove custom feature
     elif isinstance(triggered_id, dict) and triggered_id.get("type") == "custom_feature_remove":
@@ -233,7 +279,7 @@ def update_render(
         currentChildren = remove_custom_feature_from_graphs(client, feature_to_remove)
         fig = update_graph(client, features, start_date=start_date, end_date=end_date, update_action=1)
         
-        return "",features,fig, currentChildren, currentDropdownChildren, custom_name,list_custom_filter_children(client),hour_button_style
+        return "",features,fig, currentChildren, currentDropdownChildren, custom_name,list_custom_filter_children(client), client.data_features
     
     #elif isinstance(triggered_id, dict) and triggered_id.get("type") == "hour_button":
     #    index = triggered_id.get("index")
@@ -246,9 +292,9 @@ def update_render(
     
     # If no figure, return initial empty state
     if not currentFigure:
-        return "",features,fig, currentChildren, currentDropdownChildren,custom_name,list_custom_features,hour_button_style
+        return "",features,fig, currentChildren, currentDropdownChildren,custom_name,list_custom_features, client.data_features
 
-    return "",features, currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features,hour_button_style
+    return "",features, currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, client.data_features
 
 
 # Serve and render the app

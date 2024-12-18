@@ -1,9 +1,9 @@
 
 # Import necessary modules from Dash
 from dash import Dash, dcc, html, Input, Output, callback
-from components.dropdown_components import custom_features_head, list_custom_features, date_filter_dropdown
+from components.dropdown_components import custom_features_head, list_custom_features, date_filter_dropdown, feature_filter_dropdown
 from components.button_components import button, hourButton
-from styles.styles import button_style
+from styles.styles import button_style, button_dropdown_style
 
 # Define a function to create the main tabs layout
 def main_tabs(client):
@@ -31,7 +31,9 @@ def main_tabs(client):
                     ),
                     button(text="Add Custom Feature", id="add_custom_feature", style=button_style),  # Button to add custom feature
                 ]),  # Tab for feature-based filtering
-                dcc.Tab(label="Feature Filter", value="tab-1-example-graph", children=[html.H1("Tab 2")]),  # Tab for feature-based filtering
+                dcc.Tab(label="Feature Filter", value="feature-filter-tab", children=[
+                    feature_filter_dropdown(client)
+                ]),  # Tab for feature-based filtering
                 dcc.Tab(label="Hour Filter", value="hour-filter-tab", children=[
                     html.Div(
                         children=[
