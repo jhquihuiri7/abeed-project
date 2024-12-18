@@ -152,24 +152,42 @@ def date_filter_dropdown():
     day_range = [day["value"] for day in day_options]
     return html.Div(
         children=[
-            dcc.Dropdown(
-                year_range,
-                year_range,
-                multi=True,
-                className="w-[400px]",
+            html.Div(
+                children=[
+                    html.H2("Year", className="font-bold text-xl"),
+                    dcc.Dropdown(
+                        year_range,
+                        year_range,
+                        multi=True,
+                        className="w-full mt-2",
+                    ),
+                ],
+                className="w-[400px]"    
             ),
-            dcc.Dropdown(
-                month_names,
-                month_range,
-                multi=True,
-                className="w-[400px]",
+            html.Div(
+                children=[
+                    html.H2("Month", className="font-bold text-xl"),
+                    dcc.Dropdown(
+                        month_names,
+                        month_range,
+                        multi=True,
+                        className="w-full mt-2",
+                    ),
+                ],
+                className="w-[400px]"    
             ),
-            dcc.Dropdown(
-                day_options,
-                day_range,
-                multi=True,
-                className="w-[400px]",
-            ),
+            html.Div(
+                children=[
+                    html.H2("Day of the week", className="font-bold text-xl"),
+                    dcc.Dropdown(
+                        day_options,
+                        day_range,
+                        multi=True,
+                        className="w-full mt-2",
+                    ),
+                ],
+                className="w-[400px]"    
+            )
         ],
         className="flex flex-row justify-around mt-10"
     )
