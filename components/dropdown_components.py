@@ -147,23 +147,26 @@ def date_filter_dropdown():
     for day in range(days[0], days[1])
     ]
     
+    year_range =[year for year in range(years[0], years[1]+1)] 
+    month_range = [month["value"] for month in month_names] 
+    day_range = [day["value"] for day in day_options]
     return html.Div(
         children=[
             dcc.Dropdown(
-                [year for year in range(years[0], years[1]+1)],
-                [],
+                year_range,
+                year_range,
                 multi=True,
                 className="w-[400px]",
             ),
             dcc.Dropdown(
                 month_names,
-                [],
+                month_range,
                 multi=True,
                 className="w-[400px]",
             ),
             dcc.Dropdown(
                 day_options,
-                [],
+                day_range,
                 multi=True,
                 className="w-[400px]",
             ),
