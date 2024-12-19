@@ -153,8 +153,8 @@ feature_db_name_to_read_name_dict = {
 feature_read_name_to_db_name_dict = {
     "MISO pjm RT" :                     "PJMC;lmp;rt",
     "MISO pjm DA" :                     "PJMC;lmp;da",
-    "40523629.0;lmp;rtv" :              "PJM miso RT Verified",
-    "40523629.0;lmp;rtu" :              "PJM miso RT Unverified",
+    "PJM miso RT Verified" :            "40523629.0;lmp;rtv",
+    "PJM miso RT Unverified" :          "40523629.0;lmp;rtu",
     "PJM miso DA" :                     "40523629.0;lmp;da",
     "PJM Chicago Hub RT" :              "33092313.0;lmp;rtv",
     "PJM Chicago Hub DA" :              "33092313.0;lmp;da",
