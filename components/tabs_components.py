@@ -53,10 +53,11 @@ def main_tabs(client):
                                     button("Deselect range",id="remove_hour_range", style=button_style)
                                 ],
                                 className="flex flex-col w-[160px] justify-between"
-                            )      
+                            ),      
                         ],
                       className="w-full flex flex-row justify-between"  
-                    ),    
+                    ),
+                    button(text="Apply selection", id="apply_selection_hourfilter", style=button_style),    
                 ]),    # Tab for hour-based filtering
                 dcc.Tab(label="Date Filter", value="date-filter-tab", children=[
                         html.Div(
