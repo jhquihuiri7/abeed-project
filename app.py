@@ -86,6 +86,7 @@ def update_date_filter(select_all_datefilter, datefilter_dropdown):
     Output("feature_filter_list", "children"),
     Input({"type": "hour_button", "index": ALL}, "n_clicks"),
     Input("apply_hour_range","n_clicks"),
+    Input("remove_hour_range","n_clicks"),
     Input("feature_filter_add","n_clicks"),
     Input({"type": "feature_filter_remove", "index":ALL}, "n_clicks"),
     State({"type": "hour_button", "index": ALL}, "style"),
@@ -99,6 +100,7 @@ def update_date_filter(select_all_datefilter, datefilter_dropdown):
 def update_hour_button_style(
     hour_button, 
     apply_hour_range,
+    remove_hour_range,
     feature_filter_add, 
     feature_filter_remove,
     hour_button_style, 
@@ -125,9 +127,9 @@ def update_hour_button_style(
         # Toggle the background color when the hour button is clicked
         hour_button_style[index]["backgroundColor"] = "white" if hour_button_style[index]["backgroundColor"] == "#d9d9d9" else "#d9d9d9"
     
-    if triggered_id == "apply_hour_range":
+    if triggered_id == "apply_hour_range" or triggered_id == "remove_hour_range":
         for index in range(hour_filter_slider[0],hour_filter_slider[1]+1):
-            hour_button_style[index]["backgroundColor"] = "#d9d9d9"# Toggle the background color when the hour button is clicked
+            hour_button_style[index]["backgroundColor"] = "#d9d9d9" if triggered_id == "apply_hour_range" else "white"# Toggle the background color when the hour button is clicked
         return hour_button_style, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list
     
     if triggered_id == "feature_filter_add":

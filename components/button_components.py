@@ -35,5 +35,6 @@ def hourButton(hours):
         style={"backgroundColor": "white"},
         className=hourButtonStyle  # CSS class for styling the button
     ) for hour in hours
-    ]
+    ],
+    className="flex flex-row w-full justify-between"
     )

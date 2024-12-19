@@ -37,15 +37,26 @@ def main_tabs(client):
                 dcc.Tab(label="Hour Filter", value="hour-filter-tab", children=[
                     html.Div(
                         children=[
-                            hourButton(range(0,24)),
-                            button("Apply range",id="apply_hour_range", style=button_style)
+                            html.Div(
+                                children=[
+                                    hourButton(range(0,24)),
+                                    html.Div(
+                                        dcc.RangeSlider(0, 23, 1, value=[5, 15], id='hour-filter-slider', className="w-[85%]"),
+                                        className="w-full mt-5"
+                                    ),
+                                ],
+                                className="flex flex-col w-[80%] justify-center"
+                            ),
+                            html.Div(
+                                children=[
+                                    button("Select range",id="apply_hour_range", style=button_style),
+                                    button("Deselect range",id="remove_hour_range", style=button_style)
+                                ],
+                                className="flex flex-col w-[160px] justify-between"
+                            )      
                         ],
-                        className="flex flex-row w-full justify-between"
-                    ),
-                    html.Div(
-                        dcc.RangeSlider(0, 23, 1, value=[5, 15], id='hour-filter-slider', className="w-[85%]"),
-                        className="w-full mt-5"
-                    )    
+                      className="w-full flex flex-row justify-between"  
+                    ),    
                 ]),    # Tab for hour-based filtering
                 dcc.Tab(label="Date Filter", value="date-filter-tab", children=[
                         html.Div(
