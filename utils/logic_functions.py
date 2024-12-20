@@ -65,5 +65,12 @@ def update_custom_feature(features, custom_features, values):
 def updateHourButton(buttons, index_to_color):
         for button in buttons:
             print(button)
+            
+def validateFeatureFilterData(feature, min_range, max_range):
+    if feature == "" :
+        return False
+    if min_range == "" and max_range == "":
+        return False
+    return True
 
 

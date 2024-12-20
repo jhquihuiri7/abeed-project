@@ -6,7 +6,7 @@ from components.daterange_components import main_daterange
 from components.tabs_components import main_tabs
 from components.button_components import button
 from utils.functions import update_graph, add_graph, remove_graph, list_custom_filter_children, remove_custom_feature_from_graphs
-from utils.logic_functions import update_custom_feature
+from utils.logic_functions import update_custom_feature, validateFeatureFilterData
 from components.graph_components import multi_chart
 from components.dropdown_components import custom_features_head, custom_dropdow, main_dropdown, date_filter_dropdown
 import plotly.graph_objects as go
@@ -276,20 +276,22 @@ def update_render(
         return "",features,fig, currentChildren, currentDropdownChildren, custom_name,list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list
     
     if triggered_id == "feature_filter_add":
-        try:
-            feature_filter_min_range = float(feature_filter_min_range)
-            feature_filter_max_range = float(feature_filter_max_range) 
-        except:
-            feature_filter_min_range = -math.inf
-            feature_filter_max_range = math.inf
-        client.add_feature_filter(feature_filter_dropdown,feature_filter_min_range, feature_filter_max_range)
-        feature_filter_list = [html.Div([f"{feature_filter["feature_name"]}, Range: ({feature_filter["range"][0]} → {feature_filter["range"][1]})", button(
+        if validateFeatureFilterData(feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range):
+            try:
+                feature_filter_min_range = float(feature_filter_min_range)
+                feature_filter_max_range = float(feature_filter_max_range) 
+            except:
+                feature_filter_min_range = -math.inf
+                feature_filter_max_range = math.inf
+            client.add_feature_filter(feature_filter_dropdown,feature_filter_min_range, feature_filter_max_range)
+            feature_filter_list = [html.Div([f"{feature_filter["feature_name"]}, Range: ({feature_filter["range"][0]} → {feature_filter["range"][1]})", button(
                             text="REMOVE",
                             id={"type": "feature_filter_remove", "index": feature_filter["filter_uid"]},
                             style=button_dropdown_style,
                         )], className="mb-4") for feature_filter in client.feature_filters]
-        feature_filter_dropdown_opts = [feature for feature in feature_filter_dropdown_opts if feature not in feature_filter_dropdown]
-        return "",features, currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, "", "", feature_filter_list
+            feature_filter_dropdown_opts = [feature for feature in feature_filter_dropdown_opts if feature not in feature_filter_dropdown]    
+            return "",features, currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, "", "", feature_filter_list
+        return "",features, currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list
     
     
     if isinstance(triggered_id, dict) and triggered_id.get("type") == "feature_filter_remove":
