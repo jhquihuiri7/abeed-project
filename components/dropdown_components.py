@@ -204,22 +204,26 @@ def feature_filter_dropdown(client):
                         id="feature_filter_dropdown", 
                         multi=False, 
                         className="w-[400px] mr-5"),
-                    dcc.Input(
+                    html.Div([
+                        dcc.Input(
                         id="feature_filter_min_range",
                         type="text",
                         placeholder="- Infinity",
                         className="mx-5",
-                    ),
-                    dcc.Input(
+                        ),
+                        dcc.Input(
                         id="feature_filter_max_range",
                         type="text",
                         placeholder="+ Infinity",
                         className="mx-5",
-                    ),
-                    button(
+                        )    
+                    ]),
+                    html.Div(
+                        button(
                         text="ADD",
                         id="feature_filter_add",
                         style=button_dropdown_style,
+                        )
                     )
                 ],
                 className="w-[70%] flex flex-row justify my-10"
