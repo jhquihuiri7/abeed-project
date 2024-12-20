@@ -67,10 +67,13 @@ def updateHourButton(buttons, index_to_color):
             print(button)
             
 def validateFeatureFilterData(feature, min_range, max_range):
+    reason = ""
     if feature == "" :
-        return False
+        reason = "You must select a Feature"
+        return False, reason
     if min_range == "" and max_range == "":
-        return False
-    return True
+        reason = "You must give at least one input range"
+        return False, reason
+    return True, reason
 
 

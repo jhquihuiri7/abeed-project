@@ -1,10 +1,13 @@
 # packages needed
-import dash
+from dash import Dash, _dash_renderer
+_dash_renderer._set_react_version("18.2.0")
+import dash_mantine_components as dmc
 from dash import dcc, html, Input, Output, State, callback, callback_context, ALL
 from components.checkbox_components import main_checkbox
 from components.daterange_components import main_daterange
 from components.tabs_components import main_tabs
 from components.button_components import button
+from components.notification_components import show_notification
 from utils.functions import update_graph, add_graph, remove_graph, list_custom_filter_children, remove_custom_feature_from_graphs
 from utils.logic_functions import update_custom_feature, validateFeatureFilterData
 from components.graph_components import multi_chart
@@ -15,6 +18,8 @@ from styles.styles import button_style, button_dropdown_style
 from backend.db_dictionaries import feature_units_dict
 import math
 
+from dash_iconify import DashIconify
+
 
 # Initialize the client and global variables
 client = Ops()
@@ -23,17 +28,26 @@ custom_feature = []
 features_selected = []
 
 # External scripts (e.g., TailwindCSS)
-external_scripts = [{"src": "https://cdn.tailwindcss.com"}]
+external_stylesheets = [
+    dmc.styles.NOTIFICATIONS
+]
+
+external_scripts = [
+    "https://cdn.jsdelivr.net/npm/sweetalert2@11",
+    "https://cdn.tailwindcss.com"
+]
 
 # Initialize the Dash app
-app = dash.Dash(
+app = Dash(
     __name__,
     external_scripts=external_scripts,
+    external_stylesheets=external_stylesheets,
     meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}],
 )
 app.title = "Abeed project"
 # app._favicon = "favicon.ico"
-app.layout = html.Div(
+app.layout = dmc.MantineProvider(
+    html.Div(
     className="p-10 w-full",
     children=[
         html.Div(
@@ -49,10 +63,11 @@ app.layout = html.Div(
         dcc.Graph(id="main_graph"),  # Graph for displaying data
         button(text="Add Graph", id="add_graph_button", style=button_style),  # Button to add new graph
         html.Div(id="dynamic_div", children=[], className="flex flex-wrap"),  # Dynamic div for additional content
+        dmc.NotificationProvider(position="top-center"),
+        html.Div(id="notifications-container"),
     ],
 )
-
-
+)
 @callback(
     Output("date_filter_dropdown","children"),
     Input("select_all_datefilter","n_clicks"),
@@ -131,6 +146,7 @@ def update_hour_button_style(
     Output("feature_filter_min_range", "value"),
     Output("feature_filter_max_range", "value"),
     Output("feature_filter_list", "children"),
+    Output("notifications-container", "children"),
     # Inputs and states for callback
     Input("main_dropdown", "value"),
     Input("update_graph_button", "n_clicks"),
@@ -219,6 +235,7 @@ def update_render(
         features_selected = features
         if client.df.empty:
             fig = update_graph(client, features, start_date=start_date, end_date=end_date, update_action=3)
+            feature_filter_min_range, feature_filter_max_range = "", ""
         else:
             fig = update_graph(client, features, start_date=start_date, end_date=end_date, update_action=2)
         currentChildren = multi_chart(client)
@@ -226,12 +243,13 @@ def update_render(
         dynamic_dropdown = [features_selected[0]]
         custom_feature = [{"Feature": features_selected[0]}]
         custom_dropdow_children = custom_dropdow(features_selected, [""], ["Add"], custom_feature)
-        return "",features,fig, currentChildren, custom_dropdow_children, custom_name, list_custom_filter_children(client), client.data_features, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list
+        
+        return "",features,fig, currentChildren, custom_dropdow_children, custom_name, list_custom_filter_children(client), client.data_features, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, []
 
     # Add graph when add button is clicked
     elif triggered_id == "add_graph_button":
         currentChildren = add_graph(client, currentFigure)
-        return "",features,currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list
+        return "",features,currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, []
 
     # Add custom feature when button is clicked
     elif triggered_id == "add_custom_feature":
@@ -241,19 +259,19 @@ def update_render(
         fig = update_graph(client, features, start_date=start_date, end_date=end_date, update_action=1)
         custom_dropdow_children = custom_dropdow(features_selected, [""], ["Add"], custom_feature)
         
-        return "",features,fig, currentChildren, custom_dropdow_children,"",list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list
+        return "",features,fig, currentChildren, custom_dropdow_children,"",list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, []
     
     # Remove graph when remove button is clicked
     elif isinstance(triggered_id, dict) and triggered_id.get("type") == "remove_button":
         currentChildren = remove_graph(client, triggered_id.get("index"))
-        return "",features,currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list
+        return "",features,currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, []
     # Add new custom feature operation
     elif isinstance(triggered_id, dict) and triggered_id.get("type") == "operation_custom_feature_add":
         custom_feature.append({"Operation": "+", "Feature": features[0]})
         dynamic_dropdown.append("")
         operation_custom_feature_op.append("Add")
         custom_dropdow_children = custom_dropdow(features_selected, dynamic_dropdown, operation_custom_feature_op, custom_feature)
-        return "",features,currentFigure, currentChildren, custom_dropdow_children, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list
+        return "",features,currentFigure, currentChildren, custom_dropdow_children, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, []
     # Remove custom feature operation
     elif isinstance(triggered_id, dict) and triggered_id.get("type") == "operation_custom_feature_remove":
         index = triggered_id.get("index")
@@ -262,7 +280,7 @@ def update_render(
         del operation_custom_feature_op[index]
         
         custom_dropdow_children = custom_dropdow(features_selected, dynamic_dropdown, operation_custom_feature_op, custom_feature)
-        return "",features,currentFigure, currentChildren, custom_dropdow_children, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list
+        return "",features,currentFigure, currentChildren, custom_dropdow_children, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, []
     
     # Remove custom feature
     elif isinstance(triggered_id, dict) and triggered_id.get("type") == "custom_feature_remove":
@@ -273,16 +291,21 @@ def update_render(
         currentChildren = remove_custom_feature_from_graphs(client, feature_to_remove)
         fig = update_graph(client, features, start_date=start_date, end_date=end_date, update_action=1)
         
-        return "",features,fig, currentChildren, currentDropdownChildren, custom_name,list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list
+        return "",features,fig, currentChildren, currentDropdownChildren, custom_name,list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, []
     
     if triggered_id == "feature_filter_add":
-        if validateFeatureFilterData(feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range):
+        is_valid, message = validateFeatureFilterData(feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range)
+        if is_valid:
             try:
-                feature_filter_min_range = float(feature_filter_min_range)
-                feature_filter_max_range = float(feature_filter_max_range) 
+                feature_filter_min_range = float(feature_filter_min_range) 
             except:
                 feature_filter_min_range = -math.inf
+            
+            try:
+                feature_filter_max_range = float(feature_filter_max_range)
+            except:
                 feature_filter_max_range = math.inf
+                
             client.add_feature_filter(feature_filter_dropdown,feature_filter_min_range, feature_filter_max_range)
             feature_filter_list = [html.Div([f"{feature_filter["feature_name"]}, Range: ({feature_filter["range"][0]} → {feature_filter["range"][1]})", button(
                             text="REMOVE",
@@ -290,8 +313,8 @@ def update_render(
                             style=button_dropdown_style,
                         )], className="mb-4") for feature_filter in client.feature_filters]
             feature_filter_dropdown_opts = [feature for feature in feature_filter_dropdown_opts if feature not in feature_filter_dropdown]    
-            return "",features, currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, "", "", feature_filter_list
-        return "",features, currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list
+            return "",features, currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, "", "", feature_filter_list, []
+        return "",features, currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, show_notification(message)
     
     
     if isinstance(triggered_id, dict) and triggered_id.get("type") == "feature_filter_remove":
@@ -303,7 +326,7 @@ def update_render(
                             style=button_dropdown_style,
                         )]) for feature_filter in client.feature_filters]
         feature_filter_dropdown_opts = [feature for feature in client.data_features if feature not in [feature["feature_name"] for feature in client.feature_filters]]
-        return "",features, currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list   
+        return "",features, currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, []   
     
     if main_dropdown != "":
         features.append(main_dropdown)
@@ -311,9 +334,9 @@ def update_render(
     
     # If no figure, return initial empty state
     if not currentFigure:
-        return "",features,fig, currentChildren, currentDropdownChildren,custom_name,list_custom_features, client.data_features, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list
+        return "",features,fig, currentChildren, currentDropdownChildren,custom_name,list_custom_features, client.data_features, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, []
 
-    return "",features, currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, client.data_features, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list
+    return "",features, currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, client.data_features, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, []
 
 
 # Serve and render the app

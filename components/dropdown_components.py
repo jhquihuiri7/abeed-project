@@ -46,6 +46,7 @@ def custom_features_head():
             dcc.Input(
                 id="custon_name",
                 type="text",
+                value="",
                 placeholder="Type a custom name",
                 className="mx-5",
             ),
@@ -93,7 +94,7 @@ def custom_dropdow(options, dropdown_values, radio_values, list):
                             {"label": "Sub", "value": "Sub"},
                         ],
                         value=radio_value,  # Current selected operation
-                        labelStyle={"display": "inline", "margin-right": "15px"},
+                        labelStyle={"display": "inline", "marginRight": "15px"},
                         # Hide the radio buttons for the first element
                         style={"display": "none"} if index == 0 else {},
                     ),
