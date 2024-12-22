@@ -9,7 +9,7 @@ from components.tabs_components import main_tabs
 from components.button_components import button
 from components.notification_components import show_notification
 from utils.functions import update_graph, add_graph, remove_graph, list_custom_filter_children, remove_custom_feature_from_graphs
-from utils.logic_functions import update_custom_feature, validateFeatureFilterData, validateMainDropdownSelection
+from utils.logic_functions import update_custom_feature, validateFeatureFilterData, validateMainDropdownSelection, validateDeleteCustomFeatureFilter
 from components.graph_components import multi_chart
 from components.dropdown_components import custom_features_head, custom_dropdow, main_dropdown, date_filter_dropdown
 import plotly.graph_objects as go
@@ -290,6 +290,9 @@ def update_render(
     elif isinstance(triggered_id, dict) and triggered_id.get("type") == "custom_feature_remove":
         index = triggered_id.get("index")
         feature_to_remove = next((feature["feature_name"] for feature in client.created_features if feature["feature_id"] == index), None)
+        if not validateDeleteCustomFeatureFilter(feature_to_remove, client):
+            message = f'Cannot remove Custom Feature, remove "{feature_to_remove}" first.'
+            return "",client.df.columns,fig, currentChildren, currentDropdownChildren, custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, show_notification(message)  
         client.remove_custom_feature(index)
         currentChildren = remove_custom_feature_from_graphs(client, feature_to_remove)
         fig = update_graph(client, client.df.columns, start_date=start_date, end_date=end_date, update_action=1)

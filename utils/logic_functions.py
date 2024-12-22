@@ -81,4 +81,8 @@ def validateMainDropdownSelection(client):
         return False 
     return True
 
-
+def validateDeleteCustomFeatureFilter(feature_to_remove, client):
+    if feature_to_remove in [featureFilter["feature_name"] for featureFilter in client.feature_filters]:
+        return False
+    else:
+        return True
