@@ -76,4 +76,9 @@ def validateFeatureFilterData(feature, min_range, max_range):
         return False, reason
     return True, reason
 
+def validateMainDropdownSelection(client):
+    if client.data_features == []:
+        return False 
+    return True
+
 

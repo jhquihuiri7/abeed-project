@@ -9,7 +9,7 @@ from components.tabs_components import main_tabs
 from components.button_components import button
 from components.notification_components import show_notification
 from utils.functions import update_graph, add_graph, remove_graph, list_custom_filter_children, remove_custom_feature_from_graphs
-from utils.logic_functions import update_custom_feature, validateFeatureFilterData
+from utils.logic_functions import update_custom_feature, validateFeatureFilterData, validateMainDropdownSelection
 from components.graph_components import multi_chart
 from components.dropdown_components import custom_features_head, custom_dropdow, main_dropdown, date_filter_dropdown
 import plotly.graph_objects as go
@@ -233,11 +233,15 @@ def update_render(
     # Update graph when update button is clicked
     if triggered_id == "update_graph_button":
         client.data_features = features
+        if not validateMainDropdownSelection(client):
+            message = "You must select at least one feature to continue."
+            return "",client.data_features,fig, currentChildren, currentDropdownChildren, custom_name, list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, show_notification(message)
+        
         if client.df.empty:
-            fig = update_graph(client, features, start_date=start_date, end_date=end_date, update_action=3)
+            fig = update_graph(client, client.data_features, start_date=start_date, end_date=end_date, update_action=3)
             feature_filter_min_range, feature_filter_max_range = "", ""
         else:
-            fig = update_graph(client, features, start_date=start_date, end_date=end_date, update_action=2)
+            fig = update_graph(client, client.data_features, start_date=start_date, end_date=end_date, update_action=2)
         currentChildren = multi_chart(client)
         dynamic_dropdown = [client.data_features[0]]
         custom_feature = [{"Feature": client.data_features[0]}] 
