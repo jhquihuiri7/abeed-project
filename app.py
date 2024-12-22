@@ -232,19 +232,19 @@ def update_render(
             
     # Update graph when update button is clicked
     if triggered_id == "update_graph_button":
-        features_selected = features
+        client.data_features = features
         if client.df.empty:
             fig = update_graph(client, features, start_date=start_date, end_date=end_date, update_action=3)
             feature_filter_min_range, feature_filter_max_range = "", ""
         else:
             fig = update_graph(client, features, start_date=start_date, end_date=end_date, update_action=2)
         currentChildren = multi_chart(client)
-        features_selected = features
-        dynamic_dropdown = [features_selected[0]]
-        custom_feature = [{"Feature": features_selected[0]}]
-        custom_dropdow_children = custom_dropdow(features_selected, [""], ["Add"], custom_feature)
-        
-        return "",features,fig, currentChildren, custom_dropdow_children, custom_name, list_custom_filter_children(client), client.data_features, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, []
+        dynamic_dropdown = [client.data_features[0]]
+        custom_feature = [{"Feature": client.data_features[0]}] 
+        custom_dropdow_children = custom_dropdow(client.data_features, [""], ["Add"], custom_feature)
+        feature_filter_dropdown_opts = client.data_features
+    
+        return "",client.data_features,fig, currentChildren, custom_dropdow_children, custom_name, list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, []
 
     # Add graph when add button is clicked
     elif triggered_id == "add_graph_button":
@@ -254,12 +254,12 @@ def update_render(
     # Add custom feature when button is clicked
     elif triggered_id == "add_custom_feature":
         client.create_feature(custom_feature, False if custom_cumulative[-1] == "" else True, custom_name)
-        features.extend([feature["feature_name"] for feature in client.created_features])
-        feature_units_dict[features[-1]] = client.created_features[-1]["unit"]
-        fig = update_graph(client, features, start_date=start_date, end_date=end_date, update_action=1)
-        custom_dropdow_children = custom_dropdow(features_selected, [""], ["Add"], custom_feature)
+        feature_units_dict[client.df.columns[-1]] = client.created_features[-1]["unit"]
+        fig = update_graph(client, client.df.columns, start_date=start_date, end_date=end_date, update_action=1)
+        custom_dropdow_children = custom_dropdow(client.df.columns, [""], ["Add"], custom_feature)
+        feature_filter_dropdown_opts = client.df.columns
         
-        return "",features,fig, currentChildren, custom_dropdow_children,"",list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, []
+        return "",client.df.columns,fig, currentChildren, custom_dropdow_children,"",list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, []
     
     # Remove graph when remove button is clicked
     elif isinstance(triggered_id, dict) and triggered_id.get("type") == "remove_button":
@@ -267,11 +267,11 @@ def update_render(
         return "",features,currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, []
     # Add new custom feature operation
     elif isinstance(triggered_id, dict) and triggered_id.get("type") == "operation_custom_feature_add":
-        custom_feature.append({"Operation": "+", "Feature": features[0]})
+        custom_feature.append({"Operation": "+", "Feature": client.data_features[0]})
         dynamic_dropdown.append("")
         operation_custom_feature_op.append("Add")
-        custom_dropdow_children = custom_dropdow(features_selected, dynamic_dropdown, operation_custom_feature_op, custom_feature)
-        return "",features,currentFigure, currentChildren, custom_dropdow_children, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, []
+        custom_dropdow_children = custom_dropdow(client.df.columns, dynamic_dropdown, operation_custom_feature_op, custom_feature)
+        return "",client.df.columns,currentFigure, currentChildren, custom_dropdow_children, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, []
     # Remove custom feature operation
     elif isinstance(triggered_id, dict) and triggered_id.get("type") == "operation_custom_feature_remove":
         index = triggered_id.get("index")
@@ -279,19 +279,19 @@ def update_render(
         del dynamic_dropdown[index]
         del operation_custom_feature_op[index]
         
-        custom_dropdow_children = custom_dropdow(features_selected, dynamic_dropdown, operation_custom_feature_op, custom_feature)
-        return "",features,currentFigure, currentChildren, custom_dropdow_children, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, []
+        custom_dropdow_children = custom_dropdow(client.df.columns, dynamic_dropdown, operation_custom_feature_op, custom_feature)
+        return "",client.df.columns,currentFigure, currentChildren, custom_dropdow_children, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, []
     
     # Remove custom feature
     elif isinstance(triggered_id, dict) and triggered_id.get("type") == "custom_feature_remove":
         index = triggered_id.get("index")
         feature_to_remove = next((feature["feature_name"] for feature in client.created_features if feature["feature_id"] == index), None)
         client.remove_custom_feature(index)
-        features= [feature for feature in features if feature != feature_to_remove]
         currentChildren = remove_custom_feature_from_graphs(client, feature_to_remove)
-        fig = update_graph(client, features, start_date=start_date, end_date=end_date, update_action=1)
-        
-        return "",features,fig, currentChildren, currentDropdownChildren, custom_name,list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, []
+        fig = update_graph(client, client.df.columns, start_date=start_date, end_date=end_date, update_action=1)
+        feature_filter_dropdown_opts = client.df.columns
+        custom_dropdow_children = custom_dropdow(client.df.columns, [""], ["Add"], custom_feature)
+        return "",client.df.columns,fig, currentChildren, custom_dropdow_children, custom_name,list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, []
     
     if triggered_id == "feature_filter_add":
         is_valid, message = validateFeatureFilterData(feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range)
