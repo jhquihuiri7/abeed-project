@@ -86,3 +86,13 @@ def validateDeleteCustomFeatureFilter(feature_to_remove, client):
         return False
     else:
         return True
+
+def validateCustomFeaturesExistInFeatures(client, features):
+    missing_features = []
+    if client.created_features != []:
+        for custom_feature in client.created_features:
+            for feature in custom_feature["equation"]:
+                if feature["Feature"] not in features:
+                    missing_features.append(feature["Feature"])
+    
+    return True if len(missing_features)==0 else False, missing_features

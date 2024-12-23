@@ -210,13 +210,13 @@ def feature_filter_dropdown(client):
                         id="feature_filter_min_range",
                         type="text",
                         placeholder="- Infinity",
-                        className="mx-5",
+                        className="mx-5 w-[65px]",
                         ),
                         dcc.Input(
                         id="feature_filter_max_range",
                         type="text",
                         placeholder="+ Infinity",
-                        className="mx-5",
+                        className="mx-5 w-[65px]",
                         )    
                     ]),
                     html.Div(
@@ -227,14 +227,14 @@ def feature_filter_dropdown(client):
                         )
                     )
                 ],
-                className="w-[70%] flex flex-row justify my-10"
+                className="w-[65%] flex flex-row justify my-10"
             ),
             html.Div(
                 children=[
                     
                 ],
                 id="feature_filter_list",
-                className="w-[30%] my-10 flex flex-col items-end"
+                className="w-[35%] my-10 flex flex-col items-end"
             )
         ]
     )

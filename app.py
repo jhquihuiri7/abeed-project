@@ -1,24 +1,36 @@
-# packages needed
+# Dash imports
 from dash import Dash, _dash_renderer
-_dash_renderer._set_react_version("18.2.0")
-import dash_mantine_components as dmc
 from dash import dcc, html, Input, Output, State, callback, callback_context, ALL
+
+# External libraries
+import math
+import plotly.graph_objects as go
+from dash_iconify import DashIconify
+
+# Components
+import dash_mantine_components as dmc
 from components.checkbox_components import main_checkbox
 from components.daterange_components import main_daterange
 from components.tabs_components import main_tabs
 from components.button_components import button
 from components.notification_components import show_notification
-from utils.functions import update_graph, add_graph, remove_graph, list_custom_filter_children, remove_custom_feature_from_graphs
-from utils.logic_functions import update_custom_feature, validateFeatureFilterData, validateMainDropdownSelection, validateDeleteCustomFeatureFilter
 from components.graph_components import multi_chart
 from components.dropdown_components import custom_features_head, custom_dropdow, main_dropdown, date_filter_dropdown
-import plotly.graph_objects as go
-from backend.Class import Ops
-from styles.styles import button_style, button_dropdown_style
-from backend.db_dictionaries import feature_units_dict
-import math
 
-from dash_iconify import DashIconify
+# Utilities
+from utils.functions import update_graph, add_graph, remove_graph, list_custom_filter_children, remove_custom_feature_from_graphs
+from utils.logic_functions import update_custom_feature, validateFeatureFilterData, validateMainDropdownSelection, validateDeleteCustomFeatureFilter, validateCustomFeaturesExistInFeatures
+
+# Backend
+from backend.Class import Ops
+from backend.db_dictionaries import feature_units_dict
+
+# Styles
+from styles.styles import button_style, button_dropdown_style
+
+# React version setting
+_dash_renderer._set_react_version("18.2.0")
+
 
 
 # Initialize the client and global variables
@@ -228,10 +240,15 @@ def update_render(
     
     client.start_date = start_date
     client.end_date = end_date
-    client.data_features = features
+    #client.data_features = features
             
     # Update graph when update button is clicked
     if triggered_id == "update_graph_button":
+        isMissing, missingFeatures = validateCustomFeaturesExistInFeatures(client, features)
+        if not isMissing:
+            message = f"You can't update the graph until you select the missing features: {missingFeatures}"
+            return "",client.data_features,fig, currentChildren, currentDropdownChildren, custom_name, list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, show_notification(message)
+            
         client.data_features = features
         if not validateMainDropdownSelection(client):
             message = "You must select at least one feature to continue."
