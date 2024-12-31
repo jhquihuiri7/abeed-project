@@ -5,7 +5,7 @@ from dash import dcc, html, Input, Output, State, callback, callback_context, AL
 
 
 # Function to update the graph when a button is clicked
-def update_graph(client, features, start_date, end_date, update_action=1):
+def update_graph(client, update_action=1, apply_filters=False, collapse=False):
     """
     Updates the graph based on the specified update action.
 
@@ -24,7 +24,7 @@ def update_graph(client, features, start_date, end_date, update_action=1):
     """
     if update_action == 1:
         # Return the bar chart as is without modifying the data
-        return bar_chart(client)
+        return bar_chart(client,  None, False, False)
 
     if update_action == 2:
         # Update the client's data frame with the new features and date range
@@ -45,13 +45,16 @@ def update_graph(client, features, start_date, end_date, update_action=1):
     if update_action == 3:
         # Update the client's data frame with the selected features and date range
         client.update_df()
+    
+    if update_action == 4:
+        return bar_chart(client,  None, apply_filters, collapse)       
 
     # Return the updated bar chart
-    return bar_chart(client)
+    return bar_chart(client, None,False, False)
 
 
 # Function to add a graph when a button is clicked
-def add_graph(client, currentFigure):
+def add_graph(client, currentFigure, apply_filter=False, collapse=False, update=False):
     """
     Adds a new graph based on the currently visible features in the provided figure.
 
@@ -64,14 +67,15 @@ def add_graph(client, currentFigure):
     """
     if currentFigure:  # Ensure that currentFigure is not None
         # Extract names of features that are currently visible
-        sub_features = [
-            i["name"] for i in currentFigure["data"] if i["visible"] == True
-        ]
-        # Add the selected features as a new graph to the client
-        client.add_graph(sub_features)
+        if not update:
+            sub_features = [
+                i["name"] for i in currentFigure["data"] if i["visible"] == True
+            ]
+            # Add the selected features as a new graph to the client
+            client.add_graph(sub_features)
 
         # Return the updated list of graphs
-        return multi_chart(client)
+        return multi_chart(client, apply_filter, collapse)
 
 def remove_custom_feature_from_graphs(client, custom_feature):
     for i in range(0,len(client.graphs)):

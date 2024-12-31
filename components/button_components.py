@@ -1,8 +1,10 @@
 # Import custom styles from the styles module
 from styles.styles import button_style, hourButtonStyle
+import dash_daq as daq
+
 
 # Import the HTML module from Dash
-from dash import html
+from dash import html, dcc
 
 # Define a function to create a button using Dash
 def button(text, id, style):
@@ -37,4 +39,28 @@ def hourButton(hours):
     ) for hour in hours
     ],
     className="flex flex-row w-full justify-between"
+    )
+
+def apply_filters_toggle(action):
+    return html.Div(
+        children=[
+            dcc.Checklist(
+              options=["Apply filter"],
+              value=[],
+              className="mb-2",
+              id="apply_filters"
+            ),
+            html.Div(
+                daq.ToggleSwitch(
+                id='collapse_expand_filter',
+                value=True,
+                label=action,
+                labelPosition='right',
+                color= "#1975fa",
+                disabled=True
+                ),
+                className="ml-5 w-[150px]"
+            )
+        ],
+        className="flex flex-col"
     )

@@ -3,12 +3,14 @@ import plotly.graph_objects as go  # For creating Plotly charts
 from plotly.subplots import make_subplots  # For creating charts with subplots and multiple axes
 from components.button_components import button  # Custom button component
 from backend.db_dictionaries import feature_units_dict  # Dictionary containing units for features
-from utils.logic_functions import contains_both_axis  # Function to check for double axis requirements
+from utils.logic_functions import contains_both_axis, get_last_consecutive_datetime  # Function to check for double axis requirements
 from dash import dcc, html  # Dash components for UI
 from styles.styles import button_style  # Custom button styling
+import pandas as pd
+
 
 # Function to create a bar chart with optional dual axes
-def bar_chart(client, cols=None):
+def bar_chart(client, cols=None, apply_filter=False, collapse=False):
     """
     Generates a bar chart with support for a secondary Y-axis if needed.
 
@@ -24,8 +26,8 @@ def bar_chart(client, cols=None):
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     
     # Determine the columns to use for the chart
-    columns = client.df.columns if cols is None else client.df[cols].columns
-    
+    data = client.filter_df if apply_filter else client.df 
+    columns = data.columns if cols is None else data[cols].columns
     # Check if dual axes are needed and get axis names
     double_axis, axis_names = contains_both_axis(columns)
     
@@ -36,7 +38,7 @@ def bar_chart(client, cols=None):
     # Iterate over the columns to add data traces to the chart
     for column in columns:
         # Calculate the maximum value in the column
-        max_val = max(client.df[column])
+        max_val = max(data[column])
         
         # Append the value to the appropriate axis based on the feature's unit
         (
@@ -48,8 +50,8 @@ def bar_chart(client, cols=None):
         # Add a trace to the chart
         fig.add_trace(
             go.Scatter(
-                x=client.df.index,  # X-axis data (index of the dataframe)
-                y=client.df[column],  # Y-axis data (column values)
+                x=data.index,  # X-axis data (index of the dataframe)
+                y=data[column],  # Y-axis data (column values)
                 mode="lines",  # Line chart
                 line_shape="hv",
                 name=column,  # Legend label
@@ -61,6 +63,32 @@ def bar_chart(client, cols=None):
                 True if double_axis and feature_units_dict[column] == "mw" else False
             ),  # Assign trace to secondary Y-axis if applicable
         )
+        
+    
+    if client.datetimes_to_exclude and apply_filter and collapse:
+        margin = pd.Timedelta(hours=1)
+        for highlight_date in client.datetimes_to_exclude:
+            fig.add_shape(
+                type="rect",
+                x0=highlight_date,
+                x1=highlight_date+margin,
+                xref="x",
+                y0=0,
+                y1=1,
+                yref="paper",
+                line=dict(width=0),
+                fillcolor="red",
+                opacity=0.3
+            )
+    if client.datetimes_to_exclude and apply_filter and collapse==False:
+        
+        result = get_last_consecutive_datetime(data.index)
+        
+        for highlight_date in result:
+            fig.add_vline(x=highlight_date, line_dash="solid", line_color="red", opacity=0.8, line_width=3)
+        
+        formatted_dates = [timestamp.strftime("%b %d") for timestamp in result]
+        fig.update_xaxes(type="category", tickvals= result, ticktext=formatted_dates)
     
     # Update the layout of the chart
     fig.update_layout(
@@ -94,7 +122,7 @@ def bar_chart(client, cols=None):
     return fig  # Return the complete figure
 
 # Function to generate multiple charts and associate them with remove buttons
-def multi_chart(client):
+def multi_chart(client, apply_filter=False, collapse=False):
     """
     Creates multiple charts and associates a remove button with each chart.
 
@@ -115,7 +143,7 @@ def multi_chart(client):
                     # Graph component displaying the bar chart
                     dcc.Graph(
                         id=graph["graph_uid"],  # Unique ID for the graph
-                        figure=bar_chart(client, graph["graph_data_features"]),  # Generate the chart
+                        figure=bar_chart(client, graph["graph_data_features"],apply_filter, collapse),  # Generate the chart
                     ),
                     # Button to remove the graph
                     button(

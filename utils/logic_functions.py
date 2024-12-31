@@ -1,6 +1,7 @@
 # Import the feature_units_dict dictionary from the backend, 
 # which maps features to their respective measurement units.
 from backend.db_dictionaries import feature_units_dict
+from datetime import datetime, timedelta
 
 # Function to determine if a set of columns requires both primary and secondary axes
 def contains_both_axis(cols):
@@ -96,3 +97,49 @@ def validateCustomFeaturesExistInFeatures(client, features):
                     missing_features.append(feature["Feature"])
     
     return True if len(missing_features)==0 else False, missing_features
+
+def validateApplyFilterToggle(client, apply_filter, toggle):
+    
+    apply_action = True
+    toggle_action = True
+    is_valid = True
+    message = ""
+    
+    if apply_filter != []:
+        if client.datetimes_to_exclude==[]:
+            is_valid = False
+            message = "No filters to apply"
+    
+    return is_valid, apply_action, toggle_action, message
+
+def validateApplySelection(client, type):
+    is_valid = True
+    message = ""
+    if type == "hour_filter":
+        if client.hour_filters == []:
+            is_valid = False
+            message = "No hours selected"
+    
+    if type=="date_filter":
+        if client.day_of_week_filters == [] or client.month_filters == [] or client.year_filters == []:
+            is_valid = False
+            message = "Please select at least one year, month and day of the week"
+            
+    return is_valid, message
+    
+def get_last_consecutive_datetime(datetime_axis):
+    # Resultado final
+    result = []
+
+    # Iterar sobre la lista para identificar grupos consecutivos
+    current_group_last = datetime_axis[0]  # Inicialmente el primer elemento
+    
+    for i in range(1, len(datetime_axis)):
+        if datetime_axis[i] - datetime_axis[i - 1] > timedelta(hours=1):  # Cambia el intervalo según necesidad
+            # Si no son consecutivos, guardar el último del grupo actual
+            result.append(current_group_last)
+        current_group_last = datetime_axis[i]
+    
+    # Agregar el último elemento del último grupo
+    result.append(current_group_last)
+    return result

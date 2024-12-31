@@ -14,7 +14,6 @@ import unittest
 import pdb
 
 
-
 class Ops:
     def __init__(self) -> None:
 
@@ -44,7 +43,7 @@ class Ops:
         self.day_of_week_filters = list(range(7))
 
         # List of months to include when graphing with filters (0-11)
-        self.month_filters = list(range(12))
+        self.month_filters = list(range(1,13))
 
         # List of years to include when graphing with filters (2000-2025)
         self.year_filters = list(range(2000, 2026))
@@ -91,10 +90,7 @@ class Ops:
         if self.data_features and self.start_date and self.end_date:
             db_names = []
             for feature in self.data_features:
-                try:
-                    db_names.append(feature_read_name_to_db_name_dict[feature])
-                except:
-                    pass
+                db_names.append(feature_read_name_to_db_name_dict[feature])
             self.df = simple_request(self.start_date, self.end_date, db_names)[0]
             self.df.rename(columns=feature_db_name_to_read_name_dict, inplace=True)
         self.add_created_features_to_df()
@@ -224,7 +220,7 @@ class Ops:
                 
                 else:
                     custom_name = custom_name + " " + features["Operation"] + " " + features["Feature"]
-        
+
         custom_feature_unit = get_feature_units(feature_operation_list[0]["Feature"])
         self.created_features.append(
             {
@@ -235,7 +231,6 @@ class Ops:
             "unit" : custom_feature_unit
             }
         )
-        
         self.add_created_features_to_df()
 
     def remove_custom_feature(self, target_uid: str):
@@ -248,13 +243,13 @@ class Ops:
             features for features in self.created_features if features['feature_id'] != target_uid
         ]
         self.df = self.df.drop(removed_feature_name, axis=1)
-        #self.filter_df = self.filter_df.drop(removed_feature_name, axis=1)
+        self.filter_df = self.filter_df.drop(removed_feature_name, axis=1)
 
     def add_created_features_to_df(self):
         for feature in self.created_features:
             if feature["feature_name"] not in self.df.columns.to_list():   
                 self.df = add_custom_feature_column(self.df, feature)
-        #self.update_datetimes_to_exclude()
+        self.update_datetimes_to_exclude()
 
     def add_scatter_graph(self, feature1, feature2):
         # Only allow user to select features from the self.data_features or self.created_features lists (if it is a created_feature it cannot be cummulative)
