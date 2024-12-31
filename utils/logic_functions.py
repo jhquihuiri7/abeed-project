@@ -63,13 +63,35 @@ def update_custom_feature(features, custom_features, values):
 
     return updated_features  # Return the list of updated features
 
+# Function to update the color of hour buttons
 def updateHourButton(buttons, index_to_color):
-        for button in buttons:
-            print(button)
-            
+    """
+    Updates the color of hour buttons based on the provided index-to-color mapping.
+
+    Args:
+        buttons (list): List of button objects.
+        index_to_color (dict): Dictionary mapping button indices to their respective colors.
+    """
+    for button in buttons:
+        print(button)
+
+# Function to validate feature filter data
 def validateFeatureFilterData(feature, min_range, max_range):
+    """
+    Validates the input data for feature filters.
+
+    Args:
+        feature (str): The selected feature name.
+        min_range (str): Minimum range value.
+        max_range (str): Maximum range value.
+
+    Returns:
+        tuple: 
+            - (bool): True if valid, False otherwise.
+            - (str): Reason for invalidation, if applicable.
+    """
     reason = ""
-    if feature == "" :
+    if feature == "":
         reason = "You must select a Feature"
         return False, reason
     if min_range == "" and max_range == "":
@@ -77,18 +99,52 @@ def validateFeatureFilterData(feature, min_range, max_range):
         return False, reason
     return True, reason
 
+# Function to validate the main dropdown selection
 def validateMainDropdownSelection(client):
+    """
+    Validates whether the main dropdown selection is valid.
+
+    Args:
+        client (object): Client object containing feature data.
+
+    Returns:
+        bool: True if valid, False otherwise.
+    """
     if client.data_features == []:
-        return False 
+        return False
     return True
 
+# Function to validate if a custom feature filter can be deleted
 def validateDeleteCustomFeatureFilter(feature_to_remove, client):
+    """
+    Validates whether a custom feature filter can be deleted.
+
+    Args:
+        feature_to_remove (str): Feature name to be removed.
+        client (object): Client object containing feature filters.
+
+    Returns:
+        bool: True if the feature can be deleted, False otherwise.
+    """
     if feature_to_remove in [featureFilter["feature_name"] for featureFilter in client.feature_filters]:
         return False
     else:
         return True
 
+# Function to check if custom features exist in a list of features
 def validateCustomFeaturesExistInFeatures(client, features):
+    """
+    Checks if all custom features created by the client exist in the given list of features.
+
+    Args:
+        client (object): Client object containing created features.
+        features (list): List of available feature names.
+
+    Returns:
+        tuple: 
+            - (bool): True if all custom features exist, False otherwise.
+            - (list): List of missing features, if any.
+    """
     missing_features = []
     if client.created_features != []:
         for custom_feature in client.created_features:
@@ -96,23 +152,51 @@ def validateCustomFeaturesExistInFeatures(client, features):
                 if feature["Feature"] not in features:
                     missing_features.append(feature["Feature"])
     
-    return True if len(missing_features)==0 else False, missing_features
+    return True if len(missing_features) == 0 else False, missing_features
 
+# Function to validate the toggle for applying filters
 def validateApplyFilterToggle(client, apply_filter, toggle):
-    
+    """
+    Validates whether filters can be applied based on the toggle state and filter data.
+
+    Args:
+        client (object): Client object containing filter data.
+        apply_filter (list): List of filters to be applied.
+        toggle (bool): Toggle state for applying filters.
+
+    Returns:
+        tuple:
+            - (bool): True if valid, False otherwise.
+            - (bool): Action for applying filters.
+            - (bool): Action for toggling filters.
+            - (str): Message explaining the validation result.
+    """
     apply_action = True
     toggle_action = True
     is_valid = True
     message = ""
     
     if apply_filter != []:
-        if client.datetimes_to_exclude==[]:
+        if client.datetimes_to_exclude == []:
             is_valid = False
             message = "No filters to apply"
     
     return is_valid, apply_action, toggle_action, message
 
+# Function to validate the application of filter selections
 def validateApplySelection(client, type):
+    """
+    Validates whether filter selections can be applied.
+
+    Args:
+        client (object): Client object containing filter data.
+        type (str): Type of filter (e.g., "hour_filter" or "date_filter").
+
+    Returns:
+        tuple:
+            - (bool): True if valid, False otherwise.
+            - (str): Message explaining the validation result.
+    """
     is_valid = True
     message = ""
     if type == "hour_filter":
@@ -120,26 +204,34 @@ def validateApplySelection(client, type):
             is_valid = False
             message = "No hours selected"
     
-    if type=="date_filter":
+    if type == "date_filter":
         if client.day_of_week_filters == [] or client.month_filters == [] or client.year_filters == []:
             is_valid = False
             message = "Please select at least one year, month and day of the week"
             
     return is_valid, message
-    
-def get_last_consecutive_datetime(datetime_axis):
-    # Resultado final
-    result = []
 
-    # Iterar sobre la lista para identificar grupos consecutivos
-    current_group_last = datetime_axis[0]  # Inicialmente el primer elemento
+# Function to get the last consecutive datetime in a list
+def get_last_consecutive_datetime(datetime_axis):
+    """
+    Identifies and returns the last datetime in consecutive groups from a sorted list.
+
+    Args:
+        datetime_axis (list): List of datetime objects, sorted in ascending order.
+
+    Returns:
+        list: List of last datetime objects from each consecutive group.
+    """
+    result = []  # Final result list
+
+    # Initialize with the first element
+    current_group_last = datetime_axis[0]
     
+    # Iterate to identify consecutive groups
     for i in range(1, len(datetime_axis)):
-        if datetime_axis[i] - datetime_axis[i - 1] > timedelta(hours=1):  # Cambia el intervalo según necesidad
-            # Si no son consecutivos, guardar el último del grupo actual
-            result.append(current_group_last)
+        if datetime_axis[i] - datetime_axis[i - 1] > timedelta(hours=1):  # Adjust interval if needed
+            result.append(current_group_last)  # Save the last element of the current group
         current_group_last = datetime_axis[i]
     
-    # Agregar el último elemento del último grupo
-    result.append(current_group_last)
+    result.append(current_group_last)  # Add the last element of the last group
     return result
