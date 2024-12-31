@@ -71,7 +71,7 @@ def add_graph(client, currentFigure, apply_filter=False, collapse=False, update=
         if not update:
             # Extract names of visible features in the current figure
             sub_features = [
-                i["name"] for i in currentFigure["data"] if i["visible"]
+                i["name"] for i in currentFigure["data"] if i["visible"]==True
             ]
             # Add the selected features as a new graph
             client.add_graph(sub_features)
