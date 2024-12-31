@@ -86,7 +86,7 @@ def remove_custom_feature_from_graphs(client, custom_feature):
     return multi_chart(client)
 
 # Function to remove a graph when a button is clicked
-def remove_graph(client, index):
+def remove_graph(client, index, apply_filter, collapse):
     """
     Removes a graph based on its unique identifier (UUID).
 
@@ -101,7 +101,7 @@ def remove_graph(client, index):
     client.remove_graph(target_uuid=index)
 
     # Return the updated list of graphs
-    return multi_chart(client)
+    return multi_chart(client, apply_filter, collapse)
 
 def list_custom_filter_children(client):
     created_features = client.created_features

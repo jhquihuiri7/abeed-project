@@ -312,15 +312,15 @@ def update_render(
     elif triggered_id == "add_custom_feature":
         client.create_feature(custom_feature, False if custom_cumulative[-1] == "" else True, custom_name)
         feature_units_dict[client.df.columns[-1]] = client.created_features[-1]["unit"]
-        fig = update_graph(client, update_action=1)
+        fig = update_graph(client, 4, apply_filters_state, collapse_expand_filter_state)
         custom_dropdow_children = custom_dropdow(client.df.columns, [""], ["Add"], custom_feature)
         feature_filter_dropdown_opts = client.df.columns
         
-        return "",client.df.columns,fig, currentChildren, custom_dropdow_children,"",list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, []
+        return "",client.df.columns,fig, currentChildren, custom_dropdow_children,"",list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
     
     # Remove graph when remove button is clicked
     elif isinstance(triggered_id, dict) and triggered_id.get("type") == "remove_button":
-        currentChildren = remove_graph(client, triggered_id.get("index"))
+        currentChildren = remove_graph(client, triggered_id.get("index"), apply_filters_state, collapse_expand_filter_state)
         return "",features,currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
     # Add new custom feature operation
     elif isinstance(triggered_id, dict) and triggered_id.get("type") == "operation_custom_feature_add":
@@ -328,7 +328,8 @@ def update_render(
         dynamic_dropdown.append("")
         operation_custom_feature_op.append("Add")
         custom_dropdow_children = custom_dropdow(client.df.columns, dynamic_dropdown, operation_custom_feature_op, custom_feature)
-        return "",client.df.columns,currentFigure, currentChildren, custom_dropdow_children, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, []
+        return "",client.df.columns,currentFigure, currentChildren, custom_dropdow_children, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
+    
     # Remove custom feature operation
     elif isinstance(triggered_id, dict) and triggered_id.get("type") == "operation_custom_feature_remove":
         index = triggered_id.get("index")
@@ -345,13 +346,13 @@ def update_render(
         feature_to_remove = next((feature["feature_name"] for feature in client.created_features if feature["feature_id"] == index), None)
         if not validateDeleteCustomFeatureFilter(feature_to_remove, client):
             message = f'Cannot remove Custom Feature, remove "{feature_to_remove}" first.'
-            return "",client.df.columns,fig, currentChildren, currentDropdownChildren, custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, show_notification(message)  
-        client.remove_custom_feature(index)
+            return "",client.df.columns,fig, currentChildren, currentDropdownChildren, custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, show_notification(message), apply_filters_state, collapse_expand_filter_disabled
         currentChildren = remove_custom_feature_from_graphs(client, feature_to_remove)
-        fig = update_graph(client, update_action=1)
+        client.remove_custom_feature(index)
+        fig = update_graph(client, 4, apply_filters_state, collapse_expand_filter_state)
         feature_filter_dropdown_opts = client.df.columns
         custom_dropdow_children = custom_dropdow(client.df.columns, [""], ["Add"], custom_feature)
-        return "",client.df.columns,fig, currentChildren, custom_dropdow_children, custom_name,list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, []
+        return "",client.df.columns,fig, currentChildren, custom_dropdow_children, custom_name,list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
     
     if triggered_id == "feature_filter_add":
         is_valid, message = validateFeatureFilterData(feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range)
@@ -377,6 +378,7 @@ def update_render(
             apply_filters_state = ['Apply filter']
             collapse_expand_filter_disabled = False 
             fig = update_graph(client, 4, apply_filters_state!=[], collapse_expand_filter_state)
+            currentChildren = add_graph(client, currentFigure, apply_filters_state!=[], collapse_expand_filter_state, True)
             
             return "",client.df.columns, fig, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, "", "", feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
         return "",client.df.columns, currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, show_notification(message), apply_filters_state, collapse_expand_filter_disabled
@@ -394,6 +396,8 @@ def update_render(
         apply_filters_state = ['Apply filter']
         collapse_expand_filter_disabled = False 
         fig = update_graph(client, 4, apply_filters_state!=[], collapse_expand_filter_state)
+        currentChildren = add_graph(client, currentFigure, apply_filters_state!=[], collapse_expand_filter_state, True)
+        
         return "",client.df.columns, fig, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
     
     if triggered_id == "apply_selection_hourfilter":
@@ -408,6 +412,7 @@ def update_render(
             apply_filters_state = ['Apply filter']
             collapse_expand_filter_disabled = False 
             fig = update_graph(client, 4, apply_filters_state!=[], collapse_expand_filter_state)
+            currentChildren = add_graph(client, currentFigure, apply_filters_state!=[], collapse_expand_filter_state, True)
         
         return "",client.df.columns, fig, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
     
@@ -423,6 +428,7 @@ def update_render(
             apply_filters_state = ['Apply filter']
             collapse_expand_filter_disabled = False 
             fig = update_graph(client, 4, apply_filters_state!=[], collapse_expand_filter_state)
+            currentChildren = add_graph(client, currentFigure, apply_filters_state!=[], collapse_expand_filter_state, True)
         
         return "",client.df.columns, fig, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
     

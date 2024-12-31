@@ -85,7 +85,7 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False):
         result = get_last_consecutive_datetime(data.index)
         
         for highlight_date in result:
-            fig.add_vline(x=highlight_date, line_dash="solid", line_color="red", opacity=0.8, line_width=3)
+            fig.add_vline(x=highlight_date, line_dash="solid", line_color="red", opacity=0.3, line_width=3)
         
         formatted_dates = [timestamp.strftime("%b %d") for timestamp in result]
         fig.update_xaxes(type="category", tickvals= result, ticktext=formatted_dates)
