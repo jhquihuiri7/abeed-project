@@ -3,7 +3,7 @@ import plotly.graph_objects as go  # For creating Plotly charts
 from plotly.subplots import make_subplots  # For creating charts with subplots and multiple axes
 from components.button_components import button  # Custom button component
 from backend.db_dictionaries import feature_units_dict  # Dictionary containing units for features
-from utils.logic_functions import contains_both_axis, get_last_consecutive_datetime  # Function to check for double axis requirements
+from utils.logic_functions import contains_both_axis, get_last_consecutive_datetime, group_consecutive  # Function to check for double axis requirements
 from dash import dcc, html  # Dash components for UI
 from styles.styles import button_style  # Custom button styling
 import pandas as pd
@@ -67,11 +67,11 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False):
     
     if client.datetimes_to_exclude and apply_filter and collapse:
         margin = pd.Timedelta(hours=1)
-        for highlight_date in client.datetimes_to_exclude:
+        for highlight_date in group_consecutive(client.datetimes_to_exclude):
             fig.add_shape(
                 type="rect",
-                x0=highlight_date,
-                x1=highlight_date+margin,
+                x0=highlight_date[0],
+                x1=highlight_date[1]+margin,
                 xref="x",
                 y0=0,
                 y1=1,

@@ -235,3 +235,13 @@ def get_last_consecutive_datetime(datetime_axis):
     
     result.append(current_group_last)  # Add the last element of the last group
     return result
+
+def group_consecutive(datetime_axis):
+    groups = []
+    start = datetime_axis[0]
+    for i in range(1, len(datetime_axis)):
+        if datetime_axis[i] != datetime_axis[i - 1] + timedelta(hours=1):
+            groups.append([start, datetime_axis[i - 1]])
+            start = datetime_axis[i]
+    groups.append([start, datetime_axis[-1]])
+    return groups
