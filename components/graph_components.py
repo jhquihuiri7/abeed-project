@@ -3,7 +3,7 @@ import plotly.graph_objects as go  # For creating Plotly charts
 from plotly.subplots import make_subplots  # For creating charts with subplots and multiple axes
 from components.button_components import button  # Custom button component
 from backend.db_dictionaries import feature_units_dict  # Dictionary containing units for features
-from utils.logic_functions import contains_both_axis, get_last_consecutive_datetime, group_consecutive  # Function to check for double axis requirements
+from utils.logic_functions import contains_both_axis, get_last_consecutive_datetime, group_consecutive, get_first_consecutive_datetime  # Function to check for double axis requirements
 from dash import dcc, html  # Dash components for UI
 from styles.styles import button_style  # Custom button styling
 import pandas as pd
@@ -37,13 +37,13 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False):
             custom_df[custom_features] = custom_df[custom_features].ffill()
 
     
-    if client.datetimes_to_exclude and apply_filter and collapse==False:
-        margin = pd.Timedelta(hours=1)
-        new_datetimes = [result + margin for result in get_last_consecutive_datetime(client.filter_df.index)]
-        new_data = {client.filter_df.columns[0]: [np.nan]*len(new_datetimes)}
-        df_new = pd.DataFrame(new_data, index=new_datetimes)
-        filter_df = pd.concat([client.filter_df, df_new])
-        filter_df = filter_df.sort_index()
+    #if client.datetimes_to_exclude and apply_filter and collapse==False:
+    #    margin = pd.Timedelta(hours=1)
+    #    new_datetimes = [result + margin for result in get_last_consecutive_datetime(client.filter_df.index)]
+    #    new_data = {client.filter_df.columns[0]: [np.nan]*len(new_datetimes)}
+    #    df_new = pd.DataFrame(new_data, index=new_datetimes)
+    #    filter_df = pd.concat([client.filter_df, df_new])
+    #    filter_df = filter_df.sort_index()
         
         
     # Determine the columns to use for the chart
@@ -79,7 +79,6 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False):
                 name=column,  # Legend label
                 visible=True,  # Initial visibility
                 showlegend=True,  # Show legend entry
-                
             ),
             secondary_y=(
                 True if double_axis and feature_units_dict[column] == "mw" else False
@@ -105,8 +104,7 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False):
             )
     if client.datetimes_to_exclude and apply_filter and collapse==False:
         
-        result = get_last_consecutive_datetime(data.index)
-        margin = pd.Timedelta(hours=1)
+        result = get_first_consecutive_datetime(data.index)
         
         for highlight_date in result:
             fig.add_vline(x=highlight_date, line_dash="solid", line_color="red", opacity=0.3, line_width=3)

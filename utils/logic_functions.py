@@ -226,6 +226,30 @@ def get_last_consecutive_datetime(datetime_axis):
     result.append(current_group_last)  # Add the last element of the last group
     return result
 
+def get_first_consecutive_datetime(datetime_axis):
+    """
+    Identifies and returns the first datetime in consecutive groups from a sorted list.
+
+    Args:
+        datetime_axis (list): List of datetime objects, sorted in ascending order.
+
+    Returns:
+        list: List of first datetime objects from each consecutive group.
+    """
+    result = []  # Final result list
+
+    # Initialize with the first element as the start of a group
+    current_group_first = datetime_axis[0]
+    result.append(current_group_first)  # Save the first element of the first group
+    
+    # Iterate to identify consecutive groups
+    for i in range(1, len(datetime_axis)):
+        if datetime_axis[i] - datetime_axis[i - 1] > timedelta(hours=1):  # Adjust interval if needed
+            current_group_first = datetime_axis[i]  # Update to the start of the next group
+            result.append(current_group_first)  # Save the first element of the new group
+    
+    return result
+
 def group_consecutive(datetime_axis):
     groups = []
     start = datetime_axis[0]
