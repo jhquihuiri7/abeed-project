@@ -2,6 +2,7 @@
 # which maps features to their respective measurement units.
 from backend.db_dictionaries import feature_units_dict
 from datetime import datetime, timedelta
+import pandas as pd
 
 # Function to determine if a set of columns requires both primary and secondary axes
 def contains_both_axis(cols):
@@ -63,17 +64,6 @@ def update_custom_feature(features, custom_features, values):
 
     return updated_features  # Return the list of updated features
 
-# Function to update the color of hour buttons
-def updateHourButton(buttons, index_to_color):
-    """
-    Updates the color of hour buttons based on the provided index-to-color mapping.
-
-    Args:
-        buttons (list): List of button objects.
-        index_to_color (dict): Dictionary mapping button indices to their respective colors.
-    """
-    for button in buttons:
-        print(button)
 
 # Function to validate feature filter data
 def validateFeatureFilterData(feature, min_range, max_range):
@@ -245,3 +235,9 @@ def group_consecutive(datetime_axis):
             start = datetime_axis[i]
     groups.append([start, datetime_axis[-1]])
     return groups
+
+def returnValidFeatures(client):
+    if len(client.created_features) > 0 :
+        return client.df.columns[:-len(client.created_features)]    
+    return client.df.columns
+            

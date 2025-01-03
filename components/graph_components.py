@@ -84,6 +84,8 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False):
         
         result = get_last_consecutive_datetime(data.index)
         
+        margin = pd.Timedelta(minutes=30)
+        
         for highlight_date in result:
             fig.add_vline(x=highlight_date, line_dash="solid", line_color="red", opacity=0.3, line_width=3)
         

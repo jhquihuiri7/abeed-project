@@ -49,7 +49,7 @@ def update_graph(client, update_action=1, apply_filters=False, collapse=False):
         return bar_chart(client, None, apply_filters, collapse)
 
     # Return the default bar chart
-    return bar_chart(client, None, False, False)
+    return bar_chart(client, None, apply_filters, collapse)
 
 
 # Function to add a graph when a button is clicked
@@ -81,7 +81,7 @@ def add_graph(client, currentFigure, apply_filter=False, collapse=False, update=
 
 
 # Function to remove a specific custom feature from all graphs
-def remove_custom_feature_from_graphs(client, custom_feature):
+def remove_custom_feature_from_graphs(client, custom_feature, apply_filter, collapse):
     """
     Removes a custom feature from all graphs managed by the client.
 
@@ -99,7 +99,7 @@ def remove_custom_feature_from_graphs(client, custom_feature):
         except ValueError:
             # Ignore if the custom feature is not found in the graph
             pass
-    return multi_chart(client)
+    return multi_chart(client, apply_filter, collapse)
 
 
 # Function to remove a graph when a button is clicked
