@@ -66,12 +66,13 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False):
         
     
     if client.datetimes_to_exclude and apply_filter and collapse:
-        margin = pd.Timedelta(minutes=50)
+        margin_top = pd.Timedelta(minutes=55)
+        margin_bottom = pd.Timedelta(minutes=5)
         for highlight_date in group_consecutive(client.datetimes_to_exclude):
             fig.add_shape(
                 type="rect",
-                x0=highlight_date[0] - margin,
-                x1=highlight_date[1] + margin,
+                x0=highlight_date[0] - margin_bottom,
+                x1=highlight_date[1] + margin_top,
                 xref="x",
                 y0=0,
                 y1=1,

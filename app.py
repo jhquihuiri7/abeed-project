@@ -57,7 +57,7 @@ app = Dash(
     external_stylesheets=external_stylesheets,
     meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}],
 )
-app.title = "Abeed project"
+app.title = "Market Operation Dashboard"
 # app._favicon = "favicon.ico"
 app.layout = dmc.MantineProvider(
     html.Div(
