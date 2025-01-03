@@ -7,6 +7,7 @@ from utils.logic_functions import contains_both_axis, get_last_consecutive_datet
 from dash import dcc, html  # Dash components for UI
 from styles.styles import button_style  # Custom button styling
 import pandas as pd
+import numpy as np
 
 
 # Function to create a bar chart with optional dual axes
@@ -25,7 +26,8 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False):
     # Create a figure with support for a secondary Y-axis
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     
-    custom_df = pd.DataFrame()
+    custom_df = client.df
+    filter_df = client.filter_df
     if apply_filter and collapse:
         if client.created_features != []:
             custom_features = [ feature["feature_name"] for feature in client.created_features if feature["cumulative?"] == True]
@@ -33,9 +35,20 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False):
             df_2 = client.filter_df[custom_features]
             custom_df = pd.concat([df_1, df_2], axis=1)
             custom_df[custom_features] = custom_df[custom_features].ffill()
+
     
+    if client.datetimes_to_exclude and apply_filter and collapse==False:
+        margin = pd.Timedelta(hours=1)
+        new_datetimes = [result + margin for result in get_last_consecutive_datetime(client.filter_df.index)]
+        new_data = {client.filter_df.columns[0]: [np.nan]*len(new_datetimes)}
+        df_new = pd.DataFrame(new_data, index=new_datetimes)
+        filter_df = pd.concat([client.filter_df, df_new])
+        filter_df = filter_df.sort_index()
+        
+        
     # Determine the columns to use for the chart
-    data = (custom_df if collapse else client.filter_df) if apply_filter else client.df 
+    data = (custom_df if collapse else filter_df) if apply_filter else client.df 
+    
     columns = data.columns if cols is None else data[cols].columns
     # Check if dual axes are needed and get axis names
     double_axis, axis_names = contains_both_axis(columns)
@@ -93,8 +106,7 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False):
     if client.datetimes_to_exclude and apply_filter and collapse==False:
         
         result = get_last_consecutive_datetime(data.index)
-        
-        margin = pd.Timedelta(minutes=30)
+        margin = pd.Timedelta(hours=1)
         
         for highlight_date in result:
             fig.add_vline(x=highlight_date, line_dash="solid", line_color="red", opacity=0.3, line_width=3)

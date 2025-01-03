@@ -419,8 +419,8 @@ def update_render(
         else:   
             apply_filters_state = ['Apply filter']
             collapse_expand_filter_disabled = False 
-            fig = update_graph(client, 4, apply_filters_state!=[], collapse_expand_filter_state)
-            currentChildren = add_graph(client, currentFigure, apply_filters_state!=[], collapse_expand_filter_state, True)
+            fig = update_graph(client, 4, apply_filters_state, collapse_expand_filter_state)
+            currentChildren = add_graph(client, currentFigure, apply_filters_state, collapse_expand_filter_state, True)
         
         return "",returnValidFeatures(client), fig, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
     
