@@ -25,8 +25,17 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False):
     # Create a figure with support for a secondary Y-axis
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     
+    custom_df = pd.DataFrame()
+    if apply_filter and collapse:
+        if client.created_features != []:
+            custom_features = [ feature["feature_name"] for feature in client.created_features if feature["cumulative?"] == True]
+            df_1 = client.df.loc[:, ~client.df.columns.isin(custom_features)]
+            df_2 = client.filter_df[custom_features]
+            custom_df = pd.concat([df_1, df_2], axis=1)
+            custom_df[custom_features] = custom_df[custom_features].ffill()
+    
     # Determine the columns to use for the chart
-    data = client.filter_df if apply_filter else client.df 
+    data = (custom_df if collapse else client.filter_df) if apply_filter else client.df 
     columns = data.columns if cols is None else data[cols].columns
     # Check if dual axes are needed and get axis names
     double_axis, axis_names = contains_both_axis(columns)

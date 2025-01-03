@@ -302,8 +302,8 @@ def update_render(
             fig = update_graph(client, update_action=3)
             feature_filter_min_range, feature_filter_max_range = "", ""
         else:
-            fig = update_graph(client, update_action=2)
-        currentChildren = multi_chart(client)
+            fig = update_graph(client, 2, apply_filters_state, collapse_expand_filter_state)
+        currentChildren = multi_chart(client, apply_filters_state, collapse_expand_filter_state)
         dynamic_dropdown = [client.data_features[0]]
         custom_feature = [{"Feature": client.data_features[0]}] 
         custom_dropdow_children = custom_dropdow(client.data_features, [""], ["Sub"], custom_feature)
