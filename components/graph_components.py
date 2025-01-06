@@ -78,7 +78,7 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False):
                 line_shape="hv",
                 name=column,  # Legend label
                 visible=True,  # Initial visibility
-                showlegend=True,  # Show legend entry
+                showlegend=True,# Show legend entry
             ),
             secondary_y=(
                 True if double_axis and feature_units_dict[column] == "mw" else False

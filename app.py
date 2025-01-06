@@ -376,7 +376,7 @@ def update_render(
                 feature_filter_max_range = math.inf
                 
             client.add_feature_filter(feature_filter_dropdown,feature_filter_min_range, feature_filter_max_range)
-            feature_filter_list = [html.Div([f"{feature_filter["feature_name"]}, Range: ({feature_filter["range"][0]} → {feature_filter["range"][1]})", button(
+            feature_filter_list = [html.Div([f"{feature_filter['feature_name']}, Range: ({feature_filter['range'][0]} → {feature_filter['range'][1]})", button(
                             text="REMOVE",
                             id={"type": "feature_filter_remove", "index": feature_filter["filter_uid"]},
                             style=button_dropdown_style,
