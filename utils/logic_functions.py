@@ -264,4 +264,3 @@ def returnValidFeatures(client):
     if len(client.created_features) > 0 :
         return client.df.columns[:-len(client.created_features)]    
     return client.df.columns
-            

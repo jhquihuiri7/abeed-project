@@ -1,12 +1,13 @@
+import math
+import io
+
 # Dash imports
 from dash import Dash, _dash_renderer
 from dash import dcc, html, Input, Output, State, callback, callback_context, ALL
 
 # External libraries
-import math
 import plotly.graph_objects as go
 from dash_iconify import DashIconify
-import pandas as pd
 
 # Components
 import dash_mantine_components as dmc
@@ -16,7 +17,7 @@ from components.tabs_components import main_tabs
 from components.button_components import button, apply_filters_toggle
 from components.notification_components import show_notification
 from components.graph_components import multi_chart
-from components.dropdown_components import custom_features_head, custom_dropdow, main_dropdown, date_filter_dropdown
+from components.dropdown_components import custom_dropdow, main_dropdown, date_filter_dropdown
 
 # Utilities
 from utils.functions import update_graph, add_graph, remove_graph, list_custom_filter_children, remove_custom_feature_from_graphs
@@ -71,7 +72,13 @@ app.layout = dmc.MantineProvider(
             className="flex flex-row w-full justify-between"
             ),
         main_daterange(),  # Date range component
-        button(text="Update Graph", id="update_graph_button", style=button_style),  # Button to update graph
+        html.Div(
+            children=[
+                button(text="Update Graph", id="update_graph_button", style=button_style),  # Button to update graph
+                button(text="↓", id="download_data_button", style=button_style)
+                ],
+            className="flex flex-row justify-between"    
+        ),
         main_tabs(client),  # Tabs component for layout
         apply_filters_toggle("Collapse"),
         dcc.Graph(id="main_graph"),  # Graph for displaying data
@@ -79,10 +86,24 @@ app.layout = dmc.MantineProvider(
         html.Div(id="dynamic_div", children=[], className="flex flex-wrap"),  # Dynamic div for additional content
         dmc.NotificationProvider(position="top-center"),
         html.Div(id="notifications-container"),
-        dcc.Store(id="page-load", data={"loaded": False})
+        dcc.Store(id="page-load", data={"loaded": False}),
+        dcc.Download(id="download-data")
     ],
 )
 )
+
+@callback(
+    Output("download-data", "data"),
+    Input("download_data_button", "n_clicks"),
+    prevent_initial_call=True,
+)
+def download_logic(n_clicks):
+    buffer = io.StringIO()
+    client.df.to_csv(buffer, index=False, encoding="utf-8")
+    buffer.seek(0)
+
+    return dict(content=buffer.getvalue(), filename="data.csv")
+
 
 @app.callback(
     Output("page-load", "data"),
