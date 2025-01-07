@@ -48,7 +48,7 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False):
         
     # Determine the columns to use for the chart
     data = (custom_df if collapse else filter_df) if apply_filter else client.df 
-    
+
     columns = data.columns if cols is None else data[cols].columns
     # Check if dual axes are needed and get axis names
     double_axis, axis_names = contains_both_axis(columns)
