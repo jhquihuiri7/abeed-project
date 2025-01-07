@@ -99,7 +99,10 @@ app.layout = dmc.MantineProvider(
 )
 def download_logic(n_clicks):
     buffer = io.StringIO()
-    client.df.to_csv(buffer, index=False, encoding="utf-8")
+    export_df = client.df
+    export_df.reset_index(inplace=True)
+    export_df.rename(columns={'datetime': 'Datetime (HB)'}, inplace=True)
+    export_df.to_csv(buffer, index=False, encoding="utf-8")
     buffer.seek(0)
 
     return dict(content=buffer.getvalue(), filename="data.csv")
