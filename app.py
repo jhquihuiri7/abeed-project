@@ -1,5 +1,6 @@
 import math
 import io
+import pandas as pd
 
 # Dash imports
 from dash import Dash, _dash_renderer
@@ -7,7 +8,6 @@ from dash import dcc, html, Input, Output, State, callback, callback_context, AL
 
 # External libraries
 import plotly.graph_objects as go
-from dash_iconify import DashIconify
 
 # Components
 import dash_mantine_components as dmc
@@ -95,11 +95,19 @@ app.layout = dmc.MantineProvider(
 @callback(
     Output("download-data", "data"),
     Input("download_data_button", "n_clicks"),
+    State("main_graph", "figure"),
     prevent_initial_call=True,
 )
-def download_logic(n_clicks):
+def download_logic(n_clicks, currentFigure):
+    
+    export_df = pd.DataFrame()
+    if currentFigure:  # Ensure the figure is not None
+        sub_features = [
+                i["name"] for i in currentFigure["data"] if i["visible"]==True
+            ]    
+        export_df = client.df[sub_features]
+        
     buffer = io.StringIO()
-    export_df = client.df
     export_df.reset_index(inplace=True)
     export_df.rename(columns={'datetime': 'Datetime (HB)'}, inplace=True)
     export_df.to_csv(buffer, index=False, encoding="utf-8")
