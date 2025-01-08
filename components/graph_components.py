@@ -121,6 +121,10 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False):
             title=dict(text=axis_names[0]),  # Title for primary Y-axis
             side="left",  # Position on the left
             range=[0, int(max(max_y_primary) * 1.05)],  # Dynamic range with a 5% margin
+            showspikes=True,  # Show spikes on hover
+            spikemode="across",  # Spikes extend across the chart
+            spikedash="dash",  # Dashed line for spikes
+            spikesnap="cursor",  # Spikes snap to cursor
         ),
         xaxis=dict(
             showspikes=True,  # Show spikes on hover
