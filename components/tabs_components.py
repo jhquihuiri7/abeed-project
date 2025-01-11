@@ -33,7 +33,7 @@ def main_tabs(client):
                 ]),  # Tab for feature-based filtering
                 dcc.Tab(label="Feature Filter", value="feature-filter-tab", children=[
                     feature_filter_dropdown(client)
-                ]),  # Tab for feature-based filtering
+                ]),  # Tab for feature-based filteringclient
                 dcc.Tab(label="Hour Filter", value="hour-filter-tab", children=[
                     html.Div(
                         children=[

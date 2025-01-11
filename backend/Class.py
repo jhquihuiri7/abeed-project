@@ -10,6 +10,8 @@ from backend.helper_functions import *
 import pandas as pd
 import uuid
 from datetime import date, datetime
+import pickle
+import base64
 import unittest
 import pdb
 
@@ -269,3 +271,14 @@ class Ops:
 
     def download_df(self):
         self.df.to_csv("C:\\Users\\achowdhury\\Downloads\\candel_df.csv")
+        
+    def to_pickle(self) -> bytes:
+        """Serializes the current object instance to a byte string."""
+        pickled_data = pickle.dumps(self)
+        return base64.b64encode(pickled_data).decode('utf-8')
+    
+    @staticmethod
+    def from_pickle(pickle_data: bytes) -> "Ops":
+        """Loads an Ops instance from a byte string."""
+        decoded_data = base64.b64decode(pickle_data)
+        return pickle.loads(decoded_data)

@@ -23,5 +23,5 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 8000
 #
 # Command to start both Nginx and the Dash app
-CMD ["sh", "-c", "service nginx start && python app.py"]
+CMD ["sh", "-c", "service nginx start && python server.py"]
 # CMD ["sh", "-c", "python dash_app.py"]
