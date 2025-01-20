@@ -26,7 +26,7 @@ def main_dropdown():
             className="w-full flex flex row flex-wrap",  # CSS classes for layout styling
             id="main_dropdown",  # Unique identifier for the checklist component
         ),
-        className="w-[28%]"
+        className="w-[28%] mt-10"
     )
 
 

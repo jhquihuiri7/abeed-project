@@ -57,19 +57,19 @@ def create_dash_app(server):
         children=[html.Div(
         className="p-10 w-full",
         children=[
+            main_checkbox(),# Checkbox component for feature selection
             html.Div(
                 children=[
-                        main_dropdown(),
-                        main_checkbox(),# Checkbox component for feature selection
-                    ],
-                className="flex flex-row w-full justify-between"
-                ),
-            main_daterange(),  # Date range component
-            html.Div(
-                children=[
-                    button(text="Update Graph", id="update_graph_button", style=button_style),  # Button to update graph
-                    button(text="↓", id="download_data_button", style=button_style),
-                    button(text="Client", id="download_client_button", style=button_style)
+                    main_dropdown(),
+                    main_daterange(),  # Date range component
+                    html.Div(
+                        children=[
+                            button(text="Update Graph", id="update_graph_button", style=button_style),  # Button to update graph
+                            button(text="Download Data", id="download_data_button", style=button_style),
+                            button(text="Save Session", id="download_client_button", style=button_style)
+                        ],
+                        className="flex flex-row justify-between w-[500px]"
+                    )
                     ],
                 className="flex flex-row justify-between"    
             ),

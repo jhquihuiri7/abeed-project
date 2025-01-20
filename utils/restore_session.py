@@ -15,6 +15,7 @@ def restore_session(client, apply_filters_state, collapse_expand_filter_state, c
     custom_name = ""
     list_custom_features = []
     feature_filter_dropdown_opts = []
+    feature_filter_dropdown_default = ""
     feature_filter_list = []
     if client.feature_filters != [] or client.year_filters != [] or client.month_filters != [] or client.day_of_week_filters or client.hour_filters:
         apply_filters_state = ["Apply filter"]
@@ -35,10 +36,11 @@ def restore_session(client, apply_filters_state, collapse_expand_filter_state, c
         feature_filter_dropdown = [feature["feature_name"] for feature in client.feature_filters]
         feature_filter_dropdown_opts = client.df.columns
         feature_filter_dropdown_opts = [feature for feature in feature_filter_dropdown_opts if feature not in feature_filter_dropdown]
+        feature_filter_dropdown_default = feature_filter_dropdown_opts[0]
         feature_filter_list = [html.Div([f"{feature_filter['feature_name']}, Range: ({feature_filter['range'][0]} → {feature_filter['range'][1]})", button(
                                 text="REMOVE",
                                 id={"type": "feature_filter_remove", "index": feature_filter["filter_uid"]},
                                 style=button_dropdown_style,
                             )], className="mb-4") for feature_filter in client.feature_filters]
         
-    return ops_to_json(client), custom_feature, "", client.data_features, currentFigure,currentChildren, custom_dropdow_children, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown_opts[0], feature_filter_min_range, feature_filter_max_range, feature_filter_list,[], apply_filters_state, collapse_expand_filter_disabled
+    return ops_to_json(client), custom_feature, "", client.data_features, currentFigure,currentChildren, custom_dropdow_children, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown_default, feature_filter_min_range, feature_filter_max_range, feature_filter_list,[], apply_filters_state, collapse_expand_filter_disabled
