@@ -87,8 +87,8 @@ def create_dash_app(server):
     ),
         dcc.Store(id="client", data=ops_to_json(Ops())),
         ]
-    )
-
+    )      
+        
     @callback(
         Output("download-client", "data"),
         Input("download_client_button", "n_clicks"),
