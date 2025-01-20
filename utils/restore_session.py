@@ -22,7 +22,7 @@ def restore_session(client, apply_filters_state, collapse_expand_filter_state, c
         
     
     if client.data_features != []:
-        currentFigure = update_graph(client, update_action=3, apply_filters=apply_filters_state!=[], collapse=collapse_expand_filter_state)
+        currentFigure = update_graph(client, update_action=0, apply_filters=apply_filters_state!=[], collapse=collapse_expand_filter_state)
         custom_feature = [{"Feature": client.data_features[0]}]
         custom_dropdow_children = custom_dropdow(client.data_features, [""], ["Sub"], custom_feature)
     
