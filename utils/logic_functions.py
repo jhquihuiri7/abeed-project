@@ -19,7 +19,7 @@ def contains_both_axis(cols):
             - (list): Sorted list of unique units present in the columns.
     """
     # Extract unique units from the feature_units_dict for the given columns
-    units = list(set([feature_units_dict[col] for col in cols]))
+    units = list(set([feature_units_dict.get(col) for col in cols if feature_units_dict.get(col) is not None]))
     # Check if there is more than one unique unit
     return len(units) > 1, sorted(units)  # Return a boolean and a sorted list of units
 

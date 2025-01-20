@@ -2,6 +2,11 @@ from components.graph_components import bar_chart, multi_chart
 from components.button_components import button
 from styles.styles import button_dropdown_style
 from dash import dcc, html, Input, Output, State, callback, callback_context, ALL
+from backend.Class import Ops
+import pandas as pd
+import json
+from datetime import date, datetime
+import math
 
 
 # Function to update the graph when a button is clicked
@@ -154,3 +159,71 @@ def list_custom_filter_children(client):
             className="flex flex-row py-2 items-center justify-between"  # Styling for layout
         ) for feature in created_features
     ]
+
+
+def ops_to_json(session: Ops):
+    
+    def default_serializer(obj):
+        if isinstance(obj, pd.Timestamp):
+            return obj.strftime('%Y-%m-%d')  # Convert Timestamp to string in 'YYYY-MM-DD' format
+        if isinstance(obj, (pd.DatetimeIndex, pd.Series, pd.DataFrame)):
+            return obj.to_json()
+        if isinstance(obj, (datetime, date)):
+            return obj.strftime('%Y-%m-%d')  # Convert date or datetime to string in 'YYYY-MM-DD' format
+        
+        raise TypeError(f"Type {type(obj)} not serializable")
+    
+    if session.feature_filters != []:
+            for filter in session.feature_filters:
+                if filter['range'][0] == -math.inf:
+                    filter['range'][0] = -99999
+                if filter['range'][1] == math.inf:
+                    filter['range'][1] = 99999
+    
+    filtered_data = {
+        "start_date": session.start_date,
+        "end_date": session.end_date,
+        "data_features": session.data_features,
+        "graphs": session.graphs,
+        "hour_filters": session.hour_filters,
+        "day_of_week_filters": session.day_of_week_filters,
+        "month_filters": session.month_filters,
+        "year_filters": session.year_filters,
+        "feature_filters": session.feature_filters,
+        "created_features": session.created_features,
+        "scatter_graphs": session.scatter_graphs
+    }
+
+    return json.dumps(filtered_data, default=default_serializer, indent=4)
+
+def json_to_ops(json_data):
+    # Ensure `json_data` is parsed into a dictionary
+    if isinstance(json_data, str):  # If it's a string, parse it
+        data = json.loads(json_data)
+    elif isinstance(json_data, dict):  # If it's already a dictionary, use it directly
+        data = json_data
+    else:
+        raise TypeError("Input data must be a JSON string or dictionary.")
+
+    # Create a new instance of Ops
+    ops_instance = Ops()
+
+    # Populate the instance
+    ops_instance.start_date = data.get("start_date")
+    ops_instance.end_date = data.get("end_date")
+    ops_instance.data_features = data.get("data_features")
+    ops_instance.graphs = data.get("graphs")
+    ops_instance.hour_filters = data.get("hour_filters")
+    ops_instance.day_of_week_filters = data.get("day_of_week_filters")
+    ops_instance.month_filters = data.get("month_filters")
+    ops_instance.year_filters = data.get("year_filters")
+    ops_instance.feature_filters = data.get("feature_filters")
+    ops_instance.created_features = data.get("created_features")
+    ops_instance.scatter_graphs = data.get("scatter_graphs")
+
+    # Run the update methods
+    ops_instance.update_df()
+    ops_instance.update_datetimes_to_exclude()
+
+    return ops_instance
+
