@@ -1,43 +1,17 @@
+data2 = [{'props': {'children': [{'props': {'options': ['MISO pjm RT', 'MISO pjm DA', 'PJM miso RT Verified', 'PJM nyis DA'], 'value': 'MISO pjm RT', 'className': 'w-[400px]', 'id': {'type': 'dynamic-dropdown', 'index': 0}}, 'type': 'Dropdown', 'namespace': 'dash_core_components'}], 'className': 'flex flex-row my-4'}, 'type': 'Div', 'namespace': 'dash_html_components'}, {'props': {'children': [{'props': {'children': [{'props': {'options': [{'label': '+', 'value': 'Add'}, {'label': '-', 'value': 'Sub'}], 'value': 'Sub', 'inputClassName': 'mr-2', 'labelStyle': {'display': 'block'}, 'labelClassName': 'mr-5', 'id': {'type': 'operation_custom_feature_op', 'index': 1}}, 'type': 'RadioItems', 'namespace': 'dash_core_components'}, {'props': {'options': ['MISO pjm RT', 'MISO pjm DA', 'PJM miso RT Verified', 'PJM nyis DA'], 'value': 'MISO pjm DA', 'className': 'w-[400px]', 'id': {'type': 'dynamic-dropdown', 'index': 1}}, 'type': 'Dropdown', 'namespace': 'dash_core_components'}, {'props': {'children': 'ADD', 'id': {'type': 'operation_custom_feature_add', 'index': 1}, 'className': 'ml-5 bg-white border border-black rounded-full text-black font-semibold text-sm px-6 py-3 inline-block text-center cursor-pointer h-[50px]', 'n_clicks': 0}, 'type': 'Button', 'namespace': 'dash_html_components'}, {'props': {'children': None}, 'type': 'Div', 'namespace': 'dash_html_components'}], 'className': 'flex flex-row my-4'}, 'type': 'Div', 'namespace': 'dash_html_components'}, {'props': {'children': [{'props': {'options': [{'label': '+', 'value': 'Add'}, {'label': '-', 'value': 'Sub'}], 'value': 'Sub', 'inputClassName': 'mr-2', 'labelStyle': {'display': 'block'}, 'labelClassName': 'mr-5', 'id': {'type': 'operation_custom_feature_op', 'index': 2}}, 'type': 'RadioItems', 'namespace': 'dash_core_components'}, {'props': {'options': ['MISO pjm RT', 'MISO pjm DA', 'PJM miso RT Verified', 'PJM nyis DA'], 'value': 'PJM miso RT Verified', 'className': 'w-[400px]', 'id': {'type': 'dynamic-dropdown', 'index': 2}, 'search_value': ''}, 'type': 'Dropdown', 'namespace': 'dash_core_components'}, {'props': {'children': 'ADD', 'id': {'type': 'operation_custom_feature_add', 'index': 2}, 'className': 'ml-5 bg-white border border-black rounded-full text-black font-semibold text-sm px-6 py-3 inline-block text-center cursor-pointer h-[50px]', 'n_clicks': 0}, 'type': 'Button', 'namespace': 'dash_html_components'}, {'props': {'children': 'REMOVE', 'id': {'type': 'operation_custom_feature_remove', 'index': 2}, 'className': 'ml-5 bg-white border border-black rounded-full text-black font-semibold text-sm px-6 py-3 inline-block text-center cursor-pointer h-[50px]', 'n_clicks': 0}, 'type': 'Button', 'namespace': 'dash_html_components'}], 'className': 'flex flex-row my-4'}, 'type': 'Div', 'namespace': 'dash_html_components'}], 'className': ''}, 'type': 'Div', 'namespace': 'dash_html_components'}]
 
-from datetime import datetime
-
-# Example list of sorted datetime objects
-datetime_axis = [
-    datetime(2025, 1, 1, 8, 0),
-    datetime(2025, 1, 1, 9, 0),
-    datetime(2025, 1, 1, 10, 0),
-    datetime(2025, 1, 1, 12, 30),  # Break in sequence (>1 hour)
-    datetime(2025, 1, 1, 13, 30),
-    datetime(2025, 1, 1, 14, 0),
-]
-
-
-from datetime import timedelta
-
-def get_first_consecutive_datetime(datetime_axis):
-    """
-    Identifies and returns the first datetime in consecutive groups from a sorted list.
-
-    Args:
-        datetime_axis (list): List of datetime objects, sorted in ascending order.
-
-    Returns:
-        list: List of first datetime objects from each consecutive group.
-    """
-    result = []  # Final result list
-
-    # Initialize with the first element as the start of a group
-    current_group_first = datetime_axis[0]
-    result.append(current_group_first)  # Save the first element of the first group
-    
-    # Iterate to identify consecutive groups
-    for i in range(1, len(datetime_axis)):
-        if datetime_axis[i] - datetime_axis[i - 1] > timedelta(hours=1):  # Adjust interval if needed
-            current_group_first = datetime_axis[i]  # Update to the start of the next group
-            result.append(current_group_first)  # Save the first element of the new group
-    
-    return result
-
-
-result = get_first_consecutive_datetime(datetime_axis)
-
+def extract_values_custom_feature(data):
+    custom_feature = []
+    for i in data:
+        temp= i["props"]["children"]
+        try:
+            custom_feature.append({"Feature": temp[0]['props']['value']})
+        except:
+            for j in temp:    
+                print(j['props']['children'][0]['props']['value'])
+                print(j['props']['children'][1]['props']['value'])
+                custom_feature.append({"Operation": "-" if j['props']['children'][0]['props']['value'] == "Sub" else "+", "Feature": j['props']['children'][1]['props']['value']})
+    return custom_feature
+# Get all "value" keys
+values = extract_values_custom_feature(data2)
+print(values)

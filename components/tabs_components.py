@@ -1,6 +1,6 @@
 
 # Import necessary modules from Dash
-from dash import Dash, dcc, html, Input, Output, callback
+from dash import dcc, html
 from components.dropdown_components import custom_features_head, list_custom_features, date_filter_dropdown, feature_filter_dropdown
 from components.button_components import button, hourButton
 from styles.styles import button_style, button_dropdown_style
@@ -15,7 +15,8 @@ def main_tabs(client):
     """
     return html.Div(
         # Create a Tabs component inside a Div
-        dcc.Tabs(
+        children=[
+            dcc.Tabs(
             id="main-tab",  # Unique identifier for the Tabs component
             value="custom-feature-tab",  # Default active tab
             children=[
@@ -24,7 +25,7 @@ def main_tabs(client):
                     custom_features_head(),  # Heading for custom features
                     html.Div(
                         children=[
-                            html.Div(id="custom_dropdown", children=[], className="w-full"),  # Dropdown for custom features
+                            html.Div(id="custom_dropdown", children=[], className="w-[1200px] flex flex-row justify-between"),  # Dropdown for custom features
                             list_custom_features(client)
                             ],
                         className = "flex flex-row justify-between",
@@ -75,5 +76,7 @@ def main_tabs(client):
                     ]),     # Tab for day-based filtering
             ],
         ),
+        
+        ],
         className="my-10",  # CSS class to apply margin or styling
     )

@@ -264,3 +264,23 @@ def returnValidFeatures(client):
     if len(client.created_features) > 0 :
         return client.df.columns[:-len(client.created_features)]    
     return client.df.columns
+
+def get_value_range(value, sign):
+    if value == None:
+        if sign == "+":
+            return "Inf"
+        else:
+            return "-Inf"
+    else:
+        return value
+    
+def extract_values_custom_feature(data):
+    custom_feature = []
+    for i in data:
+        temp= i["props"]["children"]
+        try:
+            custom_feature.append({"Feature": temp[0]['props']['value']})
+        except:
+            for j in temp:    
+                custom_feature.append({"Operation": "-" if j['props']['children'][0]['props']['value'] == "Sub" else "+", "Feature": j['props']['children'][1]['props']['value']})
+    return custom_feature
