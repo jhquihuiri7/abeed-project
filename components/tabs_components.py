@@ -42,7 +42,7 @@ def main_tabs(client):
                                 children=[
                                     hourButton(range(0,24)),
                                     html.Div(
-                                        dcc.RangeSlider(0, 23, 1, value=[5, 15], id='hour-filter-slider', className="w-[85%]"),
+                                        dcc.RangeSlider(0, 23, 1, value=[0, 23], id='hour-filter-slider', className="w-[85%]"),
                                         className="w-full mt-5"
                                     ),
                                 ],

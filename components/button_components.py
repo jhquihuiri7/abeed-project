@@ -44,7 +44,7 @@ def hourButton(hours):
                 hour,  # Text displayed on the button
                 id={"type": "hour_button", "index": hour},  # Unique ID for the button
                 n_clicks=0,  # Initial click count set to 0
-                style={"backgroundColor": "white"},  # Default background color
+                style={"backgroundColor": "#d9d9d9"},  # Default background color
                 className=hourButtonStyle  # CSS class for styling the button
             ) for hour in hours
         ],
