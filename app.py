@@ -16,6 +16,7 @@ from components.notification_components import show_notification
 from components.graph_components import multi_chart
 from components.dropdown_components import main_dropdown, date_filter_dropdown, custom_dropdow
 
+
 # Utilities
 from utils.functions import update_graph, add_graph, remove_graph, list_custom_filter_children, remove_custom_feature_from_graphs, ops_to_json, json_to_ops
 from utils.restore_session import restore_session
@@ -26,7 +27,7 @@ from backend.Class import Ops
 from backend.db_dictionaries import feature_units_dict
 
 # Styles
-from styles.styles import button_style, button_dropdown_style
+from styles.styles import button_style, button_dropdown_style, hourButtonStyle
 
 # React version setting
 _dash_renderer._set_react_version("18.2.0")
@@ -158,6 +159,25 @@ def create_dash_app(server):
             return date_filter_dropdown()
         
         return datefilter_dropdown
+    
+    @callback(
+        Output("hour_filter_buttons","children"),
+        Input("client", "data"),
+    )
+    def reset_session_hourfilter(data):
+        client = json_to_ops(data)
+        hour_filter_buttons = []
+        for hour in range(0,24):
+            hour_filter_buttons.append(
+                html.Button(
+                    hour,  # Text displayed on the button
+                    id={"type": "hour_button", "index": hour},  # Unique ID for the button
+                    n_clicks=0,  # Initial click count set to 0
+                    style={"backgroundColor": "#d9d9d9" if hour in client.hour_filters else "white"},  # Default background color
+                    className=hourButtonStyle  # CSS class for styling the button
+                )
+            )    
+        return hour_filter_buttons
     
     @callback(
         Output({"type": "hour_button", "index": ALL}, "style"),

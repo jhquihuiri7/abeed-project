@@ -48,7 +48,8 @@ def hourButton(hours):
                 className=hourButtonStyle  # CSS class for styling the button
             ) for hour in hours
         ],
-        className="flex flex-row w-full justify-between"  # CSS class for layout styling
+        className="flex flex-row w-full justify-between",
+        id="hour_filter_buttons"# CSS class for layout styling
     )
 
 # Define a function to create a toggle switch for applying filters
