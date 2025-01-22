@@ -208,9 +208,18 @@ def json_to_ops(json_data):
     # Create a new instance of Ops
     ops_instance = Ops()
 
+    # Parse start_date and end_date as date objects
+    date_format = "%Y-%m-%d"  # Adjust this format to match the input date strings
+    ops_instance.start_date = (
+        datetime.strptime(data.get("start_date"), date_format).date()
+        if data.get("start_date") else None
+    )
+    ops_instance.end_date = (
+        datetime.strptime(data.get("end_date"), date_format).date()
+        if data.get("end_date") else None
+    )
+    
     # Populate the instance
-    ops_instance.start_date = data.get("start_date")
-    ops_instance.end_date = data.get("end_date")
     ops_instance.data_features = data.get("data_features")
     ops_instance.graphs = data.get("graphs")
     ops_instance.hour_filters = data.get("hour_filters")
