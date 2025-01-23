@@ -71,7 +71,7 @@ def main_tabs(client):
                                 button(text="Select all", id="select_all_datefilter", style=button_style),  # Button to add custom feature,
                                 button(text="Apply selection", id="apply_selection_datefilter", style=f"{button_style} ml-4"),  # Button to add custom feature
                             ],
-                            className="flex flex-row"
+                            className="flex flex-row justify-end"
                         )
                     ]),     # Tab for day-based filtering
             ],
