@@ -245,8 +245,8 @@ def date_filter_dropdown():
             children=[
                 html.H2("Year", className="font-bold text-xl"),  # Label for year dropdown
                 dcc.Dropdown(
-                    year_range,  # Options for years
-                    year_range,  # Default selected values
+                    options= year_range,  # Options for years
+                    value=year_range,  # Default selected values
                     multi=True,  # Allow multiple selections
                     id="year_dropdown_date_filter",  # Unique ID for the dropdown
                     className="w-full mt-2",  # Styling for the dropdown
@@ -258,8 +258,8 @@ def date_filter_dropdown():
             children=[
                 html.H2("Month", className="font-bold text-xl"),  # Label for month dropdown
                 dcc.Dropdown(
-                    month_names,  # Options for months
-                    month_range,  # Default selected values
+                    options = month_names,  # Options for months
+                    value = month_range,  # Default selected values
                     multi=True,  # Allow multiple selections
                     id="month_dropdown_date_filter",  # Unique ID for the dropdown
                     className="w-full mt-2",  # Styling for the dropdown
@@ -271,8 +271,8 @@ def date_filter_dropdown():
             children=[
                 html.H2("Day of the week", className="font-bold text-xl"),  # Label for day dropdown
                 dcc.Dropdown(
-                    day_options,  # Options for days
-                    day_range,  # Default selected values
+                    options = day_options,  # Options for days
+                    value = day_range,  # Default selected values
                     multi=True,  # Allow multiple selections
                     id="day_dropdown_date_filter",  # Unique ID for the dropdown
                     className="w-full mt-2",  # Styling for the dropdown

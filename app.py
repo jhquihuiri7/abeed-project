@@ -162,6 +162,9 @@ def create_dash_app(server):
     
     @callback(
         Output("hour_filter_buttons","children"),
+        Output("year_dropdown_date_filter", "value"),
+        Output("month_dropdown_date_filter", "value"),
+        Output("day_dropdown_date_filter", "value"),
         Input("client", "data"),
     )
     def reset_session_hourfilter(data):
@@ -177,7 +180,7 @@ def create_dash_app(server):
                     className=hourButtonStyle  # CSS class for styling the button
                 )
             )    
-        return hour_filter_buttons
+        return hour_filter_buttons, client.year_filters, client.month_filters, client.day_of_week_filters
     
     @callback(
         Output({"type": "hour_button", "index": ALL}, "style"),
