@@ -51,15 +51,15 @@ def main_tabs(client):
                             html.Div(
                                 children=[
                                     button("Select range",id="apply_hour_range", style=button_style),
-                                    button("Select All",id="remove_hour_range", style=button_style),
-                                    button("Deselect All",id="remove2_hour_range", style=button_style),
-                                    button(text="Apply selection", id="apply_selection_hourfilter", style=button_style),  
+                                    button("Select All",id="select_all_hour_range", style=button_style),
+                                    button("Deselect All",id="deselect_all_hour_range", style=button_style),
                                 ],
                                 className="flex flex-col w-[160px] justify-between"
                             ),      
                         ],
                       className="w-full flex flex-row justify-between"  
-                    ),  
+                    ),
+                    html.Div(button(text="Apply selection", id="apply_selection_hourfilter", style=button_style), className="w-full flex flex-row justify-center")   
                 ],),    # Tab for hour-based filtering
                 dcc.Tab(label="Date Filter", value="date-filter-tab", children=[
                         html.Div(
@@ -72,7 +72,7 @@ def main_tabs(client):
                                 button(text="Select all", id="select_all_datefilter", style=button_style),  # Button to add custom feature,
                                 button(text="Apply selection", id="apply_selection_datefilter", style=f"{button_style} ml-4"),  # Button to add custom feature
                             ],
-                            className="flex flex-row justify-end"
+                            className="flex flex-row justify-center"
                         )
                     ]),     # Tab for day-based filtering
             ],

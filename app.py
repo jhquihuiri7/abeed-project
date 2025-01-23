@@ -69,7 +69,7 @@ def create_dash_app(server):
                             button(text="Download Data", id="download_data_button", style=button_style),
                             button(text="Save Session", id="download_client_button", style=button_style)
                         ],
-                        className="flex flex-row justify-between w-[500px]"
+                        className="flex flex-row justify-between items-end w-[500px]"
                     )
                     ],
                 className="flex flex-row justify-between"    
@@ -186,7 +186,8 @@ def create_dash_app(server):
         Output({"type": "hour_button", "index": ALL}, "style"),
         Input({"type": "hour_button", "index": ALL}, "n_clicks"),
         Input("apply_hour_range","n_clicks"),
-        Input("remove_hour_range","n_clicks"),
+        Input("select_all_hour_range","n_clicks"),
+        Input("deselect_all_hour_range","n_clicks"),
         State({"type": "hour_button", "index": ALL}, "style"),
         State("hour-filter-slider", "value"),
         prevent_initial_call=True,  # Prevent initial callback call
@@ -194,7 +195,8 @@ def create_dash_app(server):
     def update_hour_button_style(
         hour_button, 
         apply_hour_range,
-        remove_hour_range,
+        select_all_hour_range,
+        deselect_all_hour_range,
         hour_button_style, 
         hour_filter_slider,
         ):
@@ -215,7 +217,17 @@ def create_dash_app(server):
             # Toggle the background color when the hour button is clicked
             hour_button_style[index]["backgroundColor"] = "white" if hour_button_style[index]["backgroundColor"] == "#d9d9d9" else "#d9d9d9"
         
-        if triggered_id == "apply_hour_range" or triggered_id == "remove_hour_range":
+        if triggered_id == "deselect_all_hour_range":
+            for index in range(0,24):
+                hour_button_style[index]["backgroundColor"] = "white"# Toggle the background color when the hour button is clicked
+            return hour_button_style
+        
+        if triggered_id == "select_all_hour_range":
+            for index in range(0,24):
+                hour_button_style[index]["backgroundColor"] = "#d9d9d9"# Toggle the background color when the hour button is clicked
+            return hour_button_style
+        
+        if triggered_id == "apply_hour_range":
             for index in range(hour_filter_slider[0],hour_filter_slider[1]+1):
                 hour_button_style[index]["backgroundColor"] = "#d9d9d9" if triggered_id == "apply_hour_range" else "white"# Toggle the background color when the hour button is clicked
             return hour_button_style
