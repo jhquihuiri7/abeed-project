@@ -2,9 +2,8 @@
 import plotly.graph_objects as go  # For creating Plotly charts
 from plotly.subplots import make_subplots  # For creating charts with subplots and multiple axes
 from components.button_components import button  # Custom button component
-from backend.db_dictionaries import feature_units_dict  # Dictionary containing units for features
 from backend.helper_functions import get_feature_units
-from utils.logic_functions import contains_both_axis, get_last_consecutive_datetime, group_consecutive, get_first_consecutive_datetime  # Function to check for double axis requirements
+from utils.logic_functions import contains_both_axis, group_consecutive, get_first_consecutive_datetime  # Function to check for double axis requirements
 from dash import dcc, html  # Dash components for UI
 from styles.styles import button_style  # Custom button styling
 import pandas as pd
@@ -42,7 +41,7 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False):
 
     columns = data.columns if cols is None else data[cols].columns
     # Check if dual axes are needed and get axis names
-    double_axis, axis_names = contains_both_axis(columns)
+    double_axis, axis_names = contains_both_axis(client,columns)
     
     # Initialize lists to store maximum Y values for each axis
     max_y_primary = []

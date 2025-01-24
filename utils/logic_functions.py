@@ -1,11 +1,12 @@
 # Import the feature_units_dict dictionary from the backend, 
 # which maps features to their respective measurement units.
 from backend.db_dictionaries import feature_units_dict
+from backend.helper_functions import get_feature_units
 from datetime import datetime, timedelta
 import pandas as pd
 
 # Function to determine if a set of columns requires both primary and secondary axes
-def contains_both_axis(cols):
+def contains_both_axis(client, cols):
     """
     Determines if the features in the given columns have different units,
     which would require both primary and secondary Y-axes.
@@ -18,8 +19,17 @@ def contains_both_axis(cols):
             - (bool): True if there are multiple units (dual axes required), False otherwise.
             - (list): Sorted list of unique units present in the columns.
     """
+    units = []
+    for column in cols:
+        try:
+            unit = get_feature_units(column)
+        except:
+            for feature in client.created_features:
+                if feature["feature_name"] == column:
+                    unit = feature["unit"]
+        units.append(unit)      
     # Extract unique units from the feature_units_dict for the given columns
-    units = list(set([feature_units_dict.get(col) for col in cols if feature_units_dict.get(col) is not None]))
+    units = set(units)
     # Check if there is more than one unique unit
     return len(units) > 1, sorted(units)  # Return a boolean and a sorted list of units
 
