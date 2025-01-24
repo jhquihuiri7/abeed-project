@@ -1,7 +1,7 @@
 import math
 import io
 import pandas as pd
-
+from datetime import date
 # Dash imports
 from dash import Dash, _dash_renderer
 from dash import dcc, html, Input, Output, State, callback, callback_context, ALL
@@ -12,7 +12,7 @@ from components.checkbox_components import main_checkbox
 from components.daterange_components import main_daterange
 from components.tabs_components import main_tabs
 from components.button_components import button, apply_filters_toggle
-from components.notification_components import show_notification
+from components.notification_components import show_notification, show_modal
 from components.graph_components import multi_chart
 from components.dropdown_components import main_dropdown, date_filter_dropdown, custom_dropdow
 
@@ -81,6 +81,7 @@ def create_dash_app(server):
             html.Div(id="dynamic_div", children=[], className="flex flex-wrap"),  # Dynamic div for additional content
             dmc.NotificationProvider(position="top-center"),
             html.Div(id="notifications-container"),
+            show_modal(),
             dcc.Download(id="download-data"),
             dcc.Download(id="download-client"),
             dcc.Store(id="temp_feature", data=[]),
@@ -89,18 +90,28 @@ def create_dash_app(server):
         dcc.Store(id="client", data=ops_to_json(Ops())),
         ]
     )      
-        
+
     @callback(
         Output("download-client", "data"),
+        Output("input-modal", "opened"),
         Input("download_client_button", "n_clicks"),
+        Input("save-button", "n_clicks"),
         State("client", "data"),
+        State("user-session", "value"),
         prevent_initial_call=True,
     )
-    def download_client(n_clicks, data):
+    def download_client(download_client_button, save_button, data, value):
+        print("OK")
+        triggered_id = callback_context.triggered[0]["prop_id"].split(".")[0]
+        if triggered_id == "download_client_button":
+            return None, True
+        
         client = json_to_ops(data)    
         client_json = ops_to_json(client)
-        
-        return dict(content=client_json, filename="data.json")
+        if value == None:
+            value =  date.today().strftime("%Y-%m-%d")
+        print(value)
+        return dict(content=client_json, filename=f"{value}.json"), False
     
     @callback(
         Output("download-data", "data"),
