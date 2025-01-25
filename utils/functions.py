@@ -56,7 +56,7 @@ def update_graph(client, update_action=1, apply_filters=False, collapse=False):
     # Return the default bar chart
     return bar_chart(client, None, apply_filters, collapse)
 
-
+# TODO DELETE
 # Function to add a graph when a button is clicked
 def add_graph(client, apply_filter=False, collapse=False, update=False):
     """

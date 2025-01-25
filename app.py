@@ -413,8 +413,10 @@ def create_dash_app(server):
         
         # Remove graph when remove button is clicked
         elif isinstance(triggered_id, dict) and triggered_id.get("type") == "remove_button":
-            currentChildren = remove_graph(client, triggered_id.get("index"), apply_filters_state, collapse_expand_filter_state)
+            client.remove_graph_button(triggered_id.get("index"))
+            currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)            
             return ops_to_json(client),custom_feature,"",returnValidFeatures(client),currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
+        
         # Add new custom feature operation
         elif isinstance(triggered_id, dict) and triggered_id.get("type") == "operation_custom_feature_add":
             custom_feature = extract_values_custom_feature(currentDropdownChildren)
