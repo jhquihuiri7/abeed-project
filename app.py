@@ -395,7 +395,11 @@ def create_dash_app(server):
     
         # Add graph when add button is clicked
         elif triggered_id == "add_graph_button":
-            currentChildren = add_graph(client, currentFigure, apply_filters_state!=[], collapse_expand_filter_state)
+            sub_features = [
+                      i["name"] for i in currentFigure["data"] if i["visible"]==True
+                  ]
+            client.add_graph_button(sub_features)
+            currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
             return ops_to_json(client),custom_feature,"",returnValidFeatures(client),currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
     
         # Add custom feature when button is clicked

@@ -31,7 +31,7 @@ def update_graph(client, update_action=1, apply_filters=False, collapse=False):
 
     if update_action == 2:
         # Update the client's data frame
-        client.update_df()
+        client.update_data()
         
         # Store and reset created features
         custom_features = client.created_features
@@ -47,7 +47,7 @@ def update_graph(client, update_action=1, apply_filters=False, collapse=False):
 
     if update_action == 3:
         # Update the client's data frame with the selected features and date range
-        client.update_df()
+        client.update_data()
     
     if update_action == 4:
         # Return the bar chart with filters and collapse options
@@ -58,7 +58,7 @@ def update_graph(client, update_action=1, apply_filters=False, collapse=False):
 
 
 # Function to add a graph when a button is clicked
-def add_graph(client, currentFigure, apply_filter=False, collapse=False, update=False):
+def add_graph(client, apply_filter=False, collapse=False, update=False):
     """
     Adds a new graph based on the currently visible features in the provided figure.
 
@@ -72,17 +72,10 @@ def add_graph(client, currentFigure, apply_filter=False, collapse=False, update=
     Returns:
         list: Updated list of graphs to be displayed.
     """
-    if currentFigure:  # Ensure the figure is not None
-        if not update:
-            # Extract names of visible features in the current figure
-            sub_features = [
-                i["name"] for i in currentFigure["data"] if i["visible"]==True
-            ]
-            # Add the selected features as a new graph
-            client.add_graph(sub_features)
+    
 
-        # Return the updated list of graphs
-        return multi_chart(client, apply_filter, collapse)
+    # Return the updated list of graphs
+    return multi_chart(client, apply_filter, collapse)
 
 
 # Function to remove a specific custom feature from all graphs
@@ -231,7 +224,7 @@ def json_to_ops(json_data):
     ops_instance.scatter_graphs = data.get("scatter_graphs")
 
     # Run the update methods
-    ops_instance.update_df()
+    ops_instance.update_data()
     ops_instance.update_datetimes_to_exclude()
 
     return ops_instance
