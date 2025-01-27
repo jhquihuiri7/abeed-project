@@ -1,7 +1,7 @@
 from components.graph_components import bar_chart, multi_chart
 from components.button_components import button
 from styles.styles import button_dropdown_style
-from dash import dcc, html, Input, Output, State, callback, callback_context, ALL
+from dash import html
 from backend.Class import Ops
 import pandas as pd
 import json

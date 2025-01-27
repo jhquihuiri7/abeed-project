@@ -1,7 +1,9 @@
+# Python packages
 import math
 import io
 import pandas as pd
 from datetime import date
+
 # Dash imports
 from dash import Dash, _dash_renderer
 from dash import dcc, html, Input, Output, State, callback, callback_context, ALL
@@ -18,15 +20,34 @@ from components.dropdown_components import main_dropdown, date_filter_dropdown, 
 
 
 # Utilities
-from utils.functions import update_graph, list_custom_filter_children, remove_custom_feature_from_graphs, ops_to_json, json_to_ops, list_feature_filter
 from utils.restore_session import restore_session
-from utils.logic_functions import update_custom_feature, validateFeatureFilterData, validateMainDropdownSelection, validateDeleteCustomFeatureFilter, validateCustomFeaturesExistInFeatures, validateApplyFilterToggle, validateApplySelection, returnValidFeatures, get_value_range, extract_values_custom_feature, get_feature_filter_name, get_feature_fitler_name_by_id, validateApplyDatetimeSelection
+from utils.logic_functions import (
+    update_custom_feature,
+    validateFeatureFilterData,
+    validateMainDropdownSelection,
+    validateDeleteCustomFeatureFilter,
+    validateCustomFeaturesExistInFeatures,
+    validateApplyFilterToggle,
+    returnValidFeatures,
+    extract_values_custom_feature,
+    get_feature_filter_name,
+    get_feature_fitler_name_by_id,
+    validateApplyDatetimeSelection
+)
+from utils.functions import (
+    update_graph,
+    list_custom_filter_children,
+    remove_custom_feature_from_graphs,
+    ops_to_json,
+    json_to_ops,
+    list_feature_filter
+)
 
 # Backend
 from backend.Class import Ops
 
 # Styles
-from styles.styles import button_style, button_dropdown_style, hourButtonStyle
+from styles.styles import button_style, hourButtonStyle
 
 # React version setting
 _dash_renderer._set_react_version("18.2.0")
@@ -347,6 +368,7 @@ def create_dash_app(server):
         custom_feature
     ):
         client = json_to_ops(data)
+        notification = []
         
         # Context to determine which input triggered the callback
         ctx = callback_context
@@ -455,8 +477,9 @@ def create_dash_app(server):
                 collapse_expand_filter_disabled = False 
                 currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
                 currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)     
-                return ops_to_json(client),custom_feature,"",returnValidFeatures(client), currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, "", "", feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
-            return ops_to_json(client),custom_feature,"",returnValidFeatures(client), currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, show_notification(message), apply_filters_state, collapse_expand_filter_disabled
+            else:
+                notification = show_notification(message)
+            return ops_to_json(client),custom_feature,"",returnValidFeatures(client), currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, "", "", feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
         
         
         if isinstance(triggered_id, dict) and triggered_id.get("type") == "feature_filter_remove":
@@ -476,7 +499,6 @@ def create_dash_app(server):
             hours_to_include = [index for index, hour in enumerate(hour_button) if hour["backgroundColor"] != "white"]
             client.apply_datetime_filters_button(hours_to_include, day_dropdown_date_filter_state, month_dropdown_date_filter_state, year_dropdown_date_filter_state)
             is_valid, message = validateApplyDatetimeSelection(client)
-            notification = []
             if is_valid:
                 apply_filters_state = ['Apply filter']
                 collapse_expand_filter_disabled = False 

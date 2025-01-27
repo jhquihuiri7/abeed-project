@@ -1,6 +1,5 @@
 # Import the feature_units_dict dictionary from the backend, 
 # which maps features to their respective measurement units.
-from backend.db_dictionaries import feature_units_dict
 from backend.helper_functions import get_feature_units
 from datetime import datetime, timedelta
 import pandas as pd
@@ -94,10 +93,10 @@ def validateFeatureFilterData(client, feature, min_range, max_range):
     
     if feature == "":
         reason = f"Cannot create a feature filter because the is no feature selected (Hint: select a feature)"
-        return False, reason
+        return False, reason, min_range, max_range
     if min_range == "" and max_range == "":
         reason = f"Cannot create a feature filter because the is no values in the input range (Hint: provide at least one input range)"
-        return False, reason
+        return False, reason, min_range, max_range
     try:
         min_range = float(min_range) 
     except:
@@ -111,7 +110,7 @@ def validateFeatureFilterData(client, feature, min_range, max_range):
     if isinstance(min_range, float) and isinstance(max_range, float):
         if min_range > max_range:
             reason = f"Cannot create a feature filter because the the min_input_range is greater than the max_input_range (Hint: min_input_range must be lesser than max_input_range)"
-            return False, reason
+            return False, reason, min_range, max_range
     
     return True, reason, min_range, max_range
 

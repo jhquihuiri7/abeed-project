@@ -24,7 +24,7 @@ def show_notification(message):
         ),
         withBorder=True,  # Whether to display a border around the notification
         color="red",  # Color of the notification (red in this case)
-        autoClose=2000  # Time (in milliseconds) before the notification auto-closes
+        autoClose=False # Time (in milliseconds) before the notification auto-closes
     )
 
 def show_modal():
