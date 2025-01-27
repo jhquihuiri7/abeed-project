@@ -20,7 +20,7 @@ from components.dropdown_components import main_dropdown, date_filter_dropdown, 
 # Utilities
 from utils.functions import update_graph, list_custom_filter_children, remove_custom_feature_from_graphs, ops_to_json, json_to_ops, list_feature_filter
 from utils.restore_session import restore_session
-from utils.logic_functions import update_custom_feature, validateFeatureFilterData, validateMainDropdownSelection, validateDeleteCustomFeatureFilter, validateCustomFeaturesExistInFeatures, validateApplyFilterToggle, validateApplySelection, returnValidFeatures, get_value_range, extract_values_custom_feature, get_feature_filter_name
+from utils.logic_functions import update_custom_feature, validateFeatureFilterData, validateMainDropdownSelection, validateDeleteCustomFeatureFilter, validateCustomFeaturesExistInFeatures, validateApplyFilterToggle, validateApplySelection, returnValidFeatures, get_value_range, extract_values_custom_feature, get_feature_filter_name, get_feature_fitler_name_by_id
 
 # Backend
 from backend.Class import Ops
@@ -461,18 +461,15 @@ def create_dash_app(server):
         
         if isinstance(triggered_id, dict) and triggered_id.get("type") == "feature_filter_remove":
             index = triggered_id.get("index")
-            client.remove_feature_filter(index)
-            feature_filter_list = [html.Div([f"{feature_filter['feature_name']}, Range: ({get_value_range(feature_filter['range'][0],'-')} → {get_value_range(feature_filter['range'][1],'+')})", button(
-                                text="REMOVE",
-                                id={"type": "feature_filter_remove", "index": feature_filter["filter_uid"]},
-                                style=button_dropdown_style,
-                            )]) for feature_filter in client.feature_filters]
-            feature_filter_dropdown_opts = [feature for feature in client.data_features if feature not in [feature["feature_name"] for feature in client.feature_filters]]
+            feature_to_free = get_feature_fitler_name_by_id(client, index)
+            client.remove_feature_filter_button(index)
+            feature_filter_list = list_feature_filter(client)
+            feature_filter_dropdown_opts = list(set(feature_filter_dropdown_opts)-set(get_feature_filter_name(client)))
+            feature_filter_dropdown_opts.append(feature_to_free)
             apply_filters_state = ['Apply filter']
             collapse_expand_filter_disabled = False 
-            currentFigure = update_graph(client, 4, apply_filters_state!=[], collapse_expand_filter_state)
-            currentChildren = add_graph(client, currentFigure, apply_filters_state!=[], collapse_expand_filter_state, True)
-            
+            currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
+            currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)  
             return ops_to_json(client),custom_feature,"",returnValidFeatures(client), currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
         
         if triggered_id == "apply_selection_hourfilter":

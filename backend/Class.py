@@ -157,8 +157,8 @@ class Ops:
         #   - DONE: The user should only be able to select from the self.data_features list and the self.created_features list but only ones that don't already have a feature filter
         
         # Validation TODO:
-        #   - There is a feature selected and either an upper or lower bound selected
-        #   - If there is an upper bound and a lower bound inputted confirm that the upper bound is greater than the lower bound
+        #   - DONE: There is a feature selected and either an upper or lower bound selected
+        #   - DONE: If there is an upper bound and a lower bound inputted confirm that the upper bound is greater than the lower bound
 
         new_feature_filter = {
             "filter_uid": str(uuid.uuid4()),

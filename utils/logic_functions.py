@@ -313,3 +313,11 @@ def extract_values_custom_feature(data):
 
 def get_feature_filter_name(client):
     return [feature["feature_name"] for feature in client.feature_filters]
+
+def get_feature_fitler_name_by_id(client, index):
+    name = ''
+    for feature in client.feature_filters:
+        if feature["filter_uid"] == index:
+            name = feature["feature_name"]
+            break
+    return name
