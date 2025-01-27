@@ -199,8 +199,7 @@ def validateApplyFilterToggle(client, apply_filter, toggle):
     
     return is_valid, apply_action, toggle_action, message
 
-# Function to validate the application of filter selections
-def validateApplySelection(client, type):
+def validateApplyDatetimeSelection(client):
     """
     Validates whether filter selections can be applied.
 
@@ -215,16 +214,10 @@ def validateApplySelection(client, type):
     """
     is_valid = True
     message = ""
-    if type == "hour_filter":
-        if client.hour_filters == []:
-            is_valid = False
-            message = "No hours selected"
     
-    if type == "date_filter":
-        if client.day_of_week_filters == [] or client.month_filters == [] or client.year_filters == []:
-            is_valid = False
-            message = "Please select at least one year, month and day of the week"
-            
+    if client.hour_filters == [] or client.day_of_week_filters == [] or client.month_filters == [] or client.year_filters == []:
+        is_valid = False
+        message = "Cannot apply datetime filter (Hint: select at least one year, one month, one day of the week and one hour of the day)"    
     return is_valid, message
 
 # Function to get the last consecutive datetime in a list

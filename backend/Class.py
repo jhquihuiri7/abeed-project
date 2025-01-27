@@ -142,16 +142,16 @@ class Ops:
 
         #after running this function we need to update the graph's to reflect the updated self.df, self.filter_df and self.datetimes_to_exclude values
         #   - Also need to update  the list of created features displayed on the custom features tab 
-
+    #TODO Done
     def apply_datetime_filters_button(self, hours_to_include_input: list[int], days_of_week_to_include_input: list[int], months_to_include_input: list[int], years_to_include_input: list[int]):
         # Validation TODO:
-        #   - Confirm that there is at least on hour, day of week, month, and year selected
+        #   - DONE: Confirm that there is at least on hour, day of week, month, and year selected
         self.update_datetime_filters(hours_to_include_input, days_of_week_to_include_input, months_to_include_input, years_to_include_input)
         self.update_datetimes_to_exclude()
         self.update_filter_df()
 
         #after running this function we need to update the graph's to reflect the updated self.filter_df and self.datetimes_to_exclude values
-
+    #TODO Done
     def add_feature_filter_button(self, feature_name: str, lower_bound: float, upper_bound: float):
         # Selection Options:
         #   - DONE: The user should only be able to select from the self.data_features list and the self.created_features list but only ones that don't already have a feature filter
@@ -172,7 +172,7 @@ class Ops:
         #after running this function we need to update the graph's to reflect the updated self.filter_df and self.datetimes_to_exclude values
         #   - Also need to update the list of feature filters displayed on the feature filter tab 
 
-
+    #TODO Done
     def remove_feature_filter_button(self, target_uuid: str):
         self.feature_filters = [
             filters

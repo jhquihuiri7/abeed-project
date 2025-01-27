@@ -20,7 +20,7 @@ from components.dropdown_components import main_dropdown, date_filter_dropdown, 
 # Utilities
 from utils.functions import update_graph, list_custom_filter_children, remove_custom_feature_from_graphs, ops_to_json, json_to_ops, list_feature_filter
 from utils.restore_session import restore_session
-from utils.logic_functions import update_custom_feature, validateFeatureFilterData, validateMainDropdownSelection, validateDeleteCustomFeatureFilter, validateCustomFeaturesExistInFeatures, validateApplyFilterToggle, validateApplySelection, returnValidFeatures, get_value_range, extract_values_custom_feature, get_feature_filter_name, get_feature_fitler_name_by_id
+from utils.logic_functions import update_custom_feature, validateFeatureFilterData, validateMainDropdownSelection, validateDeleteCustomFeatureFilter, validateCustomFeaturesExistInFeatures, validateApplyFilterToggle, validateApplySelection, returnValidFeatures, get_value_range, extract_values_custom_feature, get_feature_filter_name, get_feature_fitler_name_by_id, validateApplyDatetimeSelection
 
 # Backend
 from backend.Class import Ops
@@ -472,34 +472,18 @@ def create_dash_app(server):
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)  
             return ops_to_json(client),custom_feature,"",returnValidFeatures(client), currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
         
-        if triggered_id == "apply_selection_hourfilter":
-            client.update_hour_filters([index for index, hour in enumerate(hour_button) if hour["backgroundColor"] != "white"])
-            is_valid, message = validateApplySelection(client, "hour_filter")
+        if (triggered_id == "apply_selection_datefilter") or (triggered_id == "apply_selection_hourfilter"):
+            hours_to_include = [index for index, hour in enumerate(hour_button) if hour["backgroundColor"] != "white"]
+            client.apply_datetime_filters_button(hours_to_include, day_dropdown_date_filter_state, month_dropdown_date_filter_state, year_dropdown_date_filter_state)
+            is_valid, message = validateApplyDatetimeSelection(client)
             notification = []
-            
-            if not is_valid:
-                notification = show_notification(message)
-            else:   
+            if is_valid:
                 apply_filters_state = ['Apply filter']
                 collapse_expand_filter_disabled = False 
-                currentFigure = update_graph(client, 4, apply_filters_state, collapse_expand_filter_state)
-                currentChildren = add_graph(client, currentFigure, apply_filters_state, collapse_expand_filter_state, True)
-            
-            return ops_to_json(client),custom_feature,"",returnValidFeatures(client), currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
-        
-        if triggered_id == "apply_selection_datefilter":
-            client.update_date_filters(day_dropdown_date_filter_state, month_dropdown_date_filter_state, year_dropdown_date_filter_state)
-            is_valid, message = validateApplySelection(client, "date_filter")
-            notification = []
-            
-            if not is_valid:
+                currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
+                currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
+            else:
                 notification = show_notification(message)
-            else:   
-                apply_filters_state = ['Apply filter']
-                collapse_expand_filter_disabled = False 
-                currentFigure = update_graph(client, 4, apply_filters_state!=[], collapse_expand_filter_state)
-                currentChildren = add_graph(client, currentFigure, apply_filters_state!=[], collapse_expand_filter_state, True)
-            
             return ops_to_json(client),custom_feature,"",returnValidFeatures(client), currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
         
         if triggered_id == "apply_filters":
