@@ -39,7 +39,7 @@ def restore_session(client, apply_filters_state, collapse_expand_filter_state, c
         feature_filter_dropdown_opts = client.df.columns
         feature_filter_dropdown_opts = [feature for feature in feature_filter_dropdown_opts if feature not in feature_filter_dropdown]
         feature_filter_dropdown_default = feature_filter_dropdown_opts[0]
-        feature_filter_list = [html.Div([f"{feature_filter['feature_name']}, Range: ({get_value_range(feature_filter['range'][0],"-")} → {get_value_range(feature_filter['range'][1],"+")})", button(
+        feature_filter_list = [html.Div([f"{feature_filter['feature_name']}, Range: ({get_value_range(feature_filter['range'][0],'-')} → {get_value_range(feature_filter['range'][1],'+')})", button(
                                 text="REMOVE",
                                 id={"type": "feature_filter_remove", "index": feature_filter["filter_uid"]},
                                 style=button_dropdown_style,
