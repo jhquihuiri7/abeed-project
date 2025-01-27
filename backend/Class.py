@@ -154,7 +154,7 @@ class Ops:
 
     def add_feature_filter_button(self, feature_name: str, lower_bound: float, upper_bound: float):
         # Selection Options:
-        #   - The user should only be able to select from the self.data_features list and the self.created_features list but only ones that don't already have a feature filter
+        #   - DONE: The user should only be able to select from the self.data_features list and the self.created_features list but only ones that don't already have a feature filter
         
         # Validation TODO:
         #   - There is a feature selected and either an upper or lower bound selected
@@ -185,7 +185,7 @@ class Ops:
         #after running this function we need to update the graph's to reflect the updated self.filter_df and self.datetimes_to_exclude values
         #   - Also need to update the list of feature filters displayed on the feature filter tab 
 
-
+    #TODO Done
     def add_graph_button(self, features_list: list[str]):
         new_graph = {
             "graph_uid": str(uuid.uuid4()),
@@ -194,7 +194,7 @@ class Ops:
         self.graphs.append(new_graph)
 
         # after running this function we need to update the component that displays all the graphs in the self.graphs value
-
+    #TODO Done
     def remove_graph_button(self, target_uuid: str):
         self.graphs = [
             graphs for graphs in self.graphs if graphs["graph_uid"] != target_uuid

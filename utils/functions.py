@@ -7,6 +7,7 @@ import pandas as pd
 import json
 from datetime import date, datetime
 import math
+from utils.logic_functions import get_value_range
 
 
 # Function to update the graph when a button is clicked
@@ -56,27 +57,6 @@ def update_graph(client, update_action=1, apply_filters=False, collapse=False):
     # Return the default bar chart
     return bar_chart(client, None, apply_filters, collapse)
 
-# TODO DELETE
-# Function to add a graph when a button is clicked
-def add_graph(client, apply_filter=False, collapse=False, update=False):
-    """
-    Adds a new graph based on the currently visible features in the provided figure.
-
-    Args:
-        client: An object managing the data and graphs.
-        currentFigure (dict): The current figure, containing data about visible features.
-        apply_filter (bool, optional): Whether to apply filters to the graph.
-        collapse (bool, optional): Whether to collapse the graph layout.
-        update (bool, optional): Whether to update the graph instead of adding a new one.
-
-    Returns:
-        list: Updated list of graphs to be displayed.
-    """
-    
-
-    # Return the updated list of graphs
-    return multi_chart(client, apply_filter, collapse)
-
 
 # Function to remove a specific custom feature from all graphs
 def remove_custom_feature_from_graphs(client, custom_feature, apply_filter, collapse):
@@ -120,6 +100,13 @@ def remove_graph(client, index, apply_filter, collapse):
     # Return the updated list of graphs
     return multi_chart(client, apply_filter, collapse)
 
+
+def list_feature_filter(client):
+    return [html.Div([f"{feature_filter['feature_name']}, Range: ({get_value_range(feature_filter['range'][0],'-')} → {get_value_range(feature_filter['range'][1],'+')})", button(
+                                text="REMOVE",
+                                id={"type": "feature_filter_remove", "index": feature_filter["filter_uid"]},
+                                style=button_dropdown_style,
+                            )], className="mb-4") for feature_filter in client.feature_filters]
 
 # Function to generate a list of custom filter components
 def list_custom_filter_children(client):

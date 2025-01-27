@@ -76,7 +76,7 @@ def update_custom_feature(features, custom_features, values):
 
 
 # Function to validate feature filter data
-def validateFeatureFilterData(feature, min_range, max_range):
+def validateFeatureFilterData(client, feature, min_range, max_range):
     """
     Validates the input data for feature filters.
 
@@ -91,13 +91,29 @@ def validateFeatureFilterData(feature, min_range, max_range):
             - (str): Reason for invalidation, if applicable.
     """
     reason = ""
+    
     if feature == "":
-        reason = "You must select a Feature"
+        reason = f"Cannot create a feature filter because the is no feature selected (Hint: select a feature)"
         return False, reason
     if min_range == "" and max_range == "":
-        reason = "You must give at least one input range"
+        reason = f"Cannot create a feature filter because the is no values in the input range (Hint: provide at least one input range)"
         return False, reason
-    return True, reason
+    try:
+        min_range = float(min_range) 
+    except:
+        min_range = None
+    
+    try:
+        max_range = float(max_range)
+    except:
+        max_range = None
+    
+    if isinstance(min_range, float) and isinstance(max_range, float):
+        if min_range > max_range:
+            reason = f"Cannot create a feature filter because the the min_input_range is greater than the max_input_range (Hint: min_input_range must be lesser than max_input_range)"
+            return False, reason
+    
+    return True, reason, min_range, max_range
 
 # Function to validate the main dropdown selection
 def validateMainDropdownSelection(client):
@@ -294,3 +310,6 @@ def extract_values_custom_feature(data):
             for j in temp:    
                 custom_feature.append({"Operation": "-" if j['props']['children'][0]['props']['value'] == "Sub" else "+", "Feature": j['props']['children'][1]['props']['value']})
     return custom_feature
+
+def get_feature_filter_name(client):
+    return [feature["feature_name"] for feature in client.feature_filters]

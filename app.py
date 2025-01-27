@@ -13,18 +13,17 @@ from components.daterange_components import main_daterange
 from components.tabs_components import main_tabs
 from components.button_components import button, apply_filters_toggle
 from components.notification_components import show_notification, show_modal
-from components.graph_components import multi_chart
+from components.graph_components import multi_chart, bar_chart
 from components.dropdown_components import main_dropdown, date_filter_dropdown, custom_dropdow
 
 
 # Utilities
-from utils.functions import update_graph, add_graph, remove_graph, list_custom_filter_children, remove_custom_feature_from_graphs, ops_to_json, json_to_ops
+from utils.functions import update_graph, list_custom_filter_children, remove_custom_feature_from_graphs, ops_to_json, json_to_ops, list_feature_filter
 from utils.restore_session import restore_session
-from utils.logic_functions import update_custom_feature, validateFeatureFilterData, validateMainDropdownSelection, validateDeleteCustomFeatureFilter, validateCustomFeaturesExistInFeatures, validateApplyFilterToggle, validateApplySelection, returnValidFeatures, get_value_range, extract_values_custom_feature
+from utils.logic_functions import update_custom_feature, validateFeatureFilterData, validateMainDropdownSelection, validateDeleteCustomFeatureFilter, validateCustomFeaturesExistInFeatures, validateApplyFilterToggle, validateApplySelection, returnValidFeatures, get_value_range, extract_values_custom_feature, get_feature_filter_name
 
 # Backend
 from backend.Class import Ops
-from backend.db_dictionaries import feature_units_dict
 
 # Styles
 from styles.styles import button_style, button_dropdown_style, hourButtonStyle
@@ -447,31 +446,15 @@ def create_dash_app(server):
             return ops_to_json(client),custom_feature,"",returnValidFeatures(client),currentFigure, currentChildren, currentDropdownChildren, custom_name,list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
         
         if triggered_id == "feature_filter_add":
-            is_valid, message = validateFeatureFilterData(feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range)
-            if is_valid:
-                try:
-                    feature_filter_min_range = float(feature_filter_min_range) 
-                except:
-                    feature_filter_min_range = None
-                
-                try:
-                    feature_filter_max_range = float(feature_filter_max_range)
-                except:
-                    feature_filter_max_range = None
-                    
-                client.add_feature_filter(feature_filter_dropdown,feature_filter_min_range, feature_filter_max_range)
-                feature_filter_list = [html.Div([f"{feature_filter['feature_name']}, Range: ({get_value_range(feature_filter['range'][0],"-")} → {get_value_range(feature_filter['range'][1],"+")})", button(
-                                text="REMOVE",
-                                id={"type": "feature_filter_remove", "index": feature_filter["filter_uid"]},
-                                style=button_dropdown_style,
-                            )], className="mb-4") for feature_filter in client.feature_filters]
-                feature_filter_dropdown_opts = [feature for feature in feature_filter_dropdown_opts if feature not in feature_filter_dropdown]    
-            
+            is_valid, message, feature_filter_min_range, feature_filter_max_range = validateFeatureFilterData(client, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range)
+            if is_valid:    
+                client.add_feature_filter_button(feature_filter_dropdown,feature_filter_min_range, feature_filter_max_range)
+                feature_filter_list = list_feature_filter(client)
+                feature_filter_dropdown_opts = list(set(feature_filter_dropdown_opts)-set(get_feature_filter_name(client)))  
                 apply_filters_state = ['Apply filter']
                 collapse_expand_filter_disabled = False 
-                currentFigure = update_graph(client, 4, apply_filters_state!=[], collapse_expand_filter_state)
-                currentChildren = add_graph(client, currentFigure, apply_filters_state!=[], collapse_expand_filter_state, True)
-                
+                currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
+                currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)     
                 return ops_to_json(client),custom_feature,"",returnValidFeatures(client), currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, "", "", feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
             return ops_to_json(client),custom_feature,"",returnValidFeatures(client), currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, show_notification(message), apply_filters_state, collapse_expand_filter_disabled
         
@@ -479,7 +462,7 @@ def create_dash_app(server):
         if isinstance(triggered_id, dict) and triggered_id.get("type") == "feature_filter_remove":
             index = triggered_id.get("index")
             client.remove_feature_filter(index)
-            feature_filter_list = [html.Div([f"{feature_filter['feature_name']}, Range: ({get_value_range(feature_filter['range'][0],"-")} → {get_value_range(feature_filter['range'][1],"+")})", button(
+            feature_filter_list = [html.Div([f"{feature_filter['feature_name']}, Range: ({get_value_range(feature_filter['range'][0],'-')} → {get_value_range(feature_filter['range'][1],'+')})", button(
                                 text="REMOVE",
                                 id={"type": "feature_filter_remove", "index": feature_filter["filter_uid"]},
                                 style=button_dropdown_style,

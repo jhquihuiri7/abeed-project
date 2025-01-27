@@ -1,4 +1,4 @@
-from utils.functions import update_graph, add_graph, ops_to_json, list_custom_filter_children
+from utils.functions import update_graph, ops_to_json, list_custom_filter_children
 from utils.logic_functions import get_value_range
 from components.dropdown_components import custom_dropdow
 import plotly.graph_objects as go
