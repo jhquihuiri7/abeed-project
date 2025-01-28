@@ -76,6 +76,8 @@ features_read_name_to_db_id_dict = {
     "AECI RT": "63d89f6d-d1fa-4873-9487-1d61f7e342da",
     "ALTW.8THST.ARR DA": "50794952-15df-4717-9848-2f77c4017879",
     "ALTW.8THST.ARR RT": "6beb9a9f-a00a-489c-944a-6c33f9f9a911",
+    "MISO Meteologica Wind": "4d1f2d0c-f54b-4fc0-a81e-95c5bdbe8dab",
+    "MISO Meteologica Solar": "e6eb8626-2873-4a97-a171-dc7ee3d0f521",
 }
 
 feature_db_id_to_read_name = {
@@ -156,7 +158,8 @@ feature_db_id_to_read_name = {
     "63d89f6d-d1fa-4873-9487-1d61f7e342da": "AECI RT",
     "50794952-15df-4717-9848-2f77c4017879": "ALTW.8THST.ARR DA",
     "6beb9a9f-a00a-489c-944a-6c33f9f9a911": "ALTW.8THST.ARR RT",
-    
+    "4d1f2d0c-f54b-4fc0-a81e-95c5bdbe8dab": "MISO Meteologica Wind",
+    "e6eb8626-2873-4a97-a171-dc7ee3d0f521": "MISO Meteologica Solar",
 }
 
 feature_units_dict = {
@@ -183,8 +186,8 @@ feature_units_dict = {
     "MISOpjm shock X forecast": "dollars",
     "MISOpjm shock M forecast": "dollars",		
     "MISOpjm shock E forecast": "dollars",		
-    "Meteologica PJM Load forcast": "mw",
-    "Meteologica MISO Load forcast": "mw",
+    "PJM Meteologica  Load forcast": "mw",
+    "MISO Meteologica Load forcast": "mw",
     "PJM Wind Gen": "mw",
     "PJM Solar Gen": "mw",
     "PJM Coal Gen": "mw",
@@ -237,6 +240,8 @@ feature_units_dict = {
     "AECI RT": "dollars",
     "ALTW.8THST.ARR DA": "dollars",
     "ALTW.8THST.ARR RT": "dollars",
+    "MISO Meteologica Wind": 'mw',
+    "MISO Meteologica Solar": 'mw',
 }
 
 feature_db_name_to_read_name_dict = {
@@ -250,7 +255,7 @@ feature_db_name_to_read_name_dict = {
     "5413134.0;lmp;da":                 "PJM nyis DA",
     "5413134.0;lmp;rtu":                "PJM nyis RT Unverified",
     "5413134.0;lmp;rtv":                 "PJM nyis RT Verified",
-     "24065;lmp;da":                     "NYIS pjm DA",
+    "24065;lmp;da":                     "NYIS pjm DA",
     "5413134.0;shock_wi25_X_1.0.0;lmp_pred;da": "PJMnyis shock X forecast",
     "5413134.0;shock_wi25_M_1.0.0;lmp_pred;da": "PJMnyis shock M forecast",
     "5413134.0;shock_wi25_E_1.0.0;lmp_pred;da": "PJMnyis shock E forecast",
@@ -317,6 +322,8 @@ feature_db_name_to_read_name_dict = {
     "AECI;lmp;rt": "AECI RT",
     "ALTW.8THST.ARR;lmp;da": "ALTW.8THST.ARR DA",
     "ALTW.8THST.ARR;lmp;rt": "ALTW.8THST.ARR RT",
+    "miso_wind_total_mw": "MISO Meteologica Wind",
+    "miso_solar_total_mw": "MISO Meteologica Solar",
 }
 
 feature_read_name_to_db_name_dict = {
@@ -397,4 +404,6 @@ feature_read_name_to_db_name_dict = {
     "AECI RT": "AECI;lmp;rt",
     "ALTW.8THST.ARR DA": "ALTW.8THST.ARR;lmp;da",
     "ALTW.8THST.ARR RT": "ALTW.8THST.ARR;lmp;rt",
+    "MISO Meteologica Wind": "miso_wind_total_mw",
+    "MISO Meteologica Solar": "miso_solar_total_mw",
 }
