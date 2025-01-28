@@ -25,7 +25,7 @@ def main_tabs(client):
                     custom_features_head(),  # Heading for custom features
                     html.Div(
                         children=[
-                            html.Div(id="custom_dropdown", children=[], className="w-[1200px] flex flex-row justify-between"),  # Dropdown for custom features
+                            html.Div(id="custom_dropdown", children=[], className="w-[1200px] flex flex-row justify-left"),  # Dropdown for custom features
                             list_custom_features(client)
                             ],
                         className = "flex flex-row justify-between",

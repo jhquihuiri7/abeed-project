@@ -313,3 +313,35 @@ def get_feature_fitler_name_by_id(client, index):
             name = feature["feature_name"]
             break
     return name
+
+def validate_add_custom_feature(client, custom_feature, cumulative, custom_name):
+    message = ""
+    if len(client.data_features) < 2:
+        message = "Cannot create custom feature (Hint: select at least two data features)"
+        return False, message
+    if len(custom_feature) < 2:
+        message = "Cannot create custom feature 2 (Hint: select at least two data features)"
+        return False, message
+    for cf in custom_feature:
+        if cf["Feature"] == "" or cf["Feature"]==None:
+            message = "Cannot create custom feature (Hint: Dont leave an operation without selection)"
+            return False, message      
+    if not custom_name or custom_name == '':
+        for idx, features in enumerate(custom_feature):
+            if idx == 0:
+                custom_name = "(" + features["Feature"]
+            
+            else:
+                custom_name = custom_name + " " + features["Operation"] + " " + str(features["Feature"])
+        custom_name = custom_name + ")"
+        if cumulative:
+            custom_name = custom_name + "Σ" 
+    if custom_name in client.data_features:
+        message = "Cannot create custom feature (Hint: Feature name already exists in data_features)"
+        return False, message
+    if custom_name in [feature["feature_name"] for feature in client.created_features]:
+            
+            message = "Cannot create custom feature (Hint: Feature name already exists in created_features)"
+            return False, message
+                
+    return True, message

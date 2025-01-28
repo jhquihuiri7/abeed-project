@@ -93,7 +93,7 @@ def custom_dropdow(client, current_dropdown):
                 ),
             ],
             # Layout styling for the dropdown and buttons
-            className=f"flex flex-row my-4",
+            className=f"flex flex-row my-4 mr-5",
         )    
     )
     
@@ -300,7 +300,7 @@ def feature_filter_dropdown(client):
                 children=[
                     # Dropdown for selecting features
                     dcc.Dropdown(
-                        options=[feature for feature in client.data_features],  # Feature options
+                        options=[feature for feature in client.data_features] if (client.data_features != []) else [],  # Feature options
                         value=[],  # Default selected value
                         id="feature_filter_dropdown",  # Unique ID for the dropdown
                         multi=False,  # Allow single selection

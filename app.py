@@ -32,7 +32,8 @@ from utils.logic_functions import (
     extract_values_custom_feature,
     get_feature_filter_name,
     get_feature_fitler_name_by_id,
-    validateApplyDatetimeSelection
+    validateApplyDatetimeSelection,
+    validate_add_custom_feature
 )
 from utils.functions import (
     update_graph,
@@ -426,11 +427,16 @@ def create_dash_app(server):
         # Add custom feature when button is clicked
         elif triggered_id == "add_custom_feature":
             custom_feature = extract_values_custom_feature(currentDropdownChildren)
-            client.create_feature(custom_feature, False if custom_cumulative[-1] == "" else True, custom_name)
-            currentFigure = update_graph(client, 2, apply_filters_state, collapse_expand_filter_state)
-            custom_dropdow_children = custom_dropdow(client, custom_feature)
-            feature_filter_dropdown_opts = client.df.columns
-            return ops_to_json(client),custom_feature,"",returnValidFeatures(client),currentFigure, currentChildren, custom_dropdow_children,"",list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
+            is_valid, message = validate_add_custom_feature(client, custom_feature, custom_cumulative[-1] != "", custom_name)
+            if is_valid:
+                client.create_custom_feature_button(custom_feature, custom_cumulative[-1] != "", custom_name)
+                currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
+                custom_feature = []
+                currentDropdownChildren = custom_dropdow(client, custom_feature)
+                feature_filter_dropdown_opts.append(client.created_features[-1]['feature_name'])
+            else:
+                notification = show_notification(message)
+            return ops_to_json(client),custom_feature,"",returnValidFeatures(client),currentFigure, currentChildren, currentDropdownChildren,"",list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
         
         # Remove graph when remove button is clicked
         elif isinstance(triggered_id, dict) and triggered_id.get("type") == "remove_button":
