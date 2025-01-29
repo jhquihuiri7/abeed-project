@@ -24,21 +24,18 @@ from utils.restore_session import restore_session
 from utils.logic_functions import (
     update_custom_feature,
     validateFeatureFilterData,
-    validateMainDropdownSelection,
-    validateDeleteCustomFeatureFilter,
-    validateCustomFeaturesExistInFeatures,
-    validateApplyFilterToggle,
     returnValidFeatures,
     extract_values_custom_feature,
     get_feature_filter_name,
     get_feature_fitler_name_by_id,
     validateApplyDatetimeSelection,
-    validate_add_custom_feature
+    validate_add_custom_feature,
+    validate_delete_custom_feature,
+    validate_update_data,
+    validateApplyFilterToggle
 )
 from utils.functions import (
-    update_graph,
     list_custom_filter_children,
-    remove_custom_feature_from_graphs,
     ops_to_json,
     json_to_ops,
     list_feature_filter
@@ -325,7 +322,6 @@ def create_dash_app(server):
         State("day_dropdown_date_filter", "value"),
         State("client", "data"),
         State("temp_feature", "data"),
-        #prevent_initial_call=True,  # Prevent initial callback call
     )
     def update_render(
         main_dropdown,
@@ -393,27 +389,17 @@ def create_dash_app(server):
                 
         # Update graph when update button is clicked
         if triggered_id == "update_graph_button":
-            isMissing, missingFeatures = validateCustomFeaturesExistInFeatures(client, features)
-            if not isMissing:
-                message = f"You can't update the graph until you select the missing features: {missingFeatures}"
-                return ops_to_json(client),"",client.data_features,currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, show_notification(message), apply_filters_state, collapse_expand_filter_disabled
-                
-            client.data_features = features
-            if not validateMainDropdownSelection(client):
-                message = "You must select at least one feature to continue."
-                return ops_to_json(client),custom_feature,"",client.data_features,currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, show_notification(message), apply_filters_state, collapse_expand_filter_disabled
-            
-            if client.df.empty:
-                currentFigure = update_graph(client, update_action=3)
-                feature_filter_min_range, feature_filter_max_range = "", ""
+            is_valid, message = validate_update_data(client, features)
+            if is_valid:
+                client.update_data_button(start_date, end_date, features)
+                currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
+                currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
+                custom_feature = extract_values_custom_feature(currentDropdownChildren)
+                currentDropdownChildren = custom_dropdow(client, custom_feature)
+                feature_filter_dropdown_opts = client.data_features
             else:
-                currentFigure = update_graph(client, 2, apply_filters_state, collapse_expand_filter_state)
-            currentChildren = multi_chart(client, apply_filters_state, collapse_expand_filter_state)
-            custom_feature = extract_values_custom_feature(currentDropdownChildren)
-            currentDropdownChildren = custom_dropdow(client, custom_feature)
-            feature_filter_dropdown_opts = client.data_features
-        
-            return ops_to_json(client), custom_feature, "",returnValidFeatures(client),currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
+                notification = show_notification(message)
+            return ops_to_json(client), custom_feature, "",returnValidFeatures(client),currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
     
         # Add graph when add button is clicked
         elif triggered_id == "add_graph_button":
@@ -424,6 +410,12 @@ def create_dash_app(server):
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
             return ops_to_json(client),custom_feature,"",returnValidFeatures(client),currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
     
+        # Remove graph when remove button is clicked
+        elif isinstance(triggered_id, dict) and triggered_id.get("type") == "remove_button":
+            client.remove_graph_button(triggered_id.get("index"))
+            currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)            
+            return ops_to_json(client),custom_feature,"",returnValidFeatures(client),currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
+
         # Add custom feature when button is clicked
         elif triggered_id == "add_custom_feature":
             custom_feature = extract_values_custom_feature(currentDropdownChildren)
@@ -437,13 +429,28 @@ def create_dash_app(server):
             else:
                 notification = show_notification(message)
             return ops_to_json(client),custom_feature,"",returnValidFeatures(client),currentFigure, currentChildren, currentDropdownChildren,"",list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
-        
-        # Remove graph when remove button is clicked
-        elif isinstance(triggered_id, dict) and triggered_id.get("type") == "remove_button":
-            client.remove_graph_button(triggered_id.get("index"))
-            currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)            
-            return ops_to_json(client),custom_feature,"",returnValidFeatures(client),currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
-        
+         
+        # Remove custom feature
+        elif isinstance(triggered_id, dict) and triggered_id.get("type") == "custom_feature_remove":
+            index = triggered_id.get("index")
+            feature_to_remove = next((feature["feature_name"] for feature in client.created_features if feature["feature_id"] == index), None)
+            is_valid, message = validate_delete_custom_feature(client,feature_to_remove)
+            if is_valid:
+                client.remove_custom_feature_button(index)
+                for i in range(len(client.graphs)):
+                    try:
+                        # Attempt to remove the custom feature from each graph
+                        client.graphs[i]["graph_data_features"].remove(feature_to_remove)
+                    except ValueError:
+                        # Ignore if the custom feature is not found in the graph
+                        pass
+                currentDropdownChildren = custom_dropdow(client, [])
+                currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
+                currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state) 
+            else:
+                notification = show_notification(message)
+            return ops_to_json(client),custom_feature,"",returnValidFeatures(client),currentFigure, currentChildren, currentDropdownChildren, custom_name,list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
+               
         # Add new custom feature operation
         elif isinstance(triggered_id, dict) and triggered_id.get("type") == "operation_custom_feature_add":
             custom_feature = extract_values_custom_feature(currentDropdownChildren)
@@ -458,21 +465,7 @@ def create_dash_app(server):
             del custom_feature[index]
             currentDropdownChildren = custom_dropdow(client, custom_feature)
             return ops_to_json(client),custom_feature,"",returnValidFeatures(client),currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
-        
-        # Remove custom feature
-        elif isinstance(triggered_id, dict) and triggered_id.get("type") == "custom_feature_remove":
-            index = triggered_id.get("index")
-            feature_to_remove = next((feature["feature_name"] for feature in client.created_features if feature["feature_id"] == index), None)
-            if not validateDeleteCustomFeatureFilter(feature_to_remove, client):
-                message = f'Cannot remove Custom Feature, remove "{feature_to_remove}" first.'
-                return ops_to_json(client),"",returnValidFeatures(client),currentFigure, currentChildren, currentDropdownChildren, custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, show_notification(message), apply_filters_state, collapse_expand_filter_disabled
-            currentChildren = remove_custom_feature_from_graphs(client, feature_to_remove, apply_filters_state, collapse_expand_filter_state)
-            client.remove_custom_feature(index)
-            currentFigure = update_graph(client, 4, apply_filters_state, collapse_expand_filter_state)
-            custom_feature = extract_values_custom_feature(currentDropdownChildren)
-            currentDropdownChildren = custom_dropdow(client, custom_feature)
-            return ops_to_json(client),custom_feature,"",returnValidFeatures(client),currentFigure, currentChildren, currentDropdownChildren, custom_name,list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
-        
+                
         if triggered_id == "feature_filter_add":
             is_valid, message, feature_filter_min_range, feature_filter_max_range = validateFeatureFilterData(client, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range)
             if is_valid:    
@@ -515,23 +508,22 @@ def create_dash_app(server):
             return ops_to_json(client),custom_feature,"",returnValidFeatures(client), currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
         
         if triggered_id == "apply_filters":
-            is_valid, apply, toggle, message = validateApplyFilterToggle(client, apply_filters_state, collapse_expand_filter_state)
-            if not is_valid:
-                return ops_to_json(client),custom_feature,"",returnValidFeatures(client), currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, client.data_features, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, show_notification(message), [], collapse_expand_filter_disabled
-            
-            if apply_filters_state == []:
-                collapse_expand_filter_disabled = True
-                currentFigure = update_graph(client, 1)
+            is_valid, message = validateApplyFilterToggle(client, apply_filters_state, collapse_expand_filter_state)
+            if is_valid:  
+                if apply_filters_state == []:
+                    collapse_expand_filter_disabled = True
+                    currentFigure = bar_chart(client, None, False, False)
+                else:
+                    collapse_expand_filter_disabled = False
+                    currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
             else:
-                collapse_expand_filter_disabled = False
-                currentFigure = update_graph(client, 4, apply_filters_state!=[], collapse_expand_filter_state)
-            
-            currentChildren = add_graph(client, currentFigure, apply_filters_state!=[], collapse_expand_filter_state, True)
-            return ops_to_json(client),custom_feature,"",returnValidFeatures(client), currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, client.data_features, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
+                notification = show_notification(message)
+            currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state) 
+            return ops_to_json(client),custom_feature,"",returnValidFeatures(client), currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, client.data_features, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
             
         if triggered_id == "collapse_expand_filter":
-            currentFigure = update_graph(client, 4, apply_filters_state!=[], collapse_expand_filter_state)
-            currentChildren = add_graph(client, currentFigure, apply_filters_state!=[], collapse_expand_filter_state, True)
+            currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
+            currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state) 
             return ops_to_json(client),custom_feature,"",returnValidFeatures(client), currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, client.data_features, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
     
         if main_dropdown != "":

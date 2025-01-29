@@ -1,8 +1,5 @@
-# Import the feature_units_dict dictionary from the backend, 
-# which maps features to their respective measurement units.
 from backend.helper_functions import get_feature_units
-from datetime import datetime, timedelta
-import pandas as pd
+from datetime import timedelta
 
 # Function to determine if a set of columns requires both primary and secondary axes
 def contains_both_axis(client, cols):
@@ -114,90 +111,6 @@ def validateFeatureFilterData(client, feature, min_range, max_range):
     
     return True, reason, min_range, max_range
 
-# Function to validate the main dropdown selection
-def validateMainDropdownSelection(client):
-    """
-    Validates whether the main dropdown selection is valid.
-
-    Args:
-        client (object): Client object containing feature data.
-
-    Returns:
-        bool: True if valid, False otherwise.
-    """
-    if client.data_features == []:
-        return False
-    return True
-
-# Function to validate if a custom feature filter can be deleted
-def validateDeleteCustomFeatureFilter(feature_to_remove, client):
-    """
-    Validates whether a custom feature filter can be deleted.
-
-    Args:
-        feature_to_remove (str): Feature name to be removed.
-        client (object): Client object containing feature filters.
-
-    Returns:
-        bool: True if the feature can be deleted, False otherwise.
-    """
-    if feature_to_remove in [featureFilter["feature_name"] for featureFilter in client.feature_filters]:
-        return False
-    else:
-        return True
-
-# Function to check if custom features exist in a list of features
-def validateCustomFeaturesExistInFeatures(client, features):
-    """
-    Checks if all custom features created by the client exist in the given list of features.
-
-    Args:
-        client (object): Client object containing created features.
-        features (list): List of available feature names.
-
-    Returns:
-        tuple: 
-            - (bool): True if all custom features exist, False otherwise.
-            - (list): List of missing features, if any.
-    """
-    missing_features = []
-    if client.created_features != []:
-        for custom_feature in client.created_features:
-            for feature in custom_feature["equation"]:
-                if feature["Feature"] not in features:
-                    missing_features.append(feature["Feature"])
-    
-    return True if len(missing_features) == 0 else False, missing_features
-
-# Function to validate the toggle for applying filters
-def validateApplyFilterToggle(client, apply_filter, toggle):
-    """
-    Validates whether filters can be applied based on the toggle state and filter data.
-
-    Args:
-        client (object): Client object containing filter data.
-        apply_filter (list): List of filters to be applied.
-        toggle (bool): Toggle state for applying filters.
-
-    Returns:
-        tuple:
-            - (bool): True if valid, False otherwise.
-            - (bool): Action for applying filters.
-            - (bool): Action for toggling filters.
-            - (str): Message explaining the validation result.
-    """
-    apply_action = True
-    toggle_action = True
-    is_valid = True
-    message = ""
-    
-    if apply_filter != []:
-        if client.datetimes_to_exclude == []:
-            is_valid = False
-            message = "No filters to apply"
-    
-    return is_valid, apply_action, toggle_action, message
-
 def validateApplyDatetimeSelection(client):
     """
     Validates whether filter selections can be applied.
@@ -259,13 +172,11 @@ def get_first_consecutive_datetime(datetime_axis):
     # Initialize with the first element as the start of a group
     current_group_first = datetime_axis[0]
     result.append(current_group_first)  # Save the first element of the first group
-    
     # Iterate to identify consecutive groups
     for i in range(1, len(datetime_axis)):
         if datetime_axis[i] - datetime_axis[i - 1] > timedelta(hours=1):  # Adjust interval if needed
             current_group_first = datetime_axis[i]  # Update to the start of the next group
             result.append(current_group_first)  # Save the first element of the new group
-    
     return result
 
 def group_consecutive(datetime_axis):
@@ -306,6 +217,13 @@ def extract_values_custom_feature(data):
 def get_feature_filter_name(client):
     return [feature["feature_name"] for feature in client.feature_filters]
 
+def get_custom_features_dependence(client):
+    dependence_features = []
+    for cf in client.created_features:
+        for eq in cf["equation"]:
+            dependence_features.append(eq["Feature"])
+    return dependence_features
+    
 def get_feature_fitler_name_by_id(client, index):
     name = ''
     for feature in client.feature_filters:
@@ -344,4 +262,54 @@ def validate_add_custom_feature(client, custom_feature, cumulative, custom_name)
             message = "Cannot create custom feature (Hint: Feature name already exists in created_features)"
             return False, message
                 
+    return True, message
+
+def validate_delete_custom_feature(client, feature_to_remove):
+    message = ""
+    if feature_to_remove in get_feature_filter_name(client):
+        message = "Cannot delete custom feature because a feature filter is dependent on the custom feature being requested to delete(Hint: Delete the feature filter first)"
+        return False, message
+    return True, message
+
+def validateApplyFilterToggle(client, apply_filter, toggle):
+    """
+    Validates whether filters can be applied based on the toggle state and filter data.
+
+    Args:
+        client (object): Client object containing filter data.
+        apply_filter (list): List of filters to be applied.
+        toggle (bool): Toggle state for applying filters.
+
+    Returns:
+        tuple:
+            - (bool): True if valid, False otherwise.
+            - (bool): Action for applying filters.
+            - (bool): Action for toggling filters.
+            - (str): Message explaining the validation result.
+    """
+    is_valid = True
+    message = ""
+    
+    if apply_filter != []:
+        if client.datetimes_to_exclude == []:
+            is_valid = False
+            message = "No filters to apply"
+    
+    return is_valid, message
+
+def validate_update_data(client, selected_features):
+    message= ""
+    if len(selected_features) < 1:
+        message = "Cannot create update data (Hint: select at least one data feature)"
+        return False, message
+    feature_filter = get_feature_filter_name(client)
+    dependence_features =  get_custom_features_dependence(client)
+    if not set(feature_filter).issubset(selected_features):
+        missing_features = set(feature_filter) - set(selected_features)
+        message = f"Cannot update data, some feature filters are dependent in missing data features(Hint: select the follow missing data features: {missing_features})"
+        return False, message
+    if not set(dependence_features).issubset(selected_features):
+        missing_features = set(dependence_features) - set(selected_features)
+        message = f"Cannot update data, some custom features are dependent in missing data features(Hint: select the follow missing data features: {missing_features})"
+        return False, message
     return True, message

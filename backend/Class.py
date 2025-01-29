@@ -109,15 +109,14 @@ class Ops:
         self.update_data()
         self.add_created_features_to_df()
         self.update_datetimes_to_exclude()
-        print(self.datetimes_to_exclude)
         self.update_filter_df()
 
         #after running this function we need to update the graph's to reflect the updated self.df, self.filter_df and self.datetimes_to_exclude values
-
+    #TODO Done
     def create_custom_feature_button(self, feature_operation_list_input: list, cumulative_input: bool = False, custom_name_input:str = None):
         # Validation TODO:
-        #   - confirm that there are at least two features selected to create this feature
-        #   - confirm that there is not another feature in the self.data_features list or the self.created_features list with the same name
+        #   - DONE: confirm that there are at least two features selected to create this feature
+        #   - DONE: confirm that there is not another feature in the self.data_features list or the self.created_features list with the same name
 
         self.create_feature(feature_operation_list_input, cumulative_input, custom_name_input)
         self.add_created_features_to_df()
@@ -125,11 +124,11 @@ class Ops:
 
         #after running this function we need to update the graph's to reflect the updated self.df and self.filter_df values
         #   - Also need to update  the list of created features displayed on the custom features tab 
-
+    #TODO Done
     def remove_custom_feature_button(self, target_uid: str):
         # Validation TODO:
-        #   - Confirm that there is not a feature filter that is dependent on the custom feature being requested to delete
-        #   - If There is tell the user and give a hint to delete the filter first
+        #   - DONE: Confirm that there is not a feature filter that is dependent on the custom feature being requested to delete
+        #   - DONE: If There is tell the user and give a hint to delete the filter first
         removed_feature_name = ""
         for features in self.created_features:
             if features['feature_id'] == target_uid:
@@ -209,6 +208,7 @@ class Ops:
                 db_names.append(feature_read_name_to_db_name_dict[feature])
             self.df = simple_request(self.start_date, self.end_date, db_names)[0]
             self.df.rename(columns=feature_db_name_to_read_name_dict, inplace=True)
+        self.add_created_features_to_df() #OJO
 
     def update_date_range(self, new_start, new_end):
         self.start_date = new_start

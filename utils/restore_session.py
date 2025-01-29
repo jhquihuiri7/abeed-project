@@ -1,6 +1,7 @@
-from utils.functions import update_graph, ops_to_json, list_custom_filter_children
+from utils.functions import ops_to_json, list_custom_filter_children
 from utils.logic_functions import get_value_range
 from components.dropdown_components import custom_dropdow
+from components.graph_components import bar_chart, multi_chart
 import plotly.graph_objects as go
 from dash import html
 from components.button_components import button
@@ -21,15 +22,15 @@ def restore_session(client, apply_filters_state, collapse_expand_filter_state, c
     feature_filter_list = []
     if client.feature_filters != [] or client.year_filters != [] or client.month_filters != [] or client.day_of_week_filters or client.hour_filters:
         apply_filters_state = ["Apply filter"]
-        
+        collapse_expand_filter_disabled = False
     
     if client.data_features != []:
-        currentFigure = update_graph(client, update_action=0, apply_filters=apply_filters_state!=[], collapse=collapse_expand_filter_state)
+        currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
         custom_feature = [{"Feature": client.data_features[0]}]
         custom_dropdow_children = custom_dropdow(client,current_dropdown)
     
     if client.graphs != []:
-        currentChildren = add_graph(client, currentFigure, apply_filters_state!=[], collapse_expand_filter_state, True)
+        currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
     
     if client.created_features != []:
         list_custom_features = list_custom_filter_children(client)

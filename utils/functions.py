@@ -1,4 +1,3 @@
-from components.graph_components import bar_chart, multi_chart
 from components.button_components import button
 from styles.styles import button_dropdown_style
 from dash import html
@@ -8,98 +7,6 @@ import json
 from datetime import date, datetime
 import math
 from utils.logic_functions import get_value_range
-
-
-# Function to update the graph when a button is clicked
-def update_graph(client, update_action=1, apply_filters=False, collapse=False):
-    """
-    Updates the graph based on the specified update action.
-
-    Args:
-        client: An object managing the data and graphs.
-        update_action (int, optional): Specifies the update action:
-            1 - Update the graph without modifying data.
-            2 - Update data and recreate custom features.
-            3 - Update data based on the selected features and date range.
-            4 - Update the graph with filters and collapse options.
-
-    Returns:
-        Figure: The updated bar chart figure.
-    """
-    if update_action == 1:
-        # Return the bar chart without modifying the data
-        return bar_chart(client, None, False, False)
-
-    if update_action == 2:
-        # Update the client's data frame
-        client.update_data()
-        
-        # Store and reset created features
-        custom_features = client.created_features
-        client.created_features = []
-        
-        # Recreate each custom feature in the data frame
-        for custom_feature in custom_features:
-            client.create_feature(
-                feature_operation_list=custom_feature["equation"],  # Feature equation
-                cumulative=custom_feature["cumulative?"],          # Cumulative option
-                custom_name=custom_feature["feature_name"],         # Custom feature name
-            )
-
-    if update_action == 3:
-        # Update the client's data frame with the selected features and date range
-        client.update_data()
-    
-    if update_action == 4:
-        # Return the bar chart with filters and collapse options
-        return bar_chart(client, None, apply_filters, collapse)
-
-    # Return the default bar chart
-    return bar_chart(client, None, apply_filters, collapse)
-
-
-# Function to remove a specific custom feature from all graphs
-def remove_custom_feature_from_graphs(client, custom_feature, apply_filter, collapse):
-    """
-    Removes a custom feature from all graphs managed by the client.
-
-    Args:
-        client: An object managing the data and graphs.
-        custom_feature (str): The name of the custom feature to remove.
-
-    Returns:
-        list: Updated list of graphs without the custom feature.
-    """
-    for i in range(len(client.graphs)):
-        try:
-            # Attempt to remove the custom feature from each graph
-            client.graphs[i]["graph_data_features"].remove(custom_feature)
-        except ValueError:
-            # Ignore if the custom feature is not found in the graph
-            pass
-    return multi_chart(client, apply_filter, collapse)
-
-
-# Function to remove a graph when a button is clicked
-def remove_graph(client, index, apply_filter, collapse):
-    """
-    Removes a graph based on its unique identifier (UUID).
-
-    Args:
-        client: An object managing the data and graphs.
-        index (str): The unique identifier of the graph to remove.
-        apply_filter (bool): Whether to apply filters to the updated graph list.
-        collapse (bool): Whether to collapse the graph layout.
-
-    Returns:
-        list: Updated list of graphs to be displayed.
-    """
-    # Remove the specified graph by its UUID
-    client.remove_graph(target_uuid=index)
-
-    # Return the updated list of graphs
-    return multi_chart(client, apply_filter, collapse)
-
 
 def list_feature_filter(client):
     return [html.Div([f"{feature_filter['feature_name']}, Range: ({get_value_range(feature_filter['range'][0],'-')} → {get_value_range(feature_filter['range'][1],'+')})", button(
@@ -213,6 +120,7 @@ def json_to_ops(json_data):
     # Run the update methods
     ops_instance.update_data()
     ops_instance.update_datetimes_to_exclude()
+    ops_instance.update_filter_df()
 
     return ops_instance
 
