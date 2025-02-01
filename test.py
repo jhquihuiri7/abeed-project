@@ -1,17 +1,12 @@
-data2 = [{'props': {'children': [{'props': {'options': ['MISO pjm RT', 'MISO pjm DA', 'PJM miso RT Verified', 'PJM nyis DA'], 'value': 'MISO pjm RT', 'className': 'w-[400px]', 'id': {'type': 'dynamic-dropdown', 'index': 0}}, 'type': 'Dropdown', 'namespace': 'dash_core_components'}], 'className': 'flex flex-row my-4'}, 'type': 'Div', 'namespace': 'dash_html_components'}, {'props': {'children': [{'props': {'children': [{'props': {'options': [{'label': '+', 'value': 'Add'}, {'label': '-', 'value': 'Sub'}], 'value': 'Sub', 'inputClassName': 'mr-2', 'labelStyle': {'display': 'block'}, 'labelClassName': 'mr-5', 'id': {'type': 'operation_custom_feature_op', 'index': 1}}, 'type': 'RadioItems', 'namespace': 'dash_core_components'}, {'props': {'options': ['MISO pjm RT', 'MISO pjm DA', 'PJM miso RT Verified', 'PJM nyis DA'], 'value': 'MISO pjm DA', 'className': 'w-[400px]', 'id': {'type': 'dynamic-dropdown', 'index': 1}}, 'type': 'Dropdown', 'namespace': 'dash_core_components'}, {'props': {'children': 'ADD', 'id': {'type': 'operation_custom_feature_add', 'index': 1}, 'className': 'ml-5 bg-white border border-black rounded-full text-black font-semibold text-sm px-6 py-3 inline-block text-center cursor-pointer h-[50px]', 'n_clicks': 0}, 'type': 'Button', 'namespace': 'dash_html_components'}, {'props': {'children': None}, 'type': 'Div', 'namespace': 'dash_html_components'}], 'className': 'flex flex-row my-4'}, 'type': 'Div', 'namespace': 'dash_html_components'}, {'props': {'children': [{'props': {'options': [{'label': '+', 'value': 'Add'}, {'label': '-', 'value': 'Sub'}], 'value': 'Sub', 'inputClassName': 'mr-2', 'labelStyle': {'display': 'block'}, 'labelClassName': 'mr-5', 'id': {'type': 'operation_custom_feature_op', 'index': 2}}, 'type': 'RadioItems', 'namespace': 'dash_core_components'}, {'props': {'options': ['MISO pjm RT', 'MISO pjm DA', 'PJM miso RT Verified', 'PJM nyis DA'], 'value': 'PJM miso RT Verified', 'className': 'w-[400px]', 'id': {'type': 'dynamic-dropdown', 'index': 2}, 'search_value': ''}, 'type': 'Dropdown', 'namespace': 'dash_core_components'}, {'props': {'children': 'ADD', 'id': {'type': 'operation_custom_feature_add', 'index': 2}, 'className': 'ml-5 bg-white border border-black rounded-full text-black font-semibold text-sm px-6 py-3 inline-block text-center cursor-pointer h-[50px]', 'n_clicks': 0}, 'type': 'Button', 'namespace': 'dash_html_components'}, {'props': {'children': 'REMOVE', 'id': {'type': 'operation_custom_feature_remove', 'index': 2}, 'className': 'ml-5 bg-white border border-black rounded-full text-black font-semibold text-sm px-6 py-3 inline-block text-center cursor-pointer h-[50px]', 'n_clicks': 0}, 'type': 'Button', 'namespace': 'dash_html_components'}], 'className': 'flex flex-row my-4'}, 'type': 'Div', 'namespace': 'dash_html_components'}], 'className': ''}, 'type': 'Div', 'namespace': 'dash_html_components'}]
+#Validate if all features that the feature_filters depend on are in the data_feature_input list
+# Validate if all features that Custom features depend on are in the data_feature_input list
+# - If Either of these validations do not pass, show an error message with each feature_filter that will not be able to be created and each custom feature, along with the data feature missing
+# - ex. DONE: Cannot have "{dependent custom feature name}" custom feature without "{required data feature name}" data feature (Hint: delete "{dependent custom feature name}" or reselect "{required data feature name}" data feature)
+# - ex. DONE: Cannot have "{Data feature name feature filter is dependent on}" filter without "{Data feature name feature filter is dependent on}" data feature (Hint: delete "{Data feature name feature filter is dependent on}" filter or reselect "{Data feature name feature filter is dependent on}" data feature)
 
-def extract_values_custom_feature(data):
-    custom_feature = []
-    for i in data:
-        temp= i["props"]["children"]
-        try:
-            custom_feature.append({"Feature": temp[0]['props']['value']})
-        except:
-            for j in temp:    
-                print(j['props']['children'][0]['props']['value'])
-                print(j['props']['children'][1]['props']['value'])
-                custom_feature.append({"Operation": "-" if j['props']['children'][0]['props']['value'] == "Sub" else "+", "Feature": j['props']['children'][1]['props']['value']})
-    return custom_feature
-# Get all "value" keys
-values = extract_values_custom_feature(data2)
-print(values)
+
+
+# Validation TODO:
+# - DONE: Confirm that there is not a feature filter that is dependent on the custom feature being requested to delete
+# - DONE: If There is tell the user and give a hint to delete the filter first
+# - DONE: error message: Cannot delete {custome feature name} because it has a "Feature Filter" (Hint: delete {custom feature name} filter first)

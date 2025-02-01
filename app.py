@@ -529,8 +529,6 @@ def create_dash_app(server):
         if main_dropdown != "":
             features.append(main_dropdown)
             
-        
-        
         # If no figure, return initial empty state
         if not currentFigure:
             #return client_data,custom_feature,empty,data_features, currentFigure, currentChildren, custom_dropdow_children,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_default_opts, feature_filter_min_range, feature_filter_max_range, feature_filter_list, empty_array, apply_filters_state, collapse_expand_filter_disabled

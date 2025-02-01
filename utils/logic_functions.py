@@ -224,6 +224,15 @@ def get_custom_features_dependence(client):
             dependence_features.append(eq["Feature"])
     return dependence_features
     
+def get_custom_features_names(client, missing_features):
+    names = []
+    for cf in client.created_features:
+        for eq in cf["equation"]:
+            if eq["Feature"] in missing_features:
+                names.append(cf["feature_name"])
+                break
+    return names
+    
 def get_feature_fitler_name_by_id(client, index):
     name = ''
     for feature in client.feature_filters:
@@ -267,7 +276,7 @@ def validate_add_custom_feature(client, custom_feature, cumulative, custom_name)
 def validate_delete_custom_feature(client, feature_to_remove):
     message = ""
     if feature_to_remove in get_feature_filter_name(client):
-        message = "Cannot delete custom feature because a feature filter is dependent on the custom feature being requested to delete(Hint: Delete the feature filter first)"
+        message = f"Cannot delete {feature_to_remove} because it has a 'Feature Filter' (Hint: delete {feature_to_remove} filter first)"
         return False, message
     return True, message
 
@@ -302,14 +311,15 @@ def validate_update_data(client, selected_features):
     if len(selected_features) < 1:
         message = "Cannot create update data (Hint: select at least one data feature)"
         return False, message
-    feature_filter = get_feature_filter_name(client)
-    dependence_features =  get_custom_features_dependence(client)
-    if not set(feature_filter).issubset(selected_features):
+    feature_filter = set(get_feature_filter_name(client))
+    dependence_features =  set(get_custom_features_dependence(client))
+    if not feature_filter.issubset(selected_features):
         missing_features = set(feature_filter) - set(selected_features)
-        message = f"Cannot update data, some feature filters are dependent in missing data features(Hint: select the follow missing data features: {missing_features})"
+        message = f"Cannot have {feature_filter} feature filter without {missing_features} data feature (Hint: delete {feature_filter} filter or reselect {missing_features} data feature)"
         return False, message
-    if not set(dependence_features).issubset(selected_features):
-        missing_features = set(dependence_features) - set(selected_features)
-        message = f"Cannot update data, some custom features are dependent in missing data features(Hint: select the follow missing data features: {missing_features})"
+    if not dependence_features.issubset(selected_features):
+        missing_features = dependence_features - set(selected_features)
+        dependent_custom_features = set(get_custom_features_names(client, missing_features))
+        message = f"Cannot have {dependent_custom_features} custom feature without {missing_features} data feature (Hint: delete {dependent_custom_features} or reselect {missing_features} data feature)"
         return False, message
     return True, message
