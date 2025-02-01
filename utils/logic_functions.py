@@ -224,13 +224,16 @@ def get_custom_features_dependence(client):
             dependence_features.append(eq["Feature"])
     return dependence_features
     
-def get_custom_features_names(client, missing_features):
+def get_custom_features_names(client, missing_features, show_all = False):
     names = []
     for cf in client.created_features:
         for eq in cf["equation"]:
-            if eq["Feature"] in missing_features:
+            if show_all:
                 names.append(cf["feature_name"])
-                break
+            else:
+                if eq["Feature"] in missing_features:
+                    names.append(cf["feature_name"])
+                    break
     return names
     
 def get_feature_fitler_name_by_id(client, index):

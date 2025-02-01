@@ -28,6 +28,7 @@ from utils.logic_functions import (
     extract_values_custom_feature,
     get_feature_filter_name,
     get_feature_fitler_name_by_id,
+    get_custom_features_names,
     validateApplyDatetimeSelection,
     validate_add_custom_feature,
     validate_delete_custom_feature,
@@ -396,7 +397,7 @@ def create_dash_app(server):
                 currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
                 custom_feature = extract_values_custom_feature(currentDropdownChildren)
                 currentDropdownChildren = custom_dropdow(client, custom_feature)
-                feature_filter_dropdown_opts = client.data_features
+                feature_filter_dropdown_opts = list((set(client.data_features or []) - set(get_feature_filter_name(client) or [])) | set(get_custom_features_names(client, [], True) or []))
             else:
                 notification = show_notification(message)
             return ops_to_json(client), custom_feature, "",returnValidFeatures(client),currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
