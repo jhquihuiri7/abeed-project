@@ -78,6 +78,10 @@ features_read_name_to_db_id_dict = {
     "ALTW.8THST.ARR RT": "6beb9a9f-a00a-489c-944a-6c33f9f9a911",
     "MISO Meteologica Wind": "4d1f2d0c-f54b-4fc0-a81e-95c5bdbe8dab",
     "MISO Meteologica Solar": "e6eb8626-2873-4a97-a171-dc7ee3d0f521",
+    "IESO Meteologica Wind": "2375c248-efde-4412-a53c-ccf386ce471d",
+    "IESO Meteologica Load": "348a6a37-a47a-4840-848d-1c9f03eeaae3",
+    "NYIS ieso RT": "2b5ff94d-6ca2-432a-b562-af8bd2c24a83",
+    "NYIS ieso DA": "ce0fe015-64f1-49ff-9cdb-41ea61ce62b7",
 }
 
 feature_db_id_to_read_name = {
@@ -160,6 +164,10 @@ feature_db_id_to_read_name = {
     "6beb9a9f-a00a-489c-944a-6c33f9f9a911": "ALTW.8THST.ARR RT",
     "4d1f2d0c-f54b-4fc0-a81e-95c5bdbe8dab": "MISO Meteologica Wind",
     "e6eb8626-2873-4a97-a171-dc7ee3d0f521": "MISO Meteologica Solar",
+    "2375c248-efde-4412-a53c-ccf386ce471d": "IESO Meteologica Wind",
+    "348a6a37-a47a-4840-848d-1c9f03eeaae3": "IESO Meteologica Load",
+    "2b5ff94d-6ca2-432a-b562-af8bd2c24a83": "NYIS ieso RT",
+    "ce0fe015-64f1-49ff-9cdb-41ea61ce62b7": "NYIS ieso DA",
 }
 
 feature_units_dict = {
@@ -242,6 +250,10 @@ feature_units_dict = {
     "ALTW.8THST.ARR RT": "dollars",
     "MISO Meteologica Wind": 'mw',
     "MISO Meteologica Solar": 'mw',
+    "IESO Meteologica Wind": 'mw',
+    "IESO Meteologica Load": 'mw',
+    "NYIS ieso RT": 'dollars',
+    "NYIS ieso DA": 'dollars',
 }
 
 feature_db_name_to_read_name_dict = {
@@ -324,6 +336,10 @@ feature_db_name_to_read_name_dict = {
     "ALTW.8THST.ARR;lmp;rt": "ALTW.8THST.ARR RT",
     "miso_wind_total_mw": "MISO Meteologica Wind",
     "miso_solar_total_mw": "MISO Meteologica Solar",
+    "ieso_wind_total_mw": "IESO Meteologica Wind",
+    "ieso_load_total_mw": "IESO Meteologica Load",
+    "24063;lmp;rt": "NYIS ieso RT",
+    "24063;lmp;da": "NYIS ieso DA",
 }
 
 feature_read_name_to_db_name_dict = {
@@ -406,4 +422,8 @@ feature_read_name_to_db_name_dict = {
     "ALTW.8THST.ARR RT": "ALTW.8THST.ARR;lmp;rt",
     "MISO Meteologica Wind": "miso_wind_total_mw",
     "MISO Meteologica Solar": "miso_solar_total_mw",
+    "IESO Meteologica Wind": "ieso_wind_total_mw",
+    "IESO Meteologica Load": "ieso_load_total_mw",
+    "NYIS ieso RT": "24063;lmp;rt",
+    "NYIS ieso DA": "24063;lmp;da",
 }
