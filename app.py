@@ -26,9 +26,7 @@ from utils.logic_functions import (
     validateFeatureFilterData,
     returnValidFeatures,
     extract_values_custom_feature,
-    get_feature_filter_name,
-    get_feature_fitler_name_by_id,
-    get_custom_features_names,
+    get_feature_filter_dropdown_opts,
     validateApplyDatetimeSelection,
     validate_add_custom_feature,
     validate_delete_custom_feature,
@@ -397,7 +395,7 @@ def create_dash_app(server):
                 currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
                 custom_feature = extract_values_custom_feature(currentDropdownChildren)
                 currentDropdownChildren = custom_dropdow(client, custom_feature)
-                feature_filter_dropdown_opts = list((set(client.data_features or []) - set(get_feature_filter_name(client) or [])) | set(get_custom_features_names(client, [], True) or []))
+                feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
             else:
                 notification = show_notification(message)
             return ops_to_json(client), custom_feature, "",returnValidFeatures(client),currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
@@ -426,7 +424,7 @@ def create_dash_app(server):
                 currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
                 custom_feature = []
                 currentDropdownChildren = custom_dropdow(client, custom_feature)
-                feature_filter_dropdown_opts.append(client.created_features[-1]['feature_name'])
+                feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
             else:
                 notification = show_notification(message)
             return ops_to_json(client),custom_feature,"",returnValidFeatures(client),currentFigure, currentChildren, currentDropdownChildren,"",list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
@@ -447,7 +445,8 @@ def create_dash_app(server):
                         pass
                 currentDropdownChildren = custom_dropdow(client, [])
                 currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
-                currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state) 
+                currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
+                feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
             else:
                 notification = show_notification(message)
             return ops_to_json(client),custom_feature,"",returnValidFeatures(client),currentFigure, currentChildren, currentDropdownChildren, custom_name,list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
@@ -472,7 +471,7 @@ def create_dash_app(server):
             if is_valid:    
                 client.add_feature_filter_button(feature_filter_dropdown,feature_filter_min_range, feature_filter_max_range)
                 feature_filter_list = list_feature_filter(client)
-                feature_filter_dropdown_opts = list(set(feature_filter_dropdown_opts)-set(get_feature_filter_name(client)))  
+                feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)  
                 apply_filters_state = ['Apply filter']
                 collapse_expand_filter_disabled = False 
                 currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
@@ -484,11 +483,9 @@ def create_dash_app(server):
         
         if isinstance(triggered_id, dict) and triggered_id.get("type") == "feature_filter_remove":
             index = triggered_id.get("index")
-            feature_to_free = get_feature_fitler_name_by_id(client, index)
             client.remove_feature_filter_button(index)
             feature_filter_list = list_feature_filter(client)
-            feature_filter_dropdown_opts = list(set(feature_filter_dropdown_opts)-set(get_feature_filter_name(client)))
-            feature_filter_dropdown_opts.append(feature_to_free)
+            feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
             apply_filters_state = ['Apply filter']
             collapse_expand_filter_disabled = False 
             currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)

@@ -227,13 +227,14 @@ def get_custom_features_dependence(client):
 def get_custom_features_names(client, missing_features, show_all = False):
     names = []
     for cf in client.created_features:
-        for eq in cf["equation"]:
-            if show_all:
-                names.append(cf["feature_name"])
-            else:
-                if eq["Feature"] in missing_features:
+        if not cf["cumulative?"]:
+            for eq in cf["equation"]:
+                if show_all:
                     names.append(cf["feature_name"])
-                    break
+                else:
+                    if eq["Feature"] in missing_features:
+                        names.append(cf["feature_name"])
+                        break
     return names
     
 def get_feature_fitler_name_by_id(client, index):
@@ -329,3 +330,6 @@ def validate_update_data(client, selected_features):
 
 def format_set(s):
     return ', '.join(f"'{item}'" for item in s)
+
+def get_feature_filter_dropdown_opts(client):
+    return list((set(client.data_features or []) - set(get_feature_filter_name(client) or [])) | set(get_custom_features_names(client, [], True) or []))

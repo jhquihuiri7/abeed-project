@@ -1,5 +1,5 @@
 from utils.functions import ops_to_json, list_custom_filter_children
-from utils.logic_functions import get_value_range
+from utils.logic_functions import get_value_range, get_feature_filter_dropdown_opts
 from components.dropdown_components import custom_dropdow
 from components.graph_components import bar_chart, multi_chart
 import plotly.graph_objects as go
@@ -17,7 +17,7 @@ def restore_session(client, apply_filters_state, collapse_expand_filter_state, c
     custom_dropdow_children = []
     custom_name = ""
     list_custom_features = []
-    feature_filter_dropdown_opts = []
+    feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
     feature_filter_dropdown_default = ""
     feature_filter_list = []
     if client.feature_filters != [] or client.year_filters != [] or client.month_filters != [] or client.day_of_week_filters or client.hour_filters:
@@ -36,10 +36,6 @@ def restore_session(client, apply_filters_state, collapse_expand_filter_state, c
         list_custom_features = list_custom_filter_children(client)
         
     if client.feature_filters != []:
-        feature_filter_dropdown = [feature["feature_name"] for feature in client.feature_filters]
-        feature_filter_dropdown_opts = client.df.columns
-        feature_filter_dropdown_opts = [feature for feature in feature_filter_dropdown_opts if feature not in feature_filter_dropdown]
-        feature_filter_dropdown_default = feature_filter_dropdown_opts[0]
         feature_filter_list = [html.Div([f"{feature_filter['feature_name']}, Range: ({get_value_range(feature_filter['range'][0],"-")} → {get_value_range(feature_filter['range'][1],"+")})", button(
                                 text="REMOVE",
                                 id={"type": "feature_filter_remove", "index": feature_filter["filter_uid"]},
