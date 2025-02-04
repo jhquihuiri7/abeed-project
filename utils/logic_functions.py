@@ -279,7 +279,7 @@ def validate_add_custom_feature(client, custom_feature, cumulative, custom_name)
 def validate_delete_custom_feature(client, feature_to_remove):
     message = ""
     if feature_to_remove in get_feature_filter_name(client):
-        message = f"Cannot delete {feature_to_remove} because it has a 'Feature Filter' (Hint: delete {feature_to_remove} filter first)"
+        message = f"Cannot delete {format_set(feature_to_remove)} because it has a 'Feature Filter' (Hint: delete {format_set(feature_to_remove)} filter first)"
         return False, message
     return True, message
 
@@ -318,11 +318,14 @@ def validate_update_data(client, selected_features):
     dependence_features =  set(get_custom_features_dependence(client))
     if not feature_filter.issubset(selected_features):
         missing_features = set(feature_filter) - set(selected_features)
-        message = f"Cannot have {feature_filter} feature filter without {missing_features} data feature (Hint: delete {feature_filter} filter or reselect {missing_features} data feature)"
+        message = f"Cannot have {format_set(feature_filter)} feature filter without {format_set(missing_features)} data feature (Hint: delete {format_set(feature_filter)} filter or reselect {format_set(missing_features)} data feature)"
         return False, message
     if not dependence_features.issubset(selected_features):
         missing_features = dependence_features - set(selected_features)
         dependent_custom_features = set(get_custom_features_names(client, missing_features))
-        message = f"Cannot have {dependent_custom_features} custom feature without {missing_features} data feature (Hint: delete {dependent_custom_features} or reselect {missing_features} data feature)"
+        message = f"Cannot have {format_set(dependent_custom_features)} custom feature without {format_set(missing_features)} data feature (Hint: delete {format_set(dependent_custom_features)} or reselect {format_set(missing_features)} data feature)"
         return False, message
     return True, message
+
+def format_set(s):
+    return ', '.join(f"'{item}'" for item in s)
