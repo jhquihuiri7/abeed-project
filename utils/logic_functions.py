@@ -280,7 +280,7 @@ def validate_add_custom_feature(client, custom_feature, cumulative, custom_name)
 def validate_delete_custom_feature(client, feature_to_remove):
     message = ""
     if feature_to_remove in get_feature_filter_name(client):
-        message = f"Cannot delete {format_set(feature_to_remove)} because it has a 'Feature Filter' (Hint: delete {format_set(feature_to_remove)} filter first)"
+        message = f"Cannot delete {feature_to_remove} because it has a 'Feature Filter' (Hint: delete {feature_to_remove} filter first)"
         return False, message
     return True, message
 
