@@ -478,8 +478,7 @@ def create_dash_app(server):
                 currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)     
             else:
                 notification = show_notification(message)
-            return ops_to_json(client),custom_feature,"",returnValidFeatures(client), currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, "", "", feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
-        
+            return ops_to_json(client),custom_feature,"",returnValidFeatures(client), currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, "", "", feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled       
         
         if isinstance(triggered_id, dict) and triggered_id.get("type") == "feature_filter_remove":
             index = triggered_id.get("index")
@@ -517,12 +516,12 @@ def create_dash_app(server):
             else:
                 notification = show_notification(message)
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state) 
-            return ops_to_json(client),custom_feature,"",returnValidFeatures(client), currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, client.data_features, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
+            return ops_to_json(client),custom_feature,"",returnValidFeatures(client), currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
             
         if triggered_id == "collapse_expand_filter":
             currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state) 
-            return ops_to_json(client),custom_feature,"",returnValidFeatures(client), currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, client.data_features, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
+            return ops_to_json(client),custom_feature,"",returnValidFeatures(client), currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
     
         if main_dropdown != "":
             features.append(main_dropdown)
@@ -532,6 +531,6 @@ def create_dash_app(server):
             #return client_data,custom_feature,empty,data_features, currentFigure, currentChildren, custom_dropdow_children,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_default_opts, feature_filter_min_range, feature_filter_max_range, feature_filter_list, empty_array, apply_filters_state, collapse_expand_filter_disabled
             return restore_session(client, apply_filters_state, collapse_expand_filter_state, collapse_expand_filter_disabled,feature_filter_min_range, feature_filter_max_range, extract_values_custom_feature(currentDropdownChildren))
         
-        return ops_to_json(client),custom_feature,"",features, currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, client.data_features, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
+        return ops_to_json(client),custom_feature,"",features, currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
     
     return app
