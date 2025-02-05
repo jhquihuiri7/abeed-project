@@ -109,7 +109,7 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False, show_title=
     # Update the layout of the chart
     fig.update_layout(
         title=dict(
-        text=f"Hours: {len(client.datetimes_to_exclude)}" if show_title else "",
+        text=f"Hours: {client.filter_df.shape[0]}" if show_title else "",
         x=0.85,  
         xanchor="right"
         ),
