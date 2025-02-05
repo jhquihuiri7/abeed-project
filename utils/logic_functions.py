@@ -224,10 +224,10 @@ def get_custom_features_dependence(client):
             dependence_features.append(eq["Feature"])
     return dependence_features
     
-def get_custom_features_names(client, missing_features, show_all = False):
+def get_custom_features_names(client, missing_features, show_all = False, show_cumulative = False):
     names = []
     for cf in client.created_features:
-        if not cf["cumulative?"]:
+        if show_cumulative  or not cf["cumulative?"]:
             for eq in cf["equation"]:
                 if show_all:
                     names.append(cf["feature_name"])
@@ -319,7 +319,7 @@ def validate_update_data(client, selected_features):
     dependence_features =  set(get_custom_features_dependence(client))
     if not dependence_features.issubset(selected_features):
         missing_features = dependence_features - set(selected_features)
-        dependent_custom_features = set(get_custom_features_names(client, missing_features))
+        dependent_custom_features = set(get_custom_features_names(client, missing_features,show_cumulative=True))
         message = f"Cannot have {format_set(dependent_custom_features)} custom feature without {format_set(missing_features)} data feature (Hint: delete {format_set(dependent_custom_features)} or reselect {format_set(missing_features)} data feature)"
         return False, message
     if not feature_filter.issubset(selected_features):
