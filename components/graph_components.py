@@ -11,7 +11,7 @@ import numpy as np
 
 
 # Function to create a bar chart with optional dual axes
-def bar_chart(client, cols=None, apply_filter=False, collapse=False):
+def bar_chart(client, cols=None, apply_filter=False, collapse=False, show_title=True):
     """
     Generates a bar chart with support for a secondary Y-axis if needed.
 
@@ -108,6 +108,11 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False):
     
     # Update the layout of the chart
     fig.update_layout(
+        title=dict(
+        text=f"Hours: {len(client.datetimes_to_exclude)}" if show_title else "",
+        x=0.85,  
+        xanchor="right"
+        ),
         xaxis_title="datetime",  # X-axis title
         legend_title="Features",  # Legend title
         hovermode="x unified",  # Unified hover mode
@@ -163,7 +168,7 @@ def multi_chart(client, apply_filter=False, collapse=False):
                     # Graph component displaying the bar chart
                     dcc.Graph(
                         id=graph["graph_uid"],  # Unique ID for the graph
-                        figure=bar_chart(client, graph["graph_data_features"],apply_filter, collapse),  # Generate the chart
+                        figure=bar_chart(client, graph["graph_data_features"],apply_filter, collapse, False),  # Generate the chart
                     ),
                     # Button to remove the graph
                     button(
