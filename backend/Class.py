@@ -1,4 +1,4 @@
-from backend.endpoint_helper import simple_request
+from backend.endpoint_helper import simple_feature_request, simple_request_entities
 from backend.db_dictionaries import (
     feature_db_id_to_read_name,
     feature_db_name_to_read_name_dict,
@@ -14,9 +14,52 @@ import unittest
 import pdb
 import copy
 
+class feature_class:
+    def __init__(self) -> None:
+        # Start date for the range of dates the user wants data for
+        self.id = ''
+        self.db_name = ''
+        self.units = ''
+        self.display_name = ''
+    
+    def read_data(self, id_input, db_name_input, display_name_input, units_input):
+        self.id = id_input
+        self.db_name = db_name_input
+        self.units = units_input
+        self.display_name = display_name_input
 
 class Ops:
+    
     def __init__(self) -> None:
+        feature_json = simple_request_entities('feature', 20000)
+        feature_list: list[feature_class] = []
+        for entry in feature_json:
+            feature = feature_class()
+            feature.read_data(entry['id'], entry['name'], entry['display_name'], entry['unit'])
+            feature_list.append(feature)
+
+        feature_dict = {
+            obj.display_name if obj.display_name is not None else obj.db_name: obj
+            for obj in feature_list
+        }
+
+        available_readable_names = []
+        db_to_display_names_dict = {}
+        available_db_names = []
+        for feature in feature_dict.values():
+            if feature.display_name:
+                available_readable_names.append(feature.display_name)
+                db_to_display_names_dict[feature.db_name] = feature.display_name
+            else:
+                available_db_names.append(feature.db_name)
+
+        self.db_to_display_names_dict = db_to_display_names_dict
+
+        self.feature_dict = feature_dict
+
+        self.available_readable_names = available_readable_names
+
+        self.available_db_names = available_db_names
 
         # Start date for the range of dates the user wants data for
         self.start_date = date.today() - timedelta(7)
@@ -86,6 +129,7 @@ class Ops:
         # A list of dictoinaries, each representing a graph. Each graph dictionary has a unique id and a list of two features:
         self.scatter_graphs = []
         # single dictionary ex. {"graph_uid": '6da8871a-2860-474d-a8bf-4efa7383e26b', "graph_data_features": ["MISO pjm RT", "MISO pjm DA"]}
+    
     def update_data_button(self, start_date_input: str, end_date_input: str, data_features_input: list[str]):
         # Input Validation TODO before running this function:
         #   Validate that a start_date and end_date are selected and that there is at least one entry in the data_features_input list
@@ -205,9 +249,9 @@ class Ops:
         if self.data_features and self.start_date and self.end_date:
             db_names = []
             for feature in self.data_features:
-                db_names.append(feature_read_name_to_db_name_dict[feature])
-            self.df = simple_request(self.start_date, self.end_date, db_names)[0]
-            self.df.rename(columns=feature_db_name_to_read_name_dict, inplace=True)
+                db_names.append(self.feature_dict[feature].db_name)
+            self.df = simple_feature_request(self.start_date, self.end_date, db_names)[0]
+            self.df.rename(columns=self.db_to_display_names_dict, inplace=True) # TODO
         self.add_created_features_to_df() #OJO
 
     def update_date_range(self, new_start, new_end):
