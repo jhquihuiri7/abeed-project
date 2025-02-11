@@ -53,7 +53,9 @@ def create_dash_app(server):
     
     # External scripts (e.g., TailwindCSS)
     external_stylesheets = [
-        dmc.styles.NOTIFICATIONS
+        dmc.styles.NOTIFICATIONS,
+        "https://cdn.jsdelivr.net/npm/daisyui@4.12.23/dist/full.min.css",
+        "https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
     ]
     
     external_scripts = [
@@ -75,10 +77,17 @@ def create_dash_app(server):
         children=[html.Div(
         className="p-10 w-full",
         children=[
-            main_checkbox(),# Checkbox component for feature selection
+            main_checkbox(Ops(),"main_checkbox"),# Checkbox component for feature selection
+            main_checkbox(Ops(),"secondary_checkbox"),
+            html.Div([
+    html.Details([  # Equivalente a <details>
+        html.Summary("▼", className="collapse-title text-xl font-medium"),  # Equivalente a <summary>
+        html.Div("", className="collapse-content")  # Contenido dentro del colapso
+    ], className="collapse bg-base-200")  # Clase DaisyUI para estilo
+]),                 
             html.Div(
                 children=[
-                    main_dropdown(),
+                    main_dropdown(Ops()),
                     main_daterange(),  # Date range component
                     html.Div(
                         children=[
