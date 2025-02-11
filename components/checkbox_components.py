@@ -13,9 +13,8 @@ def main_checkbox(client, id):
         html.Div: A Dash HTML Div containing a Checklist component for feature selection.
     """
     
-    options = client.available_readable_names if id == "main_checkbox" else client.available_db_names
-    if id != "main_checkbox":
-        print(len(options))
+    options = client.available_readable_names if id == "main_checkbox" else client.available_db_names[:45]
+
     return html.Div(
         # Create a Checklist component
         dcc.Checklist(
@@ -30,3 +29,11 @@ def main_checkbox(client, id):
         ),
         className="w-full"
     )
+
+def expland_collapse_checkbox(client):
+    return html.Div([
+                html.Details([  # Equivalente a <details>
+                    html.Summary("▼", className="collapse-title text-lg text-center"),  # Equivalente a <summary>
+                    html.Div(main_checkbox(client,"secondary_checkbox"), className="collapse-content")  # Contenido dentro del colapso
+                ], className="collapse bg-base-200")  # Clase DaisyUI para estilo
+            ])
