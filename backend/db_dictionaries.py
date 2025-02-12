@@ -182,6 +182,7 @@ feature_units_dict = {
     "PJM nyis RT Unverified": "dollars",
     "PJM nyis RT Verified": "dollars",
     "NYIS pjm DA": "dollars",
+    "NYIS pjm RT": "dollars",
     "PJMnyis shock X forecast": "dollars",
     "PJMnyis shock M forecast": "dollars",
     "PJMnyis shock E forecast": "dollars",
@@ -254,6 +255,9 @@ feature_units_dict = {
     "IESO Meteologica Load": 'mw',
     "NYIS ieso RT": 'dollars',
     "NYIS ieso DA": 'dollars',
+    "MISO Minnisoda DA": 'dollars',
+    "MISO Minnisoda DRT": 'dollars',
+    
 }
 
 feature_db_name_to_read_name_dict = {
@@ -268,6 +272,7 @@ feature_db_name_to_read_name_dict = {
     "5413134.0;lmp;rtu":                "PJM nyis RT Unverified",
     "5413134.0;lmp;rtv":                 "PJM nyis RT Verified",
     "24065;lmp;da":                     "NYIS pjm DA",
+    "24065;lmp;rt":                     "NYIS pjm RT",    
     "5413134.0;shock_wi25_X_1.0.0;lmp_pred;da": "PJMnyis shock X forecast",
     "5413134.0;shock_wi25_M_1.0.0;lmp_pred;da": "PJMnyis shock M forecast",
     "5413134.0;shock_wi25_E_1.0.0;lmp_pred;da": "PJMnyis shock E forecast",
@@ -340,6 +345,8 @@ feature_db_name_to_read_name_dict = {
     "ieso_load_total_mw": "IESO Meteologica Load",
     "24063;lmp;rt": "NYIS ieso RT",
     "24063;lmp;da": "NYIS ieso DA",
+    "MINN.HUB;lmp;rt": "MISO Minnisoda RT",
+    "MINN.HUB;lmp;da": "MISO Minnisoda DA",
 }
 
 feature_read_name_to_db_name_dict = {
@@ -354,6 +361,7 @@ feature_read_name_to_db_name_dict = {
     "PJM nyis RT Unverified":                "5413134.0;lmp;rtu",
     "PJM nyis RT Verified":                 "5413134.0;lmp;rtv",
     "NYIS pjm DA":                     "24065;lmp;da",
+    "NYIS pjm RT":                      "24065;lmp;rt",
     "PJMnyis shock X forecast": "5413134.0;shock_wi25_X_1.0.0;lmp_pred;da",
     "PJMnyis shock M forecast": "5413134.0;shock_wi25_M_1.0.0;lmp_pred;da",
     "PJMnyis shock E forecast": "5413134.0;shock_wi25_E_1.0.0;lmp_pred;da",
@@ -426,4 +434,6 @@ feature_read_name_to_db_name_dict = {
     "IESO Meteologica Load": "ieso_load_total_mw",
     "NYIS ieso RT": "24063;lmp;rt",
     "NYIS ieso DA": "24063;lmp;da",
+    "MISO Minnisoda RT": "MINN.HUB;lmp;rt",
+    "MISO Minnisoda DA": "MINN.HUB;lmp;da",
 }
