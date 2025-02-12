@@ -18,7 +18,7 @@ def contains_both_axis(client, cols):
     units = []
     for column in cols:
         try:
-            unit = get_feature_units(column)
+            unit = client.feature_dict[column].units
         except:
             for feature in client.created_features:
                 if feature["feature_name"] == column:
@@ -27,7 +27,7 @@ def contains_both_axis(client, cols):
     # Extract unique units from the feature_units_dict for the given columns
     units = set(units)
     # Check if there is more than one unique unit
-    return len(units) > 1, sorted(units)  # Return a boolean and a sorted list of units
+    return len(units) > 1, sorted(units, reverse=True)  # Return a boolean and a sorted list of units
 
 # Function to manage checkbox selection, ensuring only one item remains selected
 def select_one_checkbox(last_selection):

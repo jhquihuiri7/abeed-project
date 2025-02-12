@@ -50,9 +50,9 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False, show_title=
     for column in columns:
         # Calculate the maximum value in the column
         max_val = max(data[column])
-        unit = "mv"
+        unit = "MW"
         try:
-            unit = get_feature_units(column)
+            unit = client.feature_dict[column].units
         except:
             for feature in client.created_features:
                 if feature["feature_name"] == column:
@@ -61,7 +61,7 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False, show_title=
         # Append the value to the appropriate axis based on the feature's unit
         (
             max_y_secondary.append(max_val)
-            if double_axis and unit == "mw"  # Secondary Y-axis for "mw" units
+            if double_axis and unit == "MW"  # Secondary Y-axis for "MW" units
             else max_y_primary.append(max_val)  # Primary Y-axis for other units
         )
         
@@ -77,7 +77,7 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False, show_title=
                 showlegend=True,# Show legend entry
             ),
             secondary_y=(
-                True if double_axis and unit == "mw" else False
+                True if double_axis and unit == "MW" else False
             ),  # Assign trace to secondary Y-axis if applicable
         )
         

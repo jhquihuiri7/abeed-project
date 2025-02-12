@@ -271,7 +271,9 @@ def create_dash_app(server):
         State("main_checkbox", "value")
     )
     def feature_selection(main_dropdown, main_checkbox):
-        main_checkbox.append(main_dropdown)
+        if main_dropdown != "":
+            main_checkbox.append(main_dropdown)
+            print(main_checkbox)
         return "", main_checkbox
     
     @callback(
@@ -332,7 +334,6 @@ def create_dash_app(server):
         State("temp_feature", "data"),
     )
     def update_render(
-        main_dropdown,
         update_button,
         add_button,
         remove_button,
@@ -399,6 +400,7 @@ def create_dash_app(server):
         if triggered_id == "update_graph_button":
             is_valid, message = validate_update_data(client, features)
             if is_valid:
+                print(features)
                 client.update_data_button(start_date, end_date, features)
                 currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
                 currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
