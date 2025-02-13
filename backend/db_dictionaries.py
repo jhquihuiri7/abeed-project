@@ -195,7 +195,7 @@ feature_units_dict = {
     "MISOpjm shock X forecast": "dollars",
     "MISOpjm shock M forecast": "dollars",		
     "MISOpjm shock E forecast": "dollars",		
-    "PJM Meteologica  Load forcast": "mw",
+    "PJM Meteologica Load forcast": "mw",
     "MISO Meteologica Load forcast": "mw",
     "PJM Wind Gen": "mw",
     "PJM Solar Gen": "mw",
@@ -256,7 +256,7 @@ feature_units_dict = {
     "NYIS ieso RT": 'dollars',
     "NYIS ieso DA": 'dollars',
     "MISO Minnisoda DA": 'dollars',
-    "MISO Minnisoda DRT": 'dollars',
+    "MISO Minnisoda RT": 'dollars',
     
 }
 
