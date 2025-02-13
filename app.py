@@ -6,11 +6,11 @@ from datetime import date
 
 # Dash imports
 from dash import Dash, _dash_renderer
-from dash import dcc, html, Input, Output, State, callback, callback_context, ALL
+from dash import dcc, html, Input, Output, State, callback, callback_context, ALL, exceptions
 
 # Components
 import dash_mantine_components as dmc
-from components.checkbox_components import main_checkbox, expland_collapse_checkbox
+from components.checkbox_components import main_checkbox, secondary_pagination, expandable_container
 from components.daterange_components import main_daterange
 from components.tabs_components import main_tabs
 from components.button_components import button, apply_filters_toggle
@@ -53,15 +53,14 @@ def create_dash_app(server):
     
     # External scripts (e.g., TailwindCSS)
     external_stylesheets = [
-        dmc.styles.NOTIFICATIONS,
-        "https://cdn.jsdelivr.net/npm/daisyui@4.12.23/dist/full.min.css",
-        "https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+        dmc.styles.NOTIFICATIONS
     ]
     
     external_scripts = [
         "https://cdn.tailwindcss.com"
     ]
     
+    ops = Ops()
     # Initialize the Dash app
     app = Dash(
         __name__,
@@ -77,11 +76,19 @@ def create_dash_app(server):
         children=[html.Div(
         className="p-10 w-full",
         children=[
-            main_checkbox(Ops(),"main_checkbox"),# Checkbox component for feature selection
-            expland_collapse_checkbox(Ops()),                 
+            html.Div(
+                children= [
+                    html.Button("Expand Main Features", id="toggle-button1", n_clicks=0, className="btn btn-primary font-bold"),
+                    html.Div(main_checkbox(ops, "main_checkbox"),
+                    id="expandable-text1", style={"display": "none"}, className="p-3 text-gray-700 shadow-lg rounded-lg")
+                ],
+                className="flex flex-col justify-center items-center w-full h-fit"    
+            ),
+            expandable_container(toggle_button_id="toggle_exapandable_button_seccondary", expandable_text_id="expandable-text_secondary"),
+            # Checkbox component for feature selection
             html.Div(
                 children=[
-                    main_dropdown(Ops()),
+                    main_dropdown(ops),
                     main_daterange(),  # Date range component
                     html.Div(
                         children=[
@@ -91,10 +98,10 @@ def create_dash_app(server):
                         ],
                         className="flex flex-row justify-between items-end w-[500px]"
                     )
-                ],
+                    ],
                 className="flex flex-row justify-between"    
             ),
-            main_tabs(Ops()),  # Tabs component for layout
+            main_tabs(ops),  # Tabs component for layout
             apply_filters_toggle("Collapse"),
             dcc.Graph(id="main_graph"),  # Graph for displaying data
             button(text="Add Graph", id="add_graph_button", style=button_style),  # Button to add new graph
@@ -107,10 +114,67 @@ def create_dash_app(server):
             dcc.Store(id="temp_feature", data=[]),
         ],
     ),
-        dcc.Store(id="client", data=ops_to_json(Ops())),
+        dcc.Store(id="client", data=ops_to_json(ops)),
         ]
     )      
+    @app.callback(
+    Output("expandable-text_secondary", "style"),
+    Output("toggle_exapandable_button_seccondary", "children"),
+    Input("toggle_exapandable_button_seccondary", "n_clicks"),
+    prevent_initial_call=True
+    )
+    def toggle_text_secondary(n_clicks):
+        if n_clicks % 2 == 1:
+            return {"display": "block"}, "Collapse DB Features"
+        return {"display": "none"}, "Expand DB Features"
+    
+    @app.callback(
+        Output("words-container", "children"),
+        Output("prev-btn", "disabled"),
+        Output("next-btn", "disabled"),
+        Output("pagination-numbers", "children"),
+        Input("prev-btn", "n_clicks"),
+        Input("next-btn", "n_clicks"),
+        Input({"type": "page-btn", "index": ALL}, "n_clicks"),
+        Input("current-page", "data"),
+    )
+    def update_words(prev_clicks, next_clicks, page_clicks, current_page):
+        words = ops.available_db_names
+        items_per_page = 100
+        
+        total_pages = (len(words) + items_per_page - 1) // items_per_page  # Redondeo hacia arriba
+        new_page = min(max(current_page + (next_clicks - prev_clicks), 0), total_pages - 1)
+        
+        ctx = callback_context
+        triggered_id = ctx.triggered_id
+        if isinstance(triggered_id, dict) and "index" in triggered_id:
+            new_page = triggered_id["index"]
+        else:
+            new_page = min(max(current_page + (next_clicks - prev_clicks), 0), total_pages - 1)
+    
+        start_index = new_page * items_per_page
+        end_index = start_index + items_per_page
+        current_words = words[start_index:end_index]
+    
+        word_elements = [
+            html.Div(word, className="w-[300px] overflow-hidden mt-1") 
+            for word in current_words
+        ]
+    
+        pagination_numbers = [
+            html.Button(
+                str(i + 1),
+                id={"type": "page-btn", "index": i},
+                n_clicks=0,
+                className=f"px-2 m-1 py-1 rounded-lg border border-gray-300 cursor-pointer {'bg-blue-500 text-white' if i == new_page else 'bg-gray-300 text-black'}"
+            ) 
+            for i in range(total_pages)
+        ]
+    
+        return word_elements, new_page == 0, new_page == total_pages - 1, pagination_numbers
 
+        
+    
     @callback(
         Output("download-client", "data"),
         Output("input-modal", "opened"),
@@ -121,7 +185,6 @@ def create_dash_app(server):
         prevent_initial_call=True,
     )
     def download_client(download_client_button, save_button, data, value):
-        print("OK")
         triggered_id = callback_context.triggered[0]["prop_id"].split(".")[0]
         if triggered_id == "download_client_button":
             return None, True
@@ -264,11 +327,14 @@ def create_dash_app(server):
             return hour_button_style
              
         return hour_button_style
+    
+    
     @callback(
         Output("main_dropdown", "value"),
         Output("main_checkbox", "value"),
         Input("main_dropdown", "value"),
-        State("main_checkbox", "value")
+        State("main_checkbox", "value"),
+        prevent_initial_call=True,
     )
     def feature_selection(main_dropdown, main_checkbox):
         if main_dropdown != "":
@@ -277,11 +343,49 @@ def create_dash_app(server):
         return "", main_checkbox
     
     @callback(
+        Output("custom_dropdown", "children"),
+        Input({"type": "dynamic-dropdown", "index": ALL}, "value"),
+        Input({"type": "operation_custom_feature_add", "index": ALL}, "n_clicks"),
+        Input({"type": "operation_custom_feature_remove", "index": ALL}, "n_clicks"),
+        Input({"type": "operation_custom_feature_op", "index": ALL}, "value"),
+        State("client", "data"),
+        State("custom_dropdown", "children")
+    )
+    def custom_feature_tab(dynamic_dropdown,operation_custom_feature_add, operation_custom_feature_remove, operation_custom_feature_op, data, currentDropdownChildren):
+        ctx = callback_context
+        if not ctx.triggered:
+            raise exceptions.PreventUpdate
+        client = json_to_ops(data)
+        triggered_id = ctx.triggered[0]["prop_id"].split(".")[0] if ctx.triggered else None
+    
+        try:
+            if "type" in triggered_id:
+                triggered_id = eval(triggered_id)
+        except:
+            pass
+        
+        if isinstance(triggered_id, dict) and (triggered_id.get("type") == "dynamic-dropdown" or triggered_id.get("type") == "operation_custom_feature_op"):
+            custom_feature = update_custom_feature(
+                dynamic_dropdown, custom_feature, operation_custom_feature_op
+            )
+        
+        # Add new custom feature operation
+        elif isinstance(triggered_id, dict) and triggered_id.get("type") == "operation_custom_feature_add":
+            custom_feature = extract_values_custom_feature(currentDropdownChildren)
+            custom_feature.append({"Operation":"-", "Feature":""})
+            currentDropdownChildren = custom_dropdow(client, custom_feature)
+            return currentDropdownChildren
+        else:
+            raise exceptions.PreventUpdate
+        custom_feature = extract_values_custom_feature(currentDropdownChildren)
+        currentDropdownChildren = custom_dropdow(client, custom_feature)
+        return currentDropdownChildren
+    
+    @callback(
         Output("client", "data"),
         Output("temp_feature", "data"),
         Output("main_graph", "figure"),
         Output("dynamic_div", "children"),
-        Output("custom_dropdown", "children"),
         Output("custon_name", "value"),
         Output("list_custom_features", "children"),
         Output("feature_filter_dropdown", "options"),
@@ -296,9 +400,6 @@ def create_dash_app(server):
         Input("update_graph_button", "n_clicks"),
         Input("add_graph_button", "n_clicks"),
         Input({"type": "remove_button", "index": ALL}, "n_clicks"),
-        Input({"type": "operation_custom_feature_add", "index": ALL}, "n_clicks"),
-        Input({"type": "operation_custom_feature_remove", "index": ALL}, "n_clicks"),
-        Input({"type": "operation_custom_feature_op", "index": ALL}, "value"),
         Input({"type": "dynamic-dropdown", "index": ALL}, "value"),
         Input({"type": "custom_feature_remove", "index": ALL}, "n_clicks"),
         Input("add_custom_feature", "n_clicks"),
@@ -337,9 +438,6 @@ def create_dash_app(server):
         update_button,
         add_button,
         remove_button,
-        operation_custom_feature_add,
-        operation_custom_feature_remove,
-        operation_custom_feature_op,
         dynamic_dropdown,
         custom_feature_remove,
         add_custom_feature,
@@ -378,6 +476,8 @@ def create_dash_app(server):
         
         # Context to determine which input triggered the callback
         ctx = callback_context
+        if not ctx.triggered:
+            raise exceptions.PreventUpdate
         triggered_id = ctx.triggered[0]["prop_id"].split(".")[0] if ctx.triggered else None
     
         try:
@@ -388,11 +488,6 @@ def create_dash_app(server):
             pass
         
         
-        if isinstance(triggered_id, dict) and (triggered_id.get("type") == "dynamic-dropdown" or triggered_id.get("type") == "operation_custom_feature_op"):
-            custom_feature = update_custom_feature(
-                dynamic_dropdown, custom_feature, operation_custom_feature_op
-            )
-        
         client.start_date = start_date
         client.end_date = end_date
                 
@@ -400,16 +495,15 @@ def create_dash_app(server):
         if triggered_id == "update_graph_button":
             is_valid, message = validate_update_data(client, features)
             if is_valid:
-                print(features)
                 client.update_data_button(start_date, end_date, features)
                 currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
                 currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
-                custom_feature = extract_values_custom_feature(currentDropdownChildren)
-                currentDropdownChildren = custom_dropdow(client, custom_feature)
+                #custom_feature = extract_values_custom_feature(currentDropdownChildren)
+                #currentDropdownChildren = custom_dropdow(client, custom_feature)
                 feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
             else:
                 notification = show_notification(message)
-            return ops_to_json(client), custom_feature,currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
+            return ops_to_json(client), custom_feature,currentFigure, currentChildren, custom_name, list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
     
         # Add graph when add button is clicked
         elif triggered_id == "add_graph_button":
@@ -418,13 +512,13 @@ def create_dash_app(server):
                   ]
             client.add_graph_button(sub_features)
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
-            return ops_to_json(client),custom_feature,currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
+            return ops_to_json(client),custom_feature,currentFigure, currentChildren, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
     
         # Remove graph when remove button is clicked
         elif isinstance(triggered_id, dict) and triggered_id.get("type") == "remove_button":
             client.remove_graph_button(triggered_id.get("index"))
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)            
-            return ops_to_json(client),custom_feature,currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
+            return ops_to_json(client),custom_feature,currentFigure, currentChildren, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
 
         # Add custom feature when button is clicked
         elif triggered_id == "add_custom_feature":
@@ -438,7 +532,7 @@ def create_dash_app(server):
                 feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
             else:
                 notification = show_notification(message)
-            return ops_to_json(client),custom_feature,currentFigure, currentChildren, currentDropdownChildren,"",list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
+            return ops_to_json(client),custom_feature,currentFigure, currentChildren, "",list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
          
         # Remove custom feature
         elif isinstance(triggered_id, dict) and triggered_id.get("type") == "custom_feature_remove":
@@ -460,14 +554,14 @@ def create_dash_app(server):
                 feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
             else:
                 notification = show_notification(message)
-            return ops_to_json(client),custom_feature,currentFigure, currentChildren, currentDropdownChildren, custom_name,list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
+            return ops_to_json(client),custom_feature,currentFigure, currentChildren, custom_name,list_custom_filter_children(client), feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
                
         # Add new custom feature operation
         elif isinstance(triggered_id, dict) and triggered_id.get("type") == "operation_custom_feature_add":
             custom_feature = extract_values_custom_feature(currentDropdownChildren)
             custom_feature.append({"Operation":"-", "Feature":""})
             currentDropdownChildren = custom_dropdow(client, custom_feature)
-            return ops_to_json(client),custom_feature,currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
+            return ops_to_json(client),custom_feature,currentFigure, currentChildren, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
         
         # Remove custom feature operation
         elif isinstance(triggered_id, dict) and triggered_id.get("type") == "operation_custom_feature_remove":
@@ -475,7 +569,7 @@ def create_dash_app(server):
             custom_feature = extract_values_custom_feature(currentDropdownChildren)
             del custom_feature[index]
             currentDropdownChildren = custom_dropdow(client, custom_feature)
-            return ops_to_json(client),custom_feature,currentFigure, currentChildren, currentDropdownChildren, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
+            return ops_to_json(client),custom_feature,currentFigure, currentChildren, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
                 
         if triggered_id == "feature_filter_add":
             is_valid, message, feature_filter_min_range, feature_filter_max_range = validateFeatureFilterData(client, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range)
@@ -489,7 +583,7 @@ def create_dash_app(server):
                 currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)     
             else:
                 notification = show_notification(message)
-            return ops_to_json(client),custom_feature, currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, "", "", feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled       
+            return ops_to_json(client),custom_feature,currentFigure, currentChildren, custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, "", "", feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled       
         
         if isinstance(triggered_id, dict) and triggered_id.get("type") == "feature_filter_remove":
             index = triggered_id.get("index")
@@ -500,7 +594,7 @@ def create_dash_app(server):
             collapse_expand_filter_disabled = False 
             currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)  
-            return ops_to_json(client),custom_feature, currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
+            return ops_to_json(client),custom_feature, currentFigure, currentChildren, custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
         
         if (triggered_id == "apply_selection_datefilter") or (triggered_id == "apply_selection_hourfilter"):
             hours_to_include = [index for index, hour in enumerate(hour_button) if hour["backgroundColor"] != "white"]
@@ -513,7 +607,7 @@ def create_dash_app(server):
                 currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
             else:
                 notification = show_notification(message)
-            return ops_to_json(client),custom_feature, currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
+            return ops_to_json(client),custom_feature, currentFigure, currentChildren, custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
         
         if triggered_id == "apply_filters":
             is_valid, message = validateApplyFilterToggle(client, apply_filters_state, collapse_expand_filter_state)
@@ -527,22 +621,25 @@ def create_dash_app(server):
             else:
                 notification = show_notification(message)
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state) 
-            return ops_to_json(client),custom_feature, currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
+            return ops_to_json(client),custom_feature, currentFigure, currentChildren, custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
             
         if triggered_id == "collapse_expand_filter":
             currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state) 
-            return ops_to_json(client),custom_feature, currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
+            return ops_to_json(client),custom_feature, currentFigure, currentChildren, custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
     
+        else: 
+            raise exceptions.PreventUpdate
+        
         if main_dropdown != "":
             features.append(main_dropdown)
             
         # If no figure, return initial empty state
         if not currentFigure:
-            #TODO
             #return client_data,custom_feature,empty,data_features, currentFigure, currentChildren, custom_dropdow_children,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_default_opts, feature_filter_min_range, feature_filter_max_range, feature_filter_list, empty_array, apply_filters_state, collapse_expand_filter_disabled
             return restore_session(client, apply_filters_state, collapse_expand_filter_state, collapse_expand_filter_disabled,feature_filter_min_range, feature_filter_max_range, extract_values_custom_feature(currentDropdownChildren))
         
-        return ops_to_json(client),custom_feature, currentFigure, currentChildren, currentDropdownChildren,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
+        
+        return ops_to_json(client),custom_feature, currentFigure, currentChildren, custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
     
     return app

@@ -37,3 +37,32 @@ def expland_collapse_checkbox(client):
                     html.Div(main_checkbox(client,"secondary_checkbox"), className="collapse-content")  # Contenido dentro del colapso
                 ], className="collapse bg-base-200")  # Clase DaisyUI para estilo
             ])
+
+def secondary_pagination():
+    return html.Div(
+    className="w-full h-fit shadows-lg",
+    children=[
+        dcc.Store(id="current-page", data=0),  # Almacenamos la página actual
+        
+        html.Div(id="words-container", className="flex flex-row flex-wrap justify-between"),
+
+        html.Div(
+            style={"display": "flex", "justifyContent": "center", "marginTop": "20px"},
+            children=[
+                html.Button("Prev", id="prev-btn", n_clicks=0, style={"marginRight": "10px"}),
+                html.Button("Next", id="next-btn", n_clicks=0),
+            ],
+        ),
+        html.Div(id="pagination-numbers", className="flex flex-row flex-wrap mt-5")
+    ]
+)
+    
+def expandable_container(toggle_button_id, expandable_text_id, is_main=False):
+    return html.Div(
+                children= [
+                    html.Button("Expand Main Features" if is_main else "Expand DB Features", id=toggle_button_id, n_clicks=0, className="btn btn-primary font-bold"),
+                    html.Div(secondary_pagination(),
+                    id=expandable_text_id, style={"display": "none"}, className="p-3 text-gray-700 shadow-lg rounded-lg")
+                ],
+                className="flex flex-col justify-center items-center w-full h-fit"    
+            )
