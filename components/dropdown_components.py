@@ -25,6 +25,7 @@ def main_dropdown(client):
             value="",  # Default selected values (none selected initially)
             className="w-full flex flex row flex-wrap",  # CSS classes for layout styling
             id="main_dropdown",  # Unique identifier for the checklist component
+            multi=True,
         ),
         className="w-[28%] mt-10"
     )
