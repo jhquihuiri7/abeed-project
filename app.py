@@ -10,7 +10,7 @@ from dash import dcc, html, Input, Output, State, callback, callback_context, AL
 
 # Components
 import dash_mantine_components as dmc
-from components.checkbox_components import main_checkbox, expandable_container
+from components.checkbox_components import expandable_container
 from components.daterange_components import main_daterange
 from components.tabs_components import main_tabs
 from components.button_components import button, apply_filters_toggle
@@ -96,7 +96,6 @@ def create_dash_app(server):
                 pagination_id="pagination_secondary"
                 ),
             # Checkbox component for feature selection
-            main_checkbox(ops, id="main_checkbox"),
             html.Div(
                 children=[
                     main_dropdown(ops),
@@ -170,7 +169,6 @@ def create_dash_app(server):
     )
     def update_words(prev_clicks, next_clicks, page_clicks, current_page):
         words = ops.available_readable_names
-        print(len(words))
         items_per_page = 100
         
         total_pages = (len(words) + items_per_page - 1) // items_per_page  # Redondeo hacia arriba
@@ -269,7 +267,6 @@ def create_dash_app(server):
         client_json = ops_to_json(client)
         if value == None:
             value =  date.today().strftime("%Y-%m-%d")
-        print(value)
         return dict(content=client_json, filename=f"{value}.json"), False
     
     @callback(
@@ -404,18 +401,6 @@ def create_dash_app(server):
              
         return hour_button_style
     
-    
-    @callback(
-        Output("main_checkbox", "value"),
-        Input("main_dropdown", "value"),
-        State("main_checkbox", "value"),
-        prevent_initial_call=True,
-    )
-    def feature_selection(main_dropdown, main_checkbox):
-        if main_dropdown != "":
-            main_checkbox= main_dropdown
-        return main_checkbox
-    
     @callback(
         Output("custom_dropdown", "children"),
         Input({"type": "dynamic-dropdown", "index": ALL}, "value"),
@@ -484,7 +469,7 @@ def create_dash_app(server):
         Input("collapse_expand_filter","value"),
         Input("apply_selection_datefilter", "n_clicks"),
         #Input({"type": "hour_button", "index": ALL}, "n_clicks"),
-        State("main_checkbox", "value"),
+        State("main_dropdown", "value"),
         State("main-date-picker-range", "start_date"),
         State("main-date-picker-range", "end_date"),
         State("main_graph", "figure"),
