@@ -21,7 +21,7 @@ def main_dropdown(client):
         dcc.Dropdown(
             # Generate the options for the checklist dynamically
             # Extracts the keys (features) from the feature_units_dict
-            options=[item for item in list(set(client.available_readable_names)|set(client.available_db_names[:45]))],
+            options=[item for item in client.available_readable_names],
             value="",  # Default selected values (none selected initially)
             className="w-full flex flex row flex-wrap",  # CSS classes for layout styling
             id="main_dropdown",  # Unique identifier for the checklist component

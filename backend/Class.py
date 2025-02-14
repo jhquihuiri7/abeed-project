@@ -57,9 +57,10 @@ class Ops:
 
         self.feature_dict = feature_dict
 
-        self.available_readable_names = available_readable_names
+        self.available_readable_names = sorted(available_readable_names)
+        print(self.available_readable_names)
 
-        self.available_db_names = available_db_names
+        self.available_db_names = sorted(available_db_names)
 
         # Start date for the range of dates the user wants data for
         self.start_date = date.today() - timedelta(7)

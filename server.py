@@ -29,10 +29,8 @@ def home():
             # Parse the JSON string into a Python dictionary
             data_dict = json.loads(json_data)
             client = json_to_ops(data_dict)
-            print(type(client.start_date))
             new_app.layout.children[1].data = data_dict
-            new_app.layout.children[0].children[1].children[1].children[0].start_date =  client.start_date
-            new_app.layout.children[0].children[1].children[1].children[0].end_date =  client.end_date
+
             return new_app.index()
         except json.JSONDecodeError:
             return "Invalid JSON format", 400

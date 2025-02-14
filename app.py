@@ -122,11 +122,22 @@ def create_dash_app(server):
             dcc.Download(id="download-data"),
             dcc.Download(id="download-client"),
             dcc.Store(id="temp_feature", data=[]),
+            dcc.Store(id="restore_session",data="")
         ],
     ),
         dcc.Store(id="client", data=ops_to_json(ops)),
         ]
+    )
+    @app.callback(
+        Output("main-date-picker-range","start_date"),
+        Output("main-date-picker-range","end_date"),
+        Input("restore_session", "data"),
+        State("client","data")
     )      
+    def restore_session(session, data):
+        client = json_to_ops(data)
+        return client.start_date, client.end_date
+    
     @app.callback(
     Output("main_dropdown", "options"),
     Output("expandable_text_primary", "style"),
