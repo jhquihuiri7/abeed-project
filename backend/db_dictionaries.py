@@ -82,6 +82,10 @@ features_read_name_to_db_id_dict = {
     "IESO Meteologica Load": "348a6a37-a47a-4840-848d-1c9f03eeaae3",
     "NYIS ieso RT": "2b5ff94d-6ca2-432a-b562-af8bd2c24a83",
     "NYIS ieso DA": "ce0fe015-64f1-49ff-9cdb-41ea61ce62b7",
+    "MISO pjm DA CNN v3.3.4": "9375e504-5453-458e-8383-5a729bccca76",
+    "MISO pjm RT CNN v3.3.4": "588e4c6a-e3c1-4a29-966e-8b00d9beaab1",
+    "PJM miso DA CNN v3.3.4": "750ed6f6-68ef-404d-8b7f-99c56803bd52",
+    "PJM miso RT CNN v3.3.4": "412c668e-66cc-4baf-8ff5-742054eee88e",
 }
 
 feature_db_id_to_read_name = {
@@ -168,6 +172,10 @@ feature_db_id_to_read_name = {
     "348a6a37-a47a-4840-848d-1c9f03eeaae3": "IESO Meteologica Load",
     "2b5ff94d-6ca2-432a-b562-af8bd2c24a83": "NYIS ieso RT",
     "ce0fe015-64f1-49ff-9cdb-41ea61ce62b7": "NYIS ieso DA",
+    "9375e504-5453-458e-8383-5a729bccca76": "MISO pjm DA CNN v3.3.4",
+    "588e4c6a-e3c1-4a29-966e-8b00d9beaab1": "MISO pjm RT CNN v3.3.4",
+    "750ed6f6-68ef-404d-8b7f-99c56803bd52": "PJM miso DA CNN v3.3.4",
+    "412c668e-66cc-4baf-8ff5-742054eee88e": "PJM miso RT CNN v3.3.4",
 }
 
 feature_units_dict = {
@@ -257,6 +265,10 @@ feature_units_dict = {
     "NYIS ieso DA": 'dollars',
     "MISO Minnisoda DA": 'dollars',
     "MISO Minnisoda RT": 'dollars',
+    "MISO pjm DA CNN v3.3.4": 'dollars',
+    "MISO pjm RT CNN v3.3.4": 'dollars',
+    "PJM miso DA CNN v3.3.4": 'dollars',
+    "PJM miso RT CNN v3.3.4": 'dollars',
     
 }
 
@@ -347,6 +359,10 @@ feature_db_name_to_read_name_dict = {
     "24063;lmp;da": "NYIS ieso DA",
     "MINN.HUB;lmp;rt": "MISO Minnisoda RT",
     "MINN.HUB;lmp;da": "MISO Minnisoda DA",
+    "PJMC;misovirts_v3.3.4;lmp_pred;da": "MISO pjm DA CNN v3.3.4",
+    "PJMC;misovirts_v3.3.4;lmp_pred;rt": "MISO pjm RT CNN v3.3.4",
+    "40523629.0;pjmvirts_v3.2.1;lmp_pred;da": "PJM miso DA CNN v3.3.4",
+    "40523629.0;pjmvirts_v3.2.1;lmp_pred;rt": "PJM miso RT CNN v3.3.4",
 }
 
 feature_read_name_to_db_name_dict = {
@@ -436,4 +452,8 @@ feature_read_name_to_db_name_dict = {
     "NYIS ieso DA": "24063;lmp;da",
     "MISO Minnisoda RT": "MINN.HUB;lmp;rt",
     "MISO Minnisoda DA": "MINN.HUB;lmp;da",
+    "MISO pjm DA CNN v3.3.4": "PJMC;misovirts_v3.3.4;lmp_pred;da",
+    "MISO pjm RT CNN v3.3.4": "PJMC;misovirts_v3.3.4;lmp_pred;rt",
+    "PJM miso DA CNN v3.3.4": "40523629.0;pjmvirts_v3.2.1;lmp_pred;da",
+    "PJM miso RT CNN v3.3.4": "40523629.0;pjmvirts_v3.2.1;lmp_pred;rt",
 }
