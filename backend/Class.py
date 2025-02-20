@@ -58,7 +58,6 @@ class Ops:
         self.feature_dict = feature_dict
 
         self.available_readable_names = sorted(available_readable_names)
-        print(self.available_readable_names)
 
         self.available_db_names = sorted(available_db_names)
 
@@ -330,7 +329,7 @@ class Ops:
             if cumulative:
                 custom_name = custom_name + "Σ" 
 
-        custom_feature_unit = get_feature_units(feature_operation_list[0]["Feature"])
+        custom_feature_unit = self.feature_dict[feature_operation_list[0]["Feature"]].units
         self.created_features.append(
             {
             "feature_name": custom_name,
