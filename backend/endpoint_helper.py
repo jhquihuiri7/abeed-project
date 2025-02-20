@@ -119,7 +119,7 @@ class FeatureRequest:
         datetimes = pd.date_range(
             start=self.start_date,
             end=pd.to_datetime(self.end_date) + pd.Timedelta(hours=23),
-            freq="h",
+            freq="h"
         )
         datetimes_as_string = [
             datetime.strftime("%Y-%m-%dT%H:%M:%S%z")
