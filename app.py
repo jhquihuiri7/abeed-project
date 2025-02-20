@@ -131,15 +131,14 @@ def create_dash_app(server):
     @app.callback(
         Output("main-date-picker-range","start_date"),
         Output("main-date-picker-range","end_date"),
+        Output("main_dropdown", "value"),
         Input("restore_session", "data"),
         State("client","data")
     )      
-    def restore_session(session, data):
-        ctx = callback_context
-        if not ctx.triggered:
-            raise exceptions.PreventUpdate
+    def restore_session_call(session, data):
+        print("restore")
         client = json_to_ops(data)
-        return client.start_date, client.end_date
+        return client.start_date, client.end_date, client.data_features
     
     @app.callback(
     Output("main_dropdown", "options"),
@@ -584,7 +583,7 @@ def create_dash_app(server):
         ctx = callback_context
         if not ctx.triggered:
             print("DESPUES")
-            raise exceptions.PreventUpdate
+            #raise exceptions.PreventUpdate
         triggered_id = ctx.triggered[0]["prop_id"].split(".")[0] if ctx.triggered else None
     
         try:
@@ -620,13 +619,13 @@ def create_dash_app(server):
                   ]
             client.add_graph_button(sub_features)
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
-            return ops_to_json(client),custom_feature,currentFigure, currentChildren, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
+            return ops_to_json(client),custom_feature,currentFigure, currentChildren, custom_name, currentDropdownChildren, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
     
         # Remove graph when remove button is clicked
         elif isinstance(triggered_id, dict) and triggered_id.get("type") == "remove_button":
             client.remove_graph_button(triggered_id.get("index"))
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)            
-            return ops_to_json(client),custom_feature,currentFigure, currentChildren, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
+            return ops_to_json(client),custom_feature,currentFigure, currentChildren, custom_name, currentDropdownChildren, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
 
         # Add custom feature when button is clicked
         elif triggered_id == "add_custom_feature":
@@ -672,7 +671,7 @@ def create_dash_app(server):
             custom_feature = extract_values_custom_feature(currentDropdownChildren)
             del custom_feature[index]
             currentDropdownChildren = custom_dropdow(client, custom_feature)
-            return ops_to_json(client),custom_feature,currentFigure, currentChildren, custom_name, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
+            return ops_to_json(client),custom_feature,currentFigure, currentChildren, custom_name, currentDropdownChildren, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
                 
         if triggered_id == "feature_filter_add":
             is_valid, message, feature_filter_min_range, feature_filter_max_range = validateFeatureFilterData(client, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range)
@@ -686,7 +685,7 @@ def create_dash_app(server):
                 currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)     
             else:
                 notification = show_notification(message)
-            return ops_to_json(client),custom_feature,currentFigure, currentChildren, custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, "", "", feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled       
+            return ops_to_json(client),custom_feature,currentFigure, currentChildren, custom_name, currentDropdownChildren, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, "", "", feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled       
         
         if isinstance(triggered_id, dict) and triggered_id.get("type") == "feature_filter_remove":
             index = triggered_id.get("index")
@@ -697,7 +696,7 @@ def create_dash_app(server):
             collapse_expand_filter_disabled = False 
             currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)  
-            return ops_to_json(client),custom_feature, currentFigure, currentChildren, custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
+            return ops_to_json(client),custom_feature, currentFigure, currentChildren, custom_name,currentDropdownChildren, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
         
         if (triggered_id == "apply_selection_datefilter") or (triggered_id == "apply_selection_hourfilter"):
             hours_to_include = [index for index, hour in enumerate(hour_button) if hour["backgroundColor"] != "white"]
@@ -710,7 +709,7 @@ def create_dash_app(server):
                 currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
             else:
                 notification = show_notification(message)
-            return ops_to_json(client),custom_feature, currentFigure, currentChildren, custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
+            return ops_to_json(client),custom_feature, currentFigure, currentChildren, custom_name, currentDropdownChildren, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
         
         if triggered_id == "apply_filters":
             is_valid, message = validateApplyFilterToggle(client, apply_filters_state, collapse_expand_filter_state)
@@ -724,13 +723,17 @@ def create_dash_app(server):
             else:
                 notification = show_notification(message)
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state) 
-            return ops_to_json(client),custom_feature, currentFigure, currentChildren, custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
+            return ops_to_json(client),custom_feature, currentFigure, currentChildren, custom_name, currentDropdownChildren, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
             
         if triggered_id == "collapse_expand_filter":
             currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state) 
-            return ops_to_json(client),custom_feature, currentFigure, currentChildren, custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
-    
+            return ops_to_json(client),custom_feature, currentFigure, currentChildren, custom_name, currentDropdownChildren,list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
+        
+        if not currentFigure:
+            #return client_data,custom_feature,empty,data_features, currentFigure, currentChildren, custom_dropdow_children,custom_name,list_custom_features, feature_filter_dropdown_opts, feature_filter_default_opts, feature_filter_min_range, feature_filter_max_range, feature_filter_list, empty_array, apply_filters_state, collapse_expand_filter_disabled
+            return restore_session(client, apply_filters_state, collapse_expand_filter_state, collapse_expand_filter_disabled,feature_filter_min_range, feature_filter_max_range, extract_values_custom_feature(currentDropdownChildren))
+
         else: 
             raise exceptions.PreventUpdate
         
