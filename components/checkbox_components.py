@@ -53,7 +53,7 @@ def pagination(page_store_id, features_id, prev_id, next_id, pagination_id, is_m
 def expandable_container(toggle_button_id, expandable_text_id, page_store_id, features_id, prev_id, next_id, pagination_id, is_main=False):
     return html.Div(
                 children= [
-                    html.Button("Expand Main Features" if is_main else "Expand DB Features", id=toggle_button_id, n_clicks=0, className="btn btn-primary font-bold"),
+                    html.Button("Expand Feature Menu" if is_main else "All Features", id=toggle_button_id, n_clicks=0, className="btn btn-primary font-bold"),
                     html.Div(pagination(page_store_id, features_id, prev_id, next_id, pagination_id, is_main),
                     id=expandable_text_id, style={"display": "none"}, className="p-3 text-gray-700 shadow-lg rounded-lg")
                 ],

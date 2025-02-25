@@ -99,7 +99,7 @@ def create_dash_app(server):
             html.Div(
                 children=[
                     main_dropdown(ops),
-                    main_daterange(),  # Date range component
+                    main_daterange(ops),  # Date range component
                     html.Div(
                         children=[
                             button(text="Update Graph", id="update_graph_button", style=button_style),  # Button to update graph

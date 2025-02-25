@@ -65,7 +65,7 @@ class Ops:
         self.start_date = date.today() - timedelta(7)
 
         # End date for the range of dates the user wants data for
-        self.end_date = date.today() + timedelta(1)
+        self.end_date = date.today() + timedelta(2)
 
         # Fetures the user would like to see and make graphs with:
         self.data_features = []
