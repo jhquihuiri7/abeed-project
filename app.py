@@ -85,16 +85,7 @@ def create_dash_app(server):
                 next_id="next_btn_principal",
                 pagination_id="pagination_principal",
                 is_main=True
-                ),
-            expandable_container(
-                toggle_button_id="toggle_exapandable_button_seccondary", 
-                expandable_text_id="expandable_text_secondary",
-                page_store_id="current_page_secondary",
-                features_id="features_container_secondary",
-                prev_id="prev_btn_secondary",
-                next_id="next_btn_secondary",
-                pagination_id="pagination_secondary"
-                ),
+            ),
             # Checkbox component for feature selection
             html.Div(
                 children=[
@@ -161,20 +152,17 @@ def create_dash_app(server):
     
     @app.callback(
         Output("main_dropdown", "options", allow_duplicate=True),
-        Output("expandable_text_secondary", "style"),
-        Output("toggle_exapandable_button_seccondary", "children"),
-        Input("toggle_exapandable_button_seccondary", "n_clicks"),
+        Input("all_features_checkbox", "value"),
         prevent_initial_call=True
     )
-    def toggle_text_secondary(n_clicks):
+    def toggle_all_features(value):
         ctx = callback_context
         if not ctx.triggered:
             raise exceptions.PreventUpdate
         options = ops.available_readable_names
-        if n_clicks % 2 == 1:
-            options = list(set(ops.available_readable_names) | set(ops.available_db_names))
-            return options, {"display": "block"}, "Collapse DB Features"
-        return options, {"display": "none"}, "Expand DB Features"
+        if value != []:
+            options = list(set(options) | set(ops.available_db_names))
+        return options
     
     @app.callback(
         Output("features_container_principal", "children"),
@@ -222,53 +210,6 @@ def create_dash_app(server):
         ]
     
         return word_elements, new_page == 0, new_page == total_pages - 1, pagination_numbers
-    
-    @app.callback(
-        Output("features_container_secondary", "children"),
-        Output("prev_btn_secondary", "disabled"),
-        Output("next_btn_secondary", "disabled"),
-        Output("pagination_secondary", "children"),
-        Input("prev_btn_secondary", "n_clicks"),
-        Input("next_btn_secondary", "n_clicks"),
-        Input({"type": "page_btn_secondary", "index": ALL}, "n_clicks"),
-        Input("current_page_secondary", "data"),
-    )
-    def update_words(prev_clicks, next_clicks, page_clicks, current_page):
-        words = ops.available_db_names
-        items_per_page = 100
-        
-        total_pages = (len(words) + items_per_page - 1) // items_per_page  # Redondeo hacia arriba
-        new_page = min(max(current_page + (next_clicks - prev_clicks), 0), total_pages - 1)
-        
-        ctx = callback_context
-        triggered_id = ctx.triggered_id
-        if isinstance(triggered_id, dict) and "index" in triggered_id:
-            new_page = triggered_id["index"]
-        else:
-            new_page = min(max(current_page + (next_clicks - prev_clicks), 0), total_pages - 1)
-    
-        start_index = new_page * items_per_page
-        end_index = start_index + items_per_page
-        current_words = words[start_index:end_index]
-    
-        word_elements = [
-            html.Div(word, className="w-[300px] overflow-hidden mt-1") 
-            for word in current_words
-        ]
-    
-        pagination_numbers = [
-            html.Button(
-                str(i + 1),
-                id={"type": "page_btn_secondary", "index": i},
-                n_clicks=0,
-                className=f"px-2 m-1 py-1 rounded-lg border border-gray-300 cursor-pointer {'bg-blue-500 text-white' if i == new_page else 'bg-gray-300 text-black'}"
-            ) 
-            for i in range(total_pages)
-        ]
-    
-        return word_elements, new_page == 0, new_page == total_pages - 1, pagination_numbers
-
-        
     
     @callback(
         Output("download-client", "data"),

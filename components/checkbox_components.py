@@ -53,7 +53,19 @@ def pagination(page_store_id, features_id, prev_id, next_id, pagination_id, is_m
 def expandable_container(toggle_button_id, expandable_text_id, page_store_id, features_id, prev_id, next_id, pagination_id, is_main=False):
     return html.Div(
                 children= [
-                    html.Button("Expand Feature Menu" if is_main else "All Features", id=toggle_button_id, n_clicks=0, className="btn btn-primary font-bold"),
+                    html.Div(
+                        children=[
+                            html.Button("Expand Feature Menu" if is_main else "All Features", id=toggle_button_id, n_clicks=0, className="btn btn-primary font-bold"),
+                            dcc.Checklist(
+                                options=["Select all features"],
+                                value=[],  # Default selected values (none selected initially)
+                                className="flex flex-row justify-between flex-wrap mx-10",  # CSS classes for layout styling
+                                inputClassName="mr-5",
+                                id="all_features_checkbox",  # Unique identifier for the checklist component
+                            ),
+                        ],
+                        className="flex flex-row"    
+                    ),
                     html.Div(pagination(page_store_id, features_id, prev_id, next_id, pagination_id, is_main),
                     id=expandable_text_id, style={"display": "none"}, className="p-3 text-gray-700 shadow-lg rounded-lg")
                 ],
