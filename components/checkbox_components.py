@@ -39,23 +39,16 @@ def pagination(page_store_id, features_id, prev_id, next_id, pagination_id, is_m
         
         html.Div(id=features_id, className="flex flex-row flex-wrap justify-between"),
 
-        html.Div(
-            className=f"{display} flex-row justify-center mt-5",
-            children=[
-                html.Button("Prev", id=prev_id, n_clicks=0, style={"marginRight": "10px"}),
-                html.Button("Next", id=next_id, n_clicks=0),
-            ],
-        ),
-        html.Div(id=pagination_id, className=f"{display} flex-row flex-wrap mt-5")
+
     ]
 )
     
-def expandable_container(toggle_button_id, expandable_text_id, page_store_id, features_id, prev_id, next_id, pagination_id, is_main=False):
+def expandable_container(toggle_button_id, expandable_text_id, client):
     return html.Div(
                 children= [
                     html.Div(
                         children=[
-                            html.Button("Expand Feature Menu" if is_main else "All Features", id=toggle_button_id, n_clicks=0, className="btn btn-primary font-bold"),
+                            html.Button("Expand Feature Menu", id=toggle_button_id, n_clicks=0, className="btn btn-primary font-bold"),
                             dcc.Checklist(
                                 options=["Select all features"],
                                 value=[],  # Default selected values (none selected initially)
@@ -66,7 +59,14 @@ def expandable_container(toggle_button_id, expandable_text_id, page_store_id, fe
                         ],
                         className="flex flex-row"    
                     ),
-                    html.Div(pagination(page_store_id, features_id, prev_id, next_id, pagination_id, is_main),
+                    html.Div(
+                        html.Div(
+                            html.Div(
+                                [html.Div(i, className="w-[300px] overflow-hidden mt-1") 
+                                 for i in client.available_readable_names], 
+                                className="flex flex-row flex-wrap justify-between"),
+                            className="w-full h-fit shadows-lg"
+                        ),
                     id=expandable_text_id, style={"display": "none"}, className="p-3 text-gray-700 shadow-lg rounded-lg")
                 ],
                 className="flex flex-col justify-center items-center w-full h-fit"    
