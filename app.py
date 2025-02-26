@@ -119,6 +119,16 @@ def create_dash_app(server):
         dcc.Store(id="client", data=ops_to_json(ops)),
         ]
     )
+    
+    @app.callback(
+    Output("main_dropdown", "search_value"),  # Restaura la búsqueda
+    Input("main_dropdown", "value"),  # Detecta cuando se selecciona algo
+    State("main_dropdown", "search_value"),  # Obtiene la búsqueda anterior
+    prevent_initial_call=True
+    )
+    def restore_search(value, search_value):
+        return search_value
+    
     @app.callback(
         Output("main-date-picker-range","start_date"),
         Output("main-date-picker-range","end_date"),
@@ -126,8 +136,8 @@ def create_dash_app(server):
         Input("restore_session", "data"),
         State("client","data")
     )      
+    
     def restore_session_call(session, data):
-        print("restore")
         client = json_to_ops(data)
         return client.start_date, client.end_date, client.data_features
     

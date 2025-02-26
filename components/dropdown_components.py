@@ -26,6 +26,10 @@ def main_dropdown(client):
             className="w-full flex flex row flex-wrap",  # CSS classes for layout styling
             id="main_dropdown",  # Unique identifier for the checklist component
             multi=True,
+            searchable=True,
+            search_value="Mi",
+            persistence=True,
+            persistence_type='session'
         ),
         className="w-[28%] mt-10"
     )
