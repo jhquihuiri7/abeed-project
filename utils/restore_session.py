@@ -36,7 +36,7 @@ def restore_session(client, apply_filters_state, collapse_expand_filter_state, c
         list_custom_features = list_custom_filter_children(client)
         
     if client.feature_filters != []:
-        feature_filter_list = [html.Div([f"{feature_filter['feature_name']}, Range: ({get_value_range(feature_filter['range'][0],"-")} → {get_value_range(feature_filter['range'][1],"+")})", button(
+        feature_filter_list = [html.Div([f"{feature_filter['feature_name']}, Range: ({get_value_range(feature_filter['range'][0],'-')} → {get_value_range(feature_filter['range'][1],'+')})", button(
                                 text="REMOVE",
                                 id={"type": "feature_filter_remove", "index": feature_filter["filter_uid"]},
                                 style=button_dropdown_style,
