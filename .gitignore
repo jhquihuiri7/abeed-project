@@ -1,1 +1,9 @@
 venv/
+
+# Ignore __pycache__ directories in any folder
+**/__pycache__/
+
+*.pyc
+*.pyo
+
+test.py

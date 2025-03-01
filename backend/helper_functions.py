@@ -59,13 +59,14 @@ def get_excluded_datetimes(
         ]
         dates_to_exclude.extend(dates_to_exclude_series.to_list())
     dates_to_exclude = list(set(dates_to_exclude))
-
+    
     dates_to_exclude_series = df.index[
         ~(df.index.hour.isin(hour_filters))
         | ~(df.index.weekday.isin(day_of_week_filters))
         | ~(df.index.month.isin(month_filters))
         | ~(df.index.year.isin(year_filters))
     ]
+    
     dates_to_exclude.extend(dates_to_exclude_series.to_list())
     
     # for idx, datetimes in enumerate(dates_to_exclude):
