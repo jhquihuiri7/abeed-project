@@ -1,4 +1,4 @@
-from dash import dcc, html, Input, Output, State, callback, callback_context, ALL
+from dash import dcc, html
 from styles.styles import button_dropdown_style
 from components.button_components import button
 from utils.functions import list_custom_filter_children
@@ -9,7 +9,7 @@ import calendar
 from backend.db_dictionaries import feature_units_dict
 
 
-def main_dropdown():
+def main_dropdown(client):
     """
     Creates a checklist (checkbox group) for selecting features.
 
@@ -21,12 +21,17 @@ def main_dropdown():
         dcc.Dropdown(
             # Generate the options for the checklist dynamically
             # Extracts the keys (features) from the feature_units_dict
-            options=[item[0] for item in feature_units_dict.items()],
+            options=[item for item in client.available_readable_names],
             value="",  # Default selected values (none selected initially)
             className="w-full flex flex row flex-wrap",  # CSS classes for layout styling
             id="main_dropdown",  # Unique identifier for the checklist component
+            multi=True,
+            searchable=True,
+            search_value="Mi",
+            persistence=True,
+            persistence_type='session'
         ),
-        className="w-[28%]"
+        className="w-[28%] mt-10"
     )
 
 
@@ -40,8 +45,6 @@ def custom_features_head():
     """
     return html.Div(
         children=[
-            # Title for the section
-            html.H2("Custom Features", className="font-bold text-xl"),
             # Input field for typing a custom feature name
             dcc.Input(
                 id="custon_name",
@@ -59,7 +62,7 @@ def custom_features_head():
     )
 
 # Function to dynamically create dropdowns and buttons for custom features
-def custom_dropdow(options, dropdown_values, radio_values, list):
+def custom_dropdow(client, current_dropdown):
     """
     Dynamically creates dropdown menus and buttons for custom feature operations.
 
@@ -74,60 +77,128 @@ def custom_dropdow(options, dropdown_values, radio_values, list):
     """
     first_feature_unit = ""
     dropdown_children = []
-    for index, (data, dropdown_value, radio_value) in enumerate(
-            zip(list, dropdown_values, radio_values)
-        ):
-        if index == 0:
-            try:
-                first_feature_unit = get_feature_units(dropdown_value)
-            except:
-                pass
-            
-        dropdown_children.append(
-            html.Div(
-                children=[
-                    # Radio buttons to select an operation (Add/Subtract)
-                    dcc.RadioItems(
-                        id={"type": "operation_custom_feature_op", "index": index},
-                        options=[
-                            {"label": "Add", "value": "Add"},
-                            {"label": "Sub", "value": "Sub"},
-                        ],
-                        value=radio_value,  # Current selected operation
-                        labelStyle={"display": "inline", "marginRight": "15px"},
-                        # Hide the radio buttons for the first element
-                        style={"display": "none"} if index == 0 else {},
-                    ),
-                    # Dropdown menu to select feature options
-                    dcc.Dropdown(
-                        options= options if index == 0 else [option for option in options if get_feature_units(option) == first_feature_unit], # Dropdown options
-                        value=dropdown_value,  # Current selected value
-                        id={"type": "dynamic-dropdown", "index": index},
-                        className="w-[400px]",
-                    ),
-                    # Button to add a new feature
-                    button(
-                        text="ADD",
-                        id={"type": "operation_custom_feature_add", "index": index},
-                        style=button_dropdown_style,
-                    ),
-                    # Button to remove the feature if an operation is defined
-                    (
-                        html.Div()
-                        if not data.get("Operation")  # Check if an operation exists
-                        else button(
-                            text="REMOVE",
-                            id={"type": "operation_custom_feature_remove", "index": index},
-                            style=button_dropdown_style,
-                        )
-                    ),
-                ],
-                # Layout styling for the dropdown and buttons
-                className=f"flex flex-row ml-[{index*25}px] my-4",
-            )    
+    dropdown_children_second_level = []
+    options = client.df.columns
+    
+    
+    try:
+        first_feature_unit = get_feature_units(current_dropdown[0]["Feature"])
+    except:
+        pass
+    
+    
+    dropdown_children.append(
+        html.Div(
+            children=[
+                dcc.Dropdown(
+                    options= options, # Dropdown options
+                    value= "" if current_dropdown == [] else current_dropdown[0]["Feature"],  # Current selected value
+                    id={"type": "dynamic-dropdown", "index": 0},
+                    className="w-[400px]",
+                ),
+            ],
+            # Layout styling for the dropdown and buttons
+            className=f"flex flex-row my-4 mr-5",
         )    
+    )
+    
+    if current_dropdown != []:
+        for index, data in enumerate(current_dropdown):
+            feature_unit = first_feature_unit
+            if index == 0:
+                pass        
+            else:
+                try:
+                    feature_unit = get_feature_units(data["Feature"])
+                except:
+                    for feature in client.created_features:
+                        if feature["feature_name"]==data["Feature"]:
+                            feature_unit = get_feature_units(feature["equation"][0]["Feature"])
+        
+                dropdown_children_second_level.append(
+                html.Div(
+                    children=[
+                        # Radio buttons to select an operation (Add/Subtract)
+                        dcc.RadioItems(
+                            id={"type": "operation_custom_feature_op", "index": index},
+                            options=[
+                                {"label": "+", "value": "Add"},
+                                {"label": "-", "value": "Sub"},
+                            ],
+                            value="Sub" if (data['Operation']== "-") else "Add",  # Current selected operation
+                            labelStyle={"display": "block"},
+                            inputClassName="mr-2",
+                            labelClassName="mr-5",
+                        ),
+                        # Dropdown menu to select feature options
+                        dcc.Dropdown(
+                            options= options if index == 0 else [option for option in options if feature_unit == first_feature_unit], # Dropdown options
+                            value=data['Feature'],  # Current selected value
+                            id={"type": "dynamic-dropdown", "index": index},
+                            className="w-[400px]",
+                        ),
+                        # Button to add a new feature
+                        button(
+                            text="ADD",
+                            id={"type": "operation_custom_feature_add", "index": index},
+                            style=button_dropdown_style,
+                        ),
+                        # Button to remove the feature if an operation is defined
+                        (
+                            html.Div()
+                            if index == 1  # Check if an operation exists
+                            else button(
+                                text="REMOVE",
+                                id={"type": "operation_custom_feature_remove", "index": index},
+                                style=button_dropdown_style,
+                            )
+                        ),
+                    ],
+                    # Layout styling for the dropdown and buttons
+                    className=f"flex flex-row my-4",
+                )    
+            ) 
+    else:
+        dropdown_children_second_level.append(
+                html.Div(
+                    children=[
+                        # Radio buttons to select an operation (Add/Subtract)
+                        dcc.RadioItems(
+                            id={"type": "operation_custom_feature_op", "index": 1},
+                            options=[
+                                {"label": "+", "value": "Add"},
+                                {"label": "-", "value": "Sub"},
+                            ],
+                            value='Sub',  # Current selected operation
+                            labelStyle={"display": "block"},
+                            inputClassName="mr-2",
+                            labelClassName="mr-5",
+                        ),
+                        # Dropdown menu to select feature options
+                        dcc.Dropdown(
+                            options= [option for option in options], # Dropdown options
+                            value='',  # Current selected value
+                            id={"type": "dynamic-dropdown", "index": 1},
+                            className="w-[400px]",
+                        ),
+                        # Button to add a new feature
+                        button(
+                            text="ADD",
+                            id={"type": "operation_custom_feature_add", "index": 1},
+                            style=button_dropdown_style,
+                        ),
+                    ],
+                    # Layout styling for the dropdown and buttons
+                    className=f"flex flex-row my-4",
+                )    
+            ) 
+
+            
+    
+    dropdown_children.append(html.Div(dropdown_children_second_level, className=""))
     
     return dropdown_children
+
 
 # Function to list custom features for a client
 def list_custom_features(client):
@@ -179,8 +250,8 @@ def date_filter_dropdown():
             children=[
                 html.H2("Year", className="font-bold text-xl"),  # Label for year dropdown
                 dcc.Dropdown(
-                    year_range,  # Options for years
-                    year_range,  # Default selected values
+                    options= year_range,  # Options for years
+                    value=year_range,  # Default selected values
                     multi=True,  # Allow multiple selections
                     id="year_dropdown_date_filter",  # Unique ID for the dropdown
                     className="w-full mt-2",  # Styling for the dropdown
@@ -192,8 +263,8 @@ def date_filter_dropdown():
             children=[
                 html.H2("Month", className="font-bold text-xl"),  # Label for month dropdown
                 dcc.Dropdown(
-                    month_names,  # Options for months
-                    month_range,  # Default selected values
+                    options = month_names,  # Options for months
+                    value = month_range,  # Default selected values
                     multi=True,  # Allow multiple selections
                     id="month_dropdown_date_filter",  # Unique ID for the dropdown
                     className="w-full mt-2",  # Styling for the dropdown
@@ -205,8 +276,8 @@ def date_filter_dropdown():
             children=[
                 html.H2("Day of the week", className="font-bold text-xl"),  # Label for day dropdown
                 dcc.Dropdown(
-                    day_options,  # Options for days
-                    day_range,  # Default selected values
+                    options = day_options,  # Options for days
+                    value = day_range,  # Default selected values
                     multi=True,  # Allow multiple selections
                     id="day_dropdown_date_filter",  # Unique ID for the dropdown
                     className="w-full mt-2",  # Styling for the dropdown
@@ -234,7 +305,7 @@ def feature_filter_dropdown(client):
                 children=[
                     # Dropdown for selecting features
                     dcc.Dropdown(
-                        options=[feature for feature in client.data_features],  # Feature options
+                        options=[feature for feature in client.data_features] if (client.data_features != []) else [],  # Feature options
                         value=[],  # Default selected value
                         id="feature_filter_dropdown",  # Unique ID for the dropdown
                         multi=False,  # Allow single selection

@@ -1,43 +1,52 @@
+import dash
+from dash import dcc, html
+from dash.dependencies import Input, Output
 
-from datetime import datetime
+app = dash.Dash(__name__)
 
-# Example list of sorted datetime objects
-datetime_axis = [
-    datetime(2025, 1, 1, 8, 0),
-    datetime(2025, 1, 1, 9, 0),
-    datetime(2025, 1, 1, 10, 0),
-    datetime(2025, 1, 1, 12, 30),  # Break in sequence (>1 hour)
-    datetime(2025, 1, 1, 13, 30),
-    datetime(2025, 1, 1, 14, 0),
-]
+# Generamos una lista de palabras
 
 
-from datetime import timedelta
+app.layout = html.Div(
+    style={"width": "500px", "height": "500px", "border": "1px solid black", "padding": "10px"},
+    children=[
+        dcc.Store(id="current-page", data=0),  # Almacenamos la página actual
+        
+        html.Div(id="words-container", style={"display": "grid", "gridTemplateColumns": "repeat(5, 1fr)", "gap": "10px"}),
 
-def get_first_consecutive_datetime(datetime_axis):
-    """
-    Identifies and returns the first datetime in consecutive groups from a sorted list.
+        html.Div(
+            style={"display": "flex", "justifyContent": "center", "marginTop": "20px"},
+            children=[
+                html.Button("Prev", id="prev-btn", n_clicks=0, style={"marginRight": "10px"}),
+                html.Button("Next", id="next-btn", n_clicks=0),
+            ],
+        ),
+    ],
+)
 
-    Args:
-        datetime_axis (list): List of datetime objects, sorted in ascending order.
-
-    Returns:
-        list: List of first datetime objects from each consecutive group.
-    """
-    result = []  # Final result list
-
-    # Initialize with the first element as the start of a group
-    current_group_first = datetime_axis[0]
-    result.append(current_group_first)  # Save the first element of the first group
+@app.callback(
+    Output("words-container", "children"),
+    Output("prev-btn", "disabled"),
+    Output("next-btn", "disabled"),
+    Input("prev-btn", "n_clicks"),
+    Input("next-btn", "n_clicks"),
+    Input("current-page", "data"),
+)
+def update_words(prev_clicks, next_clicks, current_page):
+    words = [f"Word {i+1}" for i in range(100)]
+    items_per_page = 25
+    total_pages = len(words) // items_per_page
+    new_page = min(max(current_page + (next_clicks - prev_clicks), 0), total_pages)
     
-    # Iterate to identify consecutive groups
-    for i in range(1, len(datetime_axis)):
-        if datetime_axis[i] - datetime_axis[i - 1] > timedelta(hours=1):  # Adjust interval if needed
-            current_group_first = datetime_axis[i]  # Update to the start of the next group
-            result.append(current_group_first)  # Save the first element of the new group
-    
-    return result
+    start_index = new_page * items_per_page
+    end_index = start_index + items_per_page
+    current_words = words[start_index:end_index]
 
+    return (
+        [html.Div(word, style={"padding": "10px", "background": "#f0f0f0", "borderRadius": "5px", "textAlign": "center"}) for word in current_words],
+        new_page == 0,
+        new_page == total_pages,
+    )
 
-result = get_first_consecutive_datetime(datetime_axis)
-
+if __name__ == "__main__":
+    app.run_server(debug=True)

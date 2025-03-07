@@ -1,6 +1,6 @@
 
 # Import necessary modules from Dash
-from dash import Dash, dcc, html, Input, Output, callback
+from dash import dcc, html
 from components.dropdown_components import custom_features_head, list_custom_features, date_filter_dropdown, feature_filter_dropdown
 from components.button_components import button, hourButton
 from styles.styles import button_style, button_dropdown_style
@@ -15,7 +15,8 @@ def main_tabs(client):
     """
     return html.Div(
         # Create a Tabs component inside a Div
-        dcc.Tabs(
+        children=[
+            dcc.Tabs(
             id="main-tab",  # Unique identifier for the Tabs component
             value="custom-feature-tab",  # Default active tab
             children=[
@@ -24,7 +25,7 @@ def main_tabs(client):
                     custom_features_head(),  # Heading for custom features
                     html.Div(
                         children=[
-                            html.Div(id="custom_dropdown", children=[], className="w-full"),  # Dropdown for custom features
+                            html.Div(id="custom_dropdown", children=[], className="w-[1200px] flex flex-row justify-left"),  # Dropdown for custom features
                             list_custom_features(client)
                             ],
                         className = "flex flex-row justify-between",
@@ -41,7 +42,7 @@ def main_tabs(client):
                                 children=[
                                     hourButton(range(0,24)),
                                     html.Div(
-                                        dcc.RangeSlider(0, 23, 1, value=[5, 15], id='hour-filter-slider', className="w-[85%]"),
+                                        dcc.RangeSlider(0, 23, 1, value=[0, 23], id='hour-filter-slider', className="w-full"),
                                         className="w-full mt-5"
                                     ),
                                 ],
@@ -50,15 +51,16 @@ def main_tabs(client):
                             html.Div(
                                 children=[
                                     button("Select range",id="apply_hour_range", style=button_style),
-                                    button("Deselect range",id="remove_hour_range", style=button_style)
+                                    button("Select All",id="select_all_hour_range", style=button_style),
+                                    button("Deselect All",id="deselect_all_hour_range", style=button_style),
                                 ],
                                 className="flex flex-col w-[160px] justify-between"
                             ),      
                         ],
                       className="w-full flex flex-row justify-between"  
                     ),
-                    button(text="Apply selection", id="apply_selection_hourfilter", style=button_style),    
-                ]),    # Tab for hour-based filtering
+                    html.Div(button(text="Apply selection", id="apply_selection_hourfilter", style=button_style), className="w-full flex flex-row justify-center")   
+                ],),    # Tab for hour-based filtering
                 dcc.Tab(label="Date Filter", value="date-filter-tab", children=[
                         html.Div(
                             children=date_filter_dropdown(),
@@ -70,10 +72,12 @@ def main_tabs(client):
                                 button(text="Select all", id="select_all_datefilter", style=button_style),  # Button to add custom feature,
                                 button(text="Apply selection", id="apply_selection_datefilter", style=f"{button_style} ml-4"),  # Button to add custom feature
                             ],
-                            className="flex flex-row"
+                            className="flex flex-row justify-center"
                         )
                     ]),     # Tab for day-based filtering
             ],
         ),
+        
+        ],
         className="my-10",  # CSS class to apply margin or styling
     )

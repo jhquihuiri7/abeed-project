@@ -2,9 +2,8 @@
 import plotly.graph_objects as go  # For creating Plotly charts
 from plotly.subplots import make_subplots  # For creating charts with subplots and multiple axes
 from components.button_components import button  # Custom button component
-from backend.db_dictionaries import feature_units_dict  # Dictionary containing units for features
 from backend.helper_functions import get_feature_units
-from utils.logic_functions import contains_both_axis, get_last_consecutive_datetime, group_consecutive, get_first_consecutive_datetime  # Function to check for double axis requirements
+from utils.logic_functions import contains_both_axis, group_consecutive, get_first_consecutive_datetime  # Function to check for double axis requirements
 from dash import dcc, html  # Dash components for UI
 from styles.styles import button_style  # Custom button styling
 import pandas as pd
@@ -12,7 +11,7 @@ import numpy as np
 
 
 # Function to create a bar chart with optional dual axes
-def bar_chart(client, cols=None, apply_filter=False, collapse=False):
+def bar_chart(client, cols=None, apply_filter=False, collapse=False, show_title=True):
     """
     Generates a bar chart with support for a secondary Y-axis if needed.
 
@@ -39,10 +38,9 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False):
                 
     # Determine the columns to use for the chart
     data = (custom_df if collapse else filter_df) if apply_filter else client.df 
-
     columns = data.columns if cols is None else data[cols].columns
     # Check if dual axes are needed and get axis names
-    double_axis, axis_names = contains_both_axis(columns)
+    double_axis, axis_names = contains_both_axis(client,columns)
     
     # Initialize lists to store maximum Y values for each axis
     max_y_primary = []
@@ -52,9 +50,9 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False):
     for column in columns:
         # Calculate the maximum value in the column
         max_val = max(data[column])
-        unit = "mv"
+        unit = "MW"
         try:
-            unit = get_feature_units(column)
+            unit = client.feature_dict[column].units
         except:
             for feature in client.created_features:
                 if feature["feature_name"] == column:
@@ -63,7 +61,7 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False):
         # Append the value to the appropriate axis based on the feature's unit
         (
             max_y_secondary.append(max_val)
-            if double_axis and unit == "mw"  # Secondary Y-axis for "mw" units
+            if double_axis and unit == "MW"  # Secondary Y-axis for "MW" units
             else max_y_primary.append(max_val)  # Primary Y-axis for other units
         )
         
@@ -79,7 +77,7 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False):
                 showlegend=True,# Show legend entry
             ),
             secondary_y=(
-                True if double_axis and unit == "mw" else False
+                True if double_axis and unit == "MW" else False
             ),  # Assign trace to secondary Y-axis if applicable
         )
         
@@ -101,9 +99,7 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False):
                 opacity=0.3
             )
     if client.datetimes_to_exclude and apply_filter and collapse==False:
-        
         result = get_first_consecutive_datetime(data.index)
-        
         for highlight_date in result:
             fig.add_vline(x=highlight_date, line_dash="solid", line_color="red", opacity=0.3, line_width=3)
         
@@ -112,6 +108,11 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False):
     
     # Update the layout of the chart
     fig.update_layout(
+        title=dict(
+        text=f"Hours: {client.filter_df.shape[0]}" if show_title else "",
+        x=0.85,  
+        xanchor="right"
+        ),
         xaxis_title="datetime",  # X-axis title
         legend_title="Features",  # Legend title
         hovermode="x unified",  # Unified hover mode
@@ -167,7 +168,7 @@ def multi_chart(client, apply_filter=False, collapse=False):
                     # Graph component displaying the bar chart
                     dcc.Graph(
                         id=graph["graph_uid"],  # Unique ID for the graph
-                        figure=bar_chart(client, graph["graph_data_features"],apply_filter, collapse),  # Generate the chart
+                        figure=bar_chart(client, graph["graph_data_features"],apply_filter, collapse, False),  # Generate the chart
                     ),
                     # Button to remove the graph
                     button(

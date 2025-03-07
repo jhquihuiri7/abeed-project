@@ -44,11 +44,12 @@ def hourButton(hours):
                 hour,  # Text displayed on the button
                 id={"type": "hour_button", "index": hour},  # Unique ID for the button
                 n_clicks=0,  # Initial click count set to 0
-                style={"backgroundColor": "white"},  # Default background color
+                style={"backgroundColor": "#d9d9d9"},  # Default background color
                 className=hourButtonStyle  # CSS class for styling the button
             ) for hour in hours
         ],
-        className="flex flex-row w-full justify-between"  # CSS class for layout styling
+        className="flex flex-row w-full justify-between",
+        id="hour_filter_buttons"# CSS class for layout styling
     )
 
 # Define a function to create a toggle switch for applying filters
