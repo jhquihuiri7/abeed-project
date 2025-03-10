@@ -126,14 +126,19 @@ def json_to_ops(json_data):
 
 def ops_to_json_upload(session: Ops):
     df = session.df.reset_index()
-    print(df)
+
     try:
        df['Datetime (HB)'] = df['Datetime (HB)'].astype(str)
     except:
         pass
     
     filtered_data = {
-        "df": df.to_dict(orient='records')
+        "df": df.to_dict(orient='records'),
+        "hour_filters": session.hour_filters,
+        "day_of_week_filters": session.day_of_week_filters,
+        "month_filters": session.month_filters,
+        "year_filters": session.year_filters,
+        "feature_filters": session.feature_filters
     }
 
     return json.dumps(filtered_data, indent=4)
@@ -141,8 +146,8 @@ def ops_to_json_upload(session: Ops):
 def json_to_ops_upload(json_data):
     # Ensure `json_data` is parsed into a dictionary
     if isinstance(json_data, str):  # If it's a string, parse it
-        json_data = json.loads(json_data)
-        df = pd.DataFrame(json_data["df"])
+        data = json.loads(json_data)
+        df = pd.DataFrame(data["df"])
         df['Datetime (HB)'] = pd.to_datetime(df['Datetime (HB)'])
         df.set_index('Datetime (HB)', inplace=True)
         
@@ -156,10 +161,14 @@ def json_to_ops_upload(json_data):
     
     # Populate the instance
     ops_instance.df = df
-
+    ops_instance.hour_filters = data.get("hour_filters")
+    ops_instance.day_of_week_filters = data.get("day_of_week_filters")
+    ops_instance.month_filters = data.get("month_filters")
+    ops_instance.year_filters = data.get("year_filters")
+    ops_instance.feature_filters = data.get("feature_filters")
     # Run the update methods
     #ops_instance.update_data()
-    #ops_instance.update_datetimes_to_exclude()
-    #ops_instance.update_filter_df()
+    ops_instance.update_datetimes_to_exclude()
+    ops_instance.update_filter_df()
 
     return ops_instance
