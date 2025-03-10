@@ -50,7 +50,7 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False, show_title=
     for column in columns:
         # Calculate the maximum value in the column
         max_val = max(data[column])
-        unit = "MW"
+        unit = "USD"
         try:
             unit = client.feature_dict[column].units
         except:

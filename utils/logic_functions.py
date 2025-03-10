@@ -17,6 +17,7 @@ def contains_both_axis(client, cols):
     """
     units = []
     for column in cols:
+        unit = "USD"
         try:
             unit = client.feature_dict[column].units
         except:
@@ -322,7 +323,7 @@ def validate_update_data(client, selected_features):
         dependent_custom_features = set(get_custom_features_names(client, missing_features,show_cumulative=True))
         message = f"Cannot have {format_set(dependent_custom_features)} custom feature without {format_set(missing_features)} data feature (Hint: delete {format_set(dependent_custom_features)} or reselect {format_set(missing_features)} data feature)"
         return False, message
-    if not feature_filter.issubset(selected_features):
+    if not feature_filter.issubset(set(selected_features) | set(get_custom_features_names(client, [],show_all=True, show_cumulative=True))):
         missing_features = set(feature_filter) - set(selected_features)
         message = f"Cannot have {format_set(feature_filter)} feature filter without {format_set(missing_features)} data feature (Hint: delete {format_set(feature_filter)} filter or reselect {format_set(missing_features)} data feature)"
         return False, message
