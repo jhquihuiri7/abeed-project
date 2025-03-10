@@ -20,29 +20,26 @@ dropZone.addEventListener('drop', (e) => {
 
   if (files.length > 0) {
     const file = files[0];
-
-    // Check if the file is a JSON file by its type or extension
-    if (file.type === 'application/json' || file.name.endsWith('.json')) {
+    const fileName = file.name.toLowerCase();
+    
+    if (file.type === 'application/json' || fileName.endsWith('.json')) {
       const reader = new FileReader();
-
-      // Set up the event for when the file is read
       reader.onload = (event) => {
         try {
-          const fileContent = event.target.result; // Get content as text
-          const jsonContent = JSON.parse(fileContent); // Parse the content as JSON
+          const fileContent = event.target.result;
+          const jsonContent = JSON.parse(fileContent);
 
-          // Send the data to Flask using a POST request
           fetch('/save-json', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify(jsonContent), // Send the JSON data to Flask
+            body: JSON.stringify(jsonContent),
           })
-          .then(response => response.json())  // Handling the response from Flask
+          .then(response => response.json())
           .then(data => {
-            console.log('Data sent to Flask:', data); // Log response from Flask
-            window.location.href = '/home?session_flag=restore'
+            console.log('Data sent to Flask:', data);
+            window.location.href = '/home?session_flag=restore';
           })
           .catch(error => {
             console.error('Error al enviar datos:', error);
@@ -54,24 +51,36 @@ dropZone.addEventListener('drop', (e) => {
           alert('El archivo contiene JSON no válido.');
         }
       };
-
-      // Handle errors during file reading
       reader.onerror = () => {
         alert('Hubo un error al leer el archivo.');
       };
-
-      // Read the file as text
       reader.readAsText(file);
+    } else if (file.type === 'text/csv' || fileName.endsWith('.csv')) {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      fetch('/upload', {
+        method: 'POST',
+        body: formData,
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('CSV file uploaded:', data);
+        window.location.href = '/custom_dash';
+      })
+      .catch(error => {
+        console.error('Error al cargar el archivo CSV:', error);
+        alert('Hubo un error al subir el archivo CSV.');
+      });
     } else {
-      alert(`Tipo de archivo no válido: "${file.name}". Por favor, sube un archivo JSON.`);
+      alert(`Tipo de archivo no válido: "${file.name}". Por favor, sube un archivo JSON o CSV.`);
     }
   } else {
-    alert('No se detectó un archivo. Por favor, sube un archivo JSON válido.');
+    alert('No se detectó un archivo. Por favor, sube un archivo JSON o CSV válido.');
   }
 });
 
 // New session button functionality
 newSessionButton.addEventListener('click', () => {
-  // Redirige a la página 'home' sin pasar los datos en la URL
-  window.location.href = '/home'; // Los datos seguirán estando en localStorage
+  window.location.href = '/home';
 });

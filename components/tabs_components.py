@@ -1,83 +1,156 @@
-
 # Import necessary modules from Dash
 from dash import dcc, html
-from components.dropdown_components import custom_features_head, list_custom_features, date_filter_dropdown, feature_filter_dropdown
+from components.dropdown_components import (
+    custom_features_head,
+    list_custom_features,
+    date_filter_dropdown,
+    feature_filter_dropdown,
+)
 from components.button_components import button, hourButton
 from styles.styles import button_style, button_dropdown_style
 
+
 # Define a function to create the main tabs layout
-def main_tabs(client):
+def main_tabs(client, show_custom=True):
     """
     Creates a set of tabs for filtering data based on different criteria.
 
     Returns:
         html.Div: A Dash HTML Div containing a Tabs component with three tabs.
     """
-    return html.Div(
-        # Create a Tabs component inside a Div
-        children=[
-            dcc.Tabs(
-            id="main-tab",  # Unique identifier for the Tabs component
-            value="custom-feature-tab",  # Default active tab
-            children=[
-                # Define individual tabs with labels and values
-                dcc.Tab(label="Custom Feature", value="custom-feature-tab",  children=[
+
+    # Lista de tabs, excluyendo "Custom Feature" si show_custom es False
+    tabs = []
+
+    if show_custom:
+        tabs.append(
+            dcc.Tab(
+                label="Custom Feature",
+                value="custom-feature-tab",
+                children=[
                     custom_features_head(),  # Heading for custom features
                     html.Div(
                         children=[
-                            html.Div(id="custom_dropdown", children=[], className="w-[1200px] flex flex-row justify-left"),  # Dropdown for custom features
-                            list_custom_features(client)
-                            ],
-                        className = "flex flex-row justify-between",
+                            html.Div(
+                                id="custom_dropdown",
+                                children=[],
+                                className="w-[1200px] flex flex-row justify-left",
+                            ),  # Dropdown for custom features
+                            list_custom_features(client),
+                        ],
+                        className="flex flex-row justify-between",
                     ),
-                    button(text="Add Custom Feature", id="add_custom_feature", style=button_style),  # Button to add custom feature
-                ]),  # Tab for feature-based filtering
-                dcc.Tab(label="Feature Filter", value="feature-filter-tab", children=[
-                    feature_filter_dropdown(client)
-                ]),  # Tab for feature-based filteringclient
-                dcc.Tab(label="Hour Filter", value="hour-filter-tab", children=[
+                    button(
+                        text="Add Custom Feature",
+                        id="add_custom_feature",
+                        style=button_style,
+                    ),  # Button to add custom feature
+                ],
+            )
+        )
+
+    # Agregar los otros tabs
+    tabs.extend(
+        [
+            dcc.Tab(
+                label="Feature Filter",
+                value="feature-filter-tab",
+                children=[feature_filter_dropdown(client)],
+            ),
+            dcc.Tab(
+                label="Hour Filter",
+                value="hour-filter-tab",
+                children=[
                     html.Div(
                         children=[
                             html.Div(
                                 children=[
-                                    hourButton(range(0,24)),
+                                    hourButton(range(0, 24)),
                                     html.Div(
-                                        dcc.RangeSlider(0, 23, 1, value=[0, 23], id='hour-filter-slider', className="w-full"),
-                                        className="w-full mt-5"
+                                        dcc.RangeSlider(
+                                            0,
+                                            23,
+                                            1,
+                                            value=[0, 23],
+                                            id="hour-filter-slider",
+                                            className="w-full",
+                                        ),
+                                        className="w-full mt-5",
                                     ),
                                 ],
-                                className="flex flex-col w-[80%] justify-center"
+                                className="flex flex-col w-[80%] justify-center",
                             ),
                             html.Div(
                                 children=[
-                                    button("Select range",id="apply_hour_range", style=button_style),
-                                    button("Select All",id="select_all_hour_range", style=button_style),
-                                    button("Deselect All",id="deselect_all_hour_range", style=button_style),
+                                    button(
+                                        "Select range",
+                                        id="apply_hour_range",
+                                        style=button_style,
+                                    ),
+                                    button(
+                                        "Select All",
+                                        id="select_all_hour_range",
+                                        style=button_style,
+                                    ),
+                                    button(
+                                        "Deselect All",
+                                        id="deselect_all_hour_range",
+                                        style=button_style,
+                                    ),
                                 ],
-                                className="flex flex-col w-[160px] justify-between"
-                            ),      
+                                className="flex flex-col w-[160px] justify-between",
+                            ),
                         ],
-                      className="w-full flex flex-row justify-between"  
+                        className="w-full flex flex-row justify-between",
                     ),
-                    html.Div(button(text="Apply selection", id="apply_selection_hourfilter", style=button_style), className="w-full flex flex-row justify-center")   
-                ],),    # Tab for hour-based filtering
-                dcc.Tab(label="Date Filter", value="date-filter-tab", children=[
-                        html.Div(
-                            children=date_filter_dropdown(),
-                            id= "date_filter_dropdown",
-                            className="flex flex-row justify-around mt-10"
+                    html.Div(
+                        button(
+                            text="Apply selection",
+                            id="apply_selection_hourfilter",
+                            style=button_style,
                         ),
-                        html.Div(
-                            children=[
-                                button(text="Select all", id="select_all_datefilter", style=button_style),  # Button to add custom feature,
-                                button(text="Apply selection", id="apply_selection_datefilter", style=f"{button_style} ml-4"),  # Button to add custom feature
-                            ],
-                            className="flex flex-row justify-center"
-                        )
-                    ]),     # Tab for day-based filtering
-            ],
-        ),
-        
+                        className="w-full flex flex-row justify-center",
+                    ),
+                ],
+            ),
+            dcc.Tab(
+                label="Date Filter",
+                value="date-filter-tab",
+                children=[
+                    html.Div(
+                        children=date_filter_dropdown(),
+                        id="date_filter_dropdown",
+                        className="flex flex-row justify-around mt-10",
+                    ),
+                    html.Div(
+                        children=[
+                            button(
+                                text="Select all",
+                                id="select_all_datefilter",
+                                style=button_style,
+                            ),
+                            button(
+                                text="Apply selection",
+                                id="apply_selection_datefilter",
+                                style=f"{button_style} ml-4",
+                            ),
+                        ],
+                        className="flex flex-row justify-center",
+                    ),
+                ],
+            ),
+        ]
+    )
+
+    return html.Div(
+        children=[
+            dcc.Tabs(
+                id="main-tab",
+                value=(
+                    tabs[0].value if tabs else None
+                ),  # Asegurar que el valor inicial sea válido
+                children=tabs,
+            ),
         ],
-        className="my-10",  # CSS class to apply margin or styling
+        className="my-10",
     )

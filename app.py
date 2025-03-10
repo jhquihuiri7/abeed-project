@@ -65,7 +65,8 @@ def create_dash_app(server):
     app = Dash(
         __name__,
         server=server, 
-        url_base_pathname='/dash/',
+        url_base_pathname='/home/',
+        #suppress_callback_exceptions=True,
         external_scripts=external_scripts,
         external_stylesheets=external_stylesheets,
         meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}],
@@ -98,7 +99,7 @@ def create_dash_app(server):
                 className="flex flex-row justify-between"    
             ),
             main_tabs(ops),  # Tabs component for layout
-            apply_filters_toggle("Collapse"),
+            apply_filters_toggle("Collapse", is_upload=False),
             dcc.Graph(id="main_graph"),  # Graph for displaying data
             button(text="Add Graph", id="add_graph_button", style=button_style),  # Button to add new graph
             html.Div(id="dynamic_div", children=[], className="flex flex-wrap"),  # Dynamic div for additional content

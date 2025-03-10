@@ -124,3 +124,42 @@ def json_to_ops(json_data):
 
     return ops_instance
 
+def ops_to_json_upload(session: Ops):
+    df = session.df.reset_index()
+    print(df)
+    try:
+       df['Datetime (HB)'] = df['Datetime (HB)'].astype(str)
+    except:
+        pass
+    
+    filtered_data = {
+        "df": df.to_dict(orient='records')
+    }
+
+    return json.dumps(filtered_data, indent=4)
+
+def json_to_ops_upload(json_data):
+    # Ensure `json_data` is parsed into a dictionary
+    if isinstance(json_data, str):  # If it's a string, parse it
+        json_data = json.loads(json_data)
+        df = pd.DataFrame(json_data["df"])
+        df['Datetime (HB)'] = pd.to_datetime(df['Datetime (HB)'])
+        df.set_index('Datetime (HB)', inplace=True)
+        
+    elif isinstance(json_data, dict):  # If it's already a dictionary, use it directly
+        data = json_data
+    else:
+        raise TypeError("Input data must be a JSON string or dictionary.")
+
+    # Create a new instance of Ops
+    ops_instance = Ops()
+    
+    # Populate the instance
+    ops_instance.df = df
+
+    # Run the update methods
+    #ops_instance.update_data()
+    #ops_instance.update_datetimes_to_exclude()
+    #ops_instance.update_filter_df()
+
+    return ops_instance

@@ -1,4 +1,4 @@
-from utils.functions import ops_to_json, list_custom_filter_children
+from utils.functions import ops_to_json, ops_to_json_upload,list_custom_filter_children
 from utils.logic_functions import get_value_range, get_feature_filter_dropdown_opts
 from components.dropdown_components import custom_dropdow
 from components.graph_components import bar_chart, multi_chart
@@ -43,3 +43,27 @@ def restore_session(client, apply_filters_state, collapse_expand_filter_state, c
                             )], className="mb-4") for feature_filter in client.feature_filters]
         
     return ops_to_json(client), custom_feature, currentFigure,currentChildren, custom_name, custom_dropdow_children, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown_default, feature_filter_min_range, feature_filter_max_range, feature_filter_list,[], apply_filters_state, collapse_expand_filter_disabled
+
+
+
+def restore_session_upload(client, apply_filters_state, collapse_expand_filter_state, collapse_expand_filter_disabled, feature_filter_min_range, feature_filter_max_range):
+    
+    currentFigure = go.Figure()
+    currentChildren = []
+    custom_dropdow_children = []
+    custom_name = ""
+    list_custom_features = []
+    feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
+    feature_filter_dropdown_default = ""
+    feature_filter_list = []
+    
+    currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
+        
+    return ops_to_json_upload(client), currentFigure,currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown_default, feature_filter_min_range, feature_filter_max_range, feature_filter_list, apply_filters_state, collapse_expand_filter_disabled
+
+
+
+
+
+
+
