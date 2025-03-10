@@ -71,10 +71,9 @@ def home_upload():
 
     if file and file.filename.endswith('.csv'):
         try:
-            # Leer el CSV usando Pandas
             uploaded_data = pd.read_csv(io.StringIO(file.stream.read().decode('utf-8')))
-            uploaded_data['Datetime (HB)'] = pd.to_datetime(uploaded_data['Datetime (HB)'])
-            uploaded_data.set_index('Datetime (HB)', inplace=True)
+            uploaded_data.iloc[:, 0] = pd.to_datetime(uploaded_data.iloc[:, 0])
+            uploaded_data.set_index(uploaded_data.columns[0], inplace=True)
            
             # Enviar la respuesta con los datos procesados
             return jsonify({'message': 'Archivo CSV recibido'}), 200

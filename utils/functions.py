@@ -148,8 +148,8 @@ def json_to_ops_upload(json_data):
     if isinstance(json_data, str):  # If it's a string, parse it
         data = json.loads(json_data)
         df = pd.DataFrame(data["df"])
-        df['Datetime (HB)'] = pd.to_datetime(df['Datetime (HB)'])
-        df.set_index('Datetime (HB)', inplace=True)
+        df.iloc[:, 0] = pd.to_datetime(df.iloc[:, 0])
+        df.set_index(df.columns[0], inplace=True)
         
     elif isinstance(json_data, dict):  # If it's already a dictionary, use it directly
         data = json_data
