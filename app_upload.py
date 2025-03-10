@@ -1,41 +1,25 @@
-# Python packages
-import math
-import io
-import pandas as pd
-from datetime import date
-
 # Dash imports
 from dash import Dash, _dash_renderer
-from dash import dcc, html, Input, Output, State, callback, callback_context, ALL, exceptions
-import json
+from dash import dcc, html, Input, Output, State, callback_context, ALL, exceptions
 
 # Components
 import dash_mantine_components as dmc
-from components.checkbox_components import expandable_container
-from components.daterange_components import main_daterange
 from components.tabs_components import main_tabs
 from components.button_components import button, apply_filters_toggle
-from components.notification_components import show_notification, show_modal
+from components.notification_components import show_notification
 from components.graph_components import multi_chart, bar_chart
-from components.dropdown_components import main_dropdown, date_filter_dropdown, custom_dropdow
+from components.dropdown_components import date_filter_dropdown
 
 
 # Utilities
 from utils.restore_session import restore_session_upload
 from utils.logic_functions import (
-    update_custom_feature,
     validateFeatureFilterData,
-    returnValidFeatures,
-    extract_values_custom_feature,
     get_feature_filter_dropdown_opts,
     validateApplyDatetimeSelection,
-    validate_add_custom_feature,
-    validate_delete_custom_feature,
-    validate_update_data,
     validateApplyFilterToggle
 )
 from utils.functions import (
-    list_custom_filter_children,
     ops_to_json_upload,
     json_to_ops_upload,
     list_feature_filter
@@ -45,7 +29,7 @@ from utils.functions import (
 from backend.Class import Ops
 
 # Styles
-from styles.styles import button_style, hourButtonStyle
+from styles.styles import button_style
 
 # React version setting
 _dash_renderer._set_react_version("18.2.0")
