@@ -50,10 +50,7 @@ def restore_session_upload(client, apply_filters_state, collapse_expand_filter_s
     
     currentFigure = go.Figure()
     currentChildren = []
-    custom_dropdow_children = []
-    custom_name = ""
-    list_custom_features = []
-    feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
+    feature_filter_dropdown_opts = client.df.columns
     feature_filter_dropdown_default = ""
     feature_filter_list = []
     

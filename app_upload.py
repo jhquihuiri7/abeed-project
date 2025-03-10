@@ -104,8 +104,8 @@ def create_dash_upload_app(server):
     def update_apply_filters(collapse_expand_filter):
                 
         return "Collapse" if collapse_expand_filter else "Expand" 
-    """
-    @callback(
+    
+    @app.callback(
         Output("date_filter_dropdown","children"),
         Input("select_all_datefilter","n_clicks"),
         State("date_filter_dropdown","children"),
@@ -130,7 +130,7 @@ def create_dash_upload_app(server):
         
         return datefilter_dropdown
     
-    @callback(
+    @app.callback(
         Output({"type": "hour_button", "index": ALL}, "style"),
         Input({"type": "hour_button", "index": ALL}, "n_clicks"),
         Input("apply_hour_range","n_clicks"),
@@ -182,7 +182,7 @@ def create_dash_upload_app(server):
             return hour_button_style
              
         return hour_button_style
-    """
+    
     @app.callback(
         Output("client", "data"),
         Output("main_graph", "figure"),
@@ -283,20 +283,17 @@ def create_dash_upload_app(server):
             client.remove_graph_button(triggered_id.get("index"))
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)            
             return ops_to_json_upload(client),currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, apply_filters_state, collapse_expand_filter_disabled
-        """        
+               
         if triggered_id == "feature_filter_add":
-            is_valid, message, feature_filter_min_range, feature_filter_max_range = validateFeatureFilterData(client, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range)
-            if is_valid:    
-                client.add_feature_filter_button(feature_filter_dropdown,feature_filter_min_range, feature_filter_max_range)
-                feature_filter_list = list_feature_filter(client)
-                feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)  
-                apply_filters_state = ['Apply filter']
-                collapse_expand_filter_disabled = False 
-                currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
-                currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)     
-            else:
-                notification = show_notification(message)
-            return ops_to_json(client),custom_feature,currentFigure, currentChildren, custom_name, currentDropdownChildren, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, "", "", feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled       
+            print(type(feature_filter_min_range))
+            client.add_feature_filter_button(feature_filter_dropdown,float(feature_filter_min_range), float(feature_filter_max_range))
+            feature_filter_list = list_feature_filter(client)
+            feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)  
+            apply_filters_state = ['Apply filter']
+            collapse_expand_filter_disabled = False 
+            currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
+            currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
+            return ops_to_json_upload(client), currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, "", "", feature_filter_list, apply_filters_state, collapse_expand_filter_disabled       
         
         if isinstance(triggered_id, dict) and triggered_id.get("type") == "feature_filter_remove":
             index = triggered_id.get("index")
@@ -307,8 +304,8 @@ def create_dash_upload_app(server):
             collapse_expand_filter_disabled = False 
             currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)  
-            return ops_to_json(client),custom_feature, currentFigure, currentChildren, custom_name,currentDropdownChildren, list_custom_features, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled
-        
+            return ops_to_json_upload(client), currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, "", "", feature_filter_list, apply_filters_state, collapse_expand_filter_disabled
+        """ 
         if (triggered_id == "apply_selection_datefilter") or (triggered_id == "apply_selection_hourfilter"):
             hours_to_include = [index for index, hour in enumerate(hour_button) if hour["backgroundColor"] != "white"]
             client.apply_datetime_filters_button(hours_to_include, day_dropdown_date_filter_state, month_dropdown_date_filter_state, year_dropdown_date_filter_state)
