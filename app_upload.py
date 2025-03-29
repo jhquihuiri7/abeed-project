@@ -232,6 +232,7 @@ def create_dash_upload_app(server):
         Output("apply_filters", "value"),
         Output("collapse_expand_filter", "disabled"),
         # Inputs and states for callback
+        Input("update_graph_button", "n_clicks"),
         Input("add_graph_button", "n_clicks"),
         Input({"type": "remove_button", "index": ALL}, "n_clicks"),
         Input("feature_filter_add","n_clicks"),
@@ -259,6 +260,7 @@ def create_dash_upload_app(server):
         State("client", "data"),
     )
     def update_render(
+        update_button,
         add_button,
         remove_button,
         feature_filter_add, 
@@ -298,14 +300,13 @@ def create_dash_upload_app(server):
             pass
         
         if triggered_id == "update_graph_button":
-            is_valid, message = validate_update_data(client, features)
-            if is_valid:
-                client.update_data_button(client.start_date, client.end_date, features)
-                currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
-                currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
-                feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
-            else:
-                notification = show_notification(message)
+            print(client.start_date, client.end_date)
+            
+            client.update_data_button(client.start_date, client.end_date, features, overrite_current_df=False)
+            currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
+            currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
+            feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
+            
             return ops_to_json_upload(client),currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
         
         # Add graph when add button is clicked

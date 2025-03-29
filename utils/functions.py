@@ -131,6 +131,14 @@ def ops_to_json_upload(session: Ops):
        df['Datetime (HB)'] = df['Datetime (HB)'].astype(str)
     except:
         pass
+    try:
+       df['datetime'] = df['datetime'].astype(str)
+    except:
+        pass
+    try:
+       df['index'] = df['index'].astype(str)
+    except:
+        pass
     
     filtered_data = {
         "df": df.to_dict(orient='records'),

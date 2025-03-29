@@ -92,6 +92,8 @@ def custom_dash():
     if not uploaded_data.empty:
         client = Ops()
         client.df = uploaded_data
+        client.start_date = client.df.min()
+        client.end_date = client.df.max()
         json_data = ops_to_json_upload(client)
         uploaded_data = pd.DataFrame()
         # Aquí puedes actualizar la aplicación de Dash con los nuevos datos
