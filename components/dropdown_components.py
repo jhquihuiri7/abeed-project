@@ -31,7 +31,7 @@ def main_dropdown(client):
             persistence=True,
             persistence_type='session'
         ),
-        className="w-[28%] mt-10"
+        className="w-[28%]"
     )
 
 

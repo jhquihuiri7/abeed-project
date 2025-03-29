@@ -126,22 +126,28 @@ def json_to_ops(json_data):
 
 def ops_to_json_upload(session: Ops):
     df = session.df.reset_index()
+    filter_df = session.filter_df.reset_index()
 
     try:
        df['Datetime (HB)'] = df['Datetime (HB)'].astype(str)
+       filter_df['Datetime (HB)'] = filter_df['Datetime (HB)'].astype(str)
     except:
         pass
     try:
        df['datetime'] = df['datetime'].astype(str)
+       filter_df['datetime'] = filter_df['datetime'].astype(str)
     except:
         pass
     try:
        df['index'] = df['index'].astype(str)
+       filter_df['index'] = filter_df['index'].astype(str)
     except:
         pass
     
     filtered_data = {
         "df": df.to_dict(orient='records'),
+        "filter_df": filter_df.to_dict(orient='records'),
+        "created_features":session.created_features,
         "hour_filters": session.hour_filters,
         "day_of_week_filters": session.day_of_week_filters,
         "month_filters": session.month_filters,
@@ -158,6 +164,11 @@ def json_to_ops_upload(json_data):
         df = pd.DataFrame(data["df"])
         df.iloc[:, 0] = pd.to_datetime(df.iloc[:, 0])
         df.set_index(df.columns[0], inplace=True)
+
+        filter_df = pd.DataFrame(data["filter_df"])
+        if not filter_df.empty:
+            filter_df.iloc[:, 0] = pd.to_datetime(filter_df.iloc[:, 0])
+            filter_df.set_index(filter_df.columns[0], inplace=True)
         
     elif isinstance(json_data, dict):  # If it's already a dictionary, use it directly
         data = json_data
@@ -169,6 +180,8 @@ def json_to_ops_upload(json_data):
     
     # Populate the instance
     ops_instance.df = df
+    ops_instance.filter_df = filter_df
+    ops_instance.created_features = data.get("created_features") 
     ops_instance.hour_filters = data.get("hour_filters")
     ops_instance.day_of_week_filters = data.get("day_of_week_filters")
     ops_instance.month_filters = data.get("month_filters")

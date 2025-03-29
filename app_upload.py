@@ -322,11 +322,10 @@ def create_dash_upload_app(server):
             return ops_to_json_upload(client),currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
         
         if triggered_id == "make_cumulative_button":
-            gg = [
+            dropdown_operation = [
                 {"Feature": cumulative_dropdown}
             ]
-
-            client.create_custom_feature_button(gg, True,"")
+            client.create_custom_feature_button(dropdown_operation, True,"")
             currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
             feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
