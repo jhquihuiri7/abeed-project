@@ -10,7 +10,7 @@ from components.tabs_components import main_tabs
 from components.button_components import button, apply_filters_toggle
 from components.notification_components import show_notification
 from components.graph_components import multi_chart, bar_chart
-from components.dropdown_components import main_dropdown, date_filter_dropdown
+from components.dropdown_components import main_dropdown, date_filter_dropdown, cumulative_conversion_dropdown
 
 
 # Utilities
@@ -76,15 +76,17 @@ def create_dash_upload_app(server):
             html.Div(
                 children=[
                     main_dropdown(ops),
-                    html.Div(
-                        children=[
-                            button(text="Update Graph", id="update_graph_button", style=button_style),  # Button to update graph
-                        ],
-                        className="flex flex-row justify-between items-end w-[500px]"
-                    )
+                    button(text="Update Graph", id="update_graph_button", style=button_style),
                     ],
                 className="flex flex-row justify-between"    
-            ),    
+            ),  
+            html.Div(
+                children=[
+                    cumulative_conversion_dropdown(ops),
+                    button(text="Make cumulative", id="make_cumulative_button", style=button_style)
+                ],
+                className="flex flex-row justify-between my-10"
+            ),
             main_tabs(ops, show_custom=False),  # Tabs component for layout
             apply_filters_toggle("Collapse"),
             dcc.Graph(id="main_graph"),  # Graph for displaying data
@@ -220,6 +222,14 @@ def create_dash_upload_app(server):
         return hour_button_style
     
     @app.callback(
+        Output("cumulative_dropdown","options"),
+        Input("client", "data")
+    )
+    def cumulative_dropdown(data):
+        client = json_to_ops_upload(data)
+        return client.df.columns
+
+    @app.callback(
         Output("client", "data"),
         Output("main_graph", "figure"),
         Output("dynamic_div", "children"),
@@ -233,6 +243,7 @@ def create_dash_upload_app(server):
         Output("collapse_expand_filter", "disabled"),
         # Inputs and states for callback
         Input("update_graph_button", "n_clicks"),
+        Input("make_cumulative_button", "n_clicks"),
         Input("add_graph_button", "n_clicks"),
         Input({"type": "remove_button", "index": ALL}, "n_clicks"),
         Input("feature_filter_add","n_clicks"),
@@ -243,6 +254,7 @@ def create_dash_upload_app(server):
         Input("apply_selection_datefilter", "n_clicks"),
         #Input({"type": "hour_button", "index": ALL}, "n_clicks"),
         State("main_dropdown", "value"),
+        State("cumulative_dropdown","value"),
         State("main_graph", "figure"),
         State("dynamic_div", "children"),
         State("feature_filter_dropdown", "options"),
@@ -261,6 +273,7 @@ def create_dash_upload_app(server):
     )
     def update_render(
         update_button,
+        make_cumulative,
         add_button,
         remove_button,
         feature_filter_add, 
@@ -270,6 +283,7 @@ def create_dash_upload_app(server):
         collapse_expand_filter,
         apply_selection_datefilter,
         features,
+        cumulative_dropdown,
         currentFigure,
         currentChildren,
         feature_filter_dropdown_opts,
@@ -300,9 +314,19 @@ def create_dash_upload_app(server):
             pass
         
         if triggered_id == "update_graph_button":
-            print(client.start_date, client.end_date)
-            
             client.update_data_button(client.start_date, client.end_date, features, overrite_current_df=False)
+            currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
+            currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
+            feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
+            
+            return ops_to_json_upload(client),currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
+        
+        if triggered_id == "make_cumulative_button":
+            gg = [
+                {"Feature": cumulative_dropdown}
+            ]
+
+            client.create_custom_feature_button(gg, True,"")
             currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
             feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)

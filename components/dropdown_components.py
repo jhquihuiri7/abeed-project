@@ -344,3 +344,14 @@ def feature_filter_dropdown(client):
             )
         ]
     )
+
+def cumulative_conversion_dropdown(client):
+    return html.Div(
+        dcc.Dropdown(
+            id="cumulative_dropdown",
+            value="",
+            options=client.df.columns,
+            className="w-full flex flex row flex-wrap",
+        ),
+        className="w-[28%]",
+    )
