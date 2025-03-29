@@ -66,7 +66,6 @@ def create_dash_app(server):
         __name__,
         server=server, 
         url_base_pathname='/home/',
-        #suppress_callback_exceptions=True,
         external_scripts=external_scripts,
         external_stylesheets=external_stylesheets,
         meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}],
@@ -82,6 +81,7 @@ def create_dash_app(server):
                 expandable_text_id="expandable_text_primary",
                 client=ops
             ),
+            
             # Checkbox component for feature selection
             html.Div(
                 children=[

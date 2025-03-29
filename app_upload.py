@@ -4,16 +4,19 @@ from dash import dcc, html, Input, Output, State, callback_context, ALL, excepti
 
 # Components
 import dash_mantine_components as dmc
+from components.checkbox_components import expandable_container
+
 from components.tabs_components import main_tabs
 from components.button_components import button, apply_filters_toggle
 from components.notification_components import show_notification
 from components.graph_components import multi_chart, bar_chart
-from components.dropdown_components import date_filter_dropdown
+from components.dropdown_components import main_dropdown, date_filter_dropdown
 
 
 # Utilities
 from utils.restore_session import restore_session_upload
 from utils.logic_functions import (
+    validate_update_data,
     validateFeatureFilterData,
     get_feature_filter_dropdown_opts,
     validateApplyDatetimeSelection,
@@ -64,7 +67,24 @@ def create_dash_upload_app(server):
     app.layout = dmc.MantineProvider(
         children=[html.Div(
         className="p-10 w-full",
-        children=[            
+        children=[     
+            expandable_container(
+                toggle_button_id="toggle_exapandable_button_primary", 
+                expandable_text_id="expandable_text_primary",
+                client=ops
+            ),        
+            html.Div(
+                children=[
+                    main_dropdown(ops),
+                    html.Div(
+                        children=[
+                            button(text="Update Graph", id="update_graph_button", style=button_style),  # Button to update graph
+                        ],
+                        className="flex flex-row justify-between items-end w-[500px]"
+                    )
+                    ],
+                className="flex flex-row justify-between"    
+            ),    
             main_tabs(ops, show_custom=False),  # Tabs component for layout
             apply_filters_toggle("Collapse"),
             dcc.Graph(id="main_graph"),  # Graph for displaying data
@@ -77,6 +97,39 @@ def create_dash_upload_app(server):
         dcc.Store(id="client", data=ops_to_json_upload(ops)),
         ]
     ) 
+    
+    @app.callback(
+    Output("main_dropdown", "options"),
+    Output("expandable_text_primary", "style"),
+    Output("toggle_exapandable_button_primary", "children"),
+    Input("toggle_exapandable_button_primary", "n_clicks"),
+    State("expandable_text_primary", "style"),
+    prevent_initial_call=True
+    )
+    def toggle_text_primary(n_clicks, expandable_text_primary):
+        ctx = callback_context
+        if not ctx.triggered:
+            raise exceptions.PreventUpdate
+        options = ops.available_readable_names
+        if n_clicks % 2 == 1:
+            if expandable_text_primary["display"] == "block":
+                options = list(set(ops.available_readable_names) | set(ops.available_db_names))
+            return options, {"display": "block"}, "Collapse Feature Menu"
+        return options, {"display": "none"}, "Expand Feature Menu"
+    
+    @app.callback(
+        Output("main_dropdown", "options", allow_duplicate=True),
+        Input("all_features_checkbox", "value"),
+        prevent_initial_call=True
+    )
+    def toggle_all_features(value):
+        ctx = callback_context
+        if not ctx.triggered:
+            raise exceptions.PreventUpdate
+        options = ops.available_readable_names
+        if value != []:
+            options = list(set(options) | set(ops.available_db_names))
+        return options
     
     
     @app.callback(
@@ -188,6 +241,7 @@ def create_dash_upload_app(server):
         Input("collapse_expand_filter","value"),
         Input("apply_selection_datefilter", "n_clicks"),
         #Input({"type": "hour_button", "index": ALL}, "n_clicks"),
+        State("main_dropdown", "value"),
         State("main_graph", "figure"),
         State("dynamic_div", "children"),
         State("feature_filter_dropdown", "options"),
@@ -213,6 +267,7 @@ def create_dash_upload_app(server):
         apply_filters,
         collapse_expand_filter,
         apply_selection_datefilter,
+        features,
         currentFigure,
         currentChildren,
         feature_filter_dropdown_opts,
@@ -242,6 +297,16 @@ def create_dash_upload_app(server):
         except:
             pass
         
+        if triggered_id == "update_graph_button":
+            is_valid, message = validate_update_data(client, features)
+            if is_valid:
+                client.update_data_button(client.start_date, client.end_date, features)
+                currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
+                currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
+                feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
+            else:
+                notification = show_notification(message)
+            return ops_to_json_upload(client),currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
         
         # Add graph when add button is clicked
         if triggered_id == "add_graph_button":
@@ -251,7 +316,7 @@ def create_dash_upload_app(server):
             client.add_graph_button(sub_features)
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
             return ops_to_json_upload(client),currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
-        
+            
         # Remove graph when remove button is clicked
         elif isinstance(triggered_id, dict) and triggered_id.get("type") == "remove_button":
             client.remove_graph_button(triggered_id.get("index"))
