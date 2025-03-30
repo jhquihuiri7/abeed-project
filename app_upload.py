@@ -305,7 +305,7 @@ def create_dash_upload_app(server):
         notification = []
         ctx = callback_context
         triggered_id = ctx.triggered[0]["prop_id"].split(".")[0] if ctx.triggered else None
-    
+
         try:
             # Try to convert dynamic trigger ID to dictionary if possible
             if "type" in triggered_id:
@@ -317,7 +317,7 @@ def create_dash_upload_app(server):
             client.update_data_button(client.start_date, client.end_date, features, overrite_current_df=False)
             currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
-            feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
+            feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client, is_upload=True)
             
             return ops_to_json_upload(client),currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
         
@@ -328,7 +328,7 @@ def create_dash_upload_app(server):
             client.create_custom_feature_button(dropdown_operation, True,"")
             currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
-            feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
+            feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client, is_upload=True)
             
             return ops_to_json_upload(client),currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
         
@@ -352,7 +352,7 @@ def create_dash_upload_app(server):
             if is_valid:    
                 client.add_feature_filter_button(feature_filter_dropdown,feature_filter_min_range, feature_filter_max_range)
                 feature_filter_list = list_feature_filter(client)
-                feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)  
+                feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client, is_upload=True)  
                 apply_filters_state = ['Apply filter']
                 collapse_expand_filter_disabled = False 
                 currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
@@ -365,7 +365,7 @@ def create_dash_upload_app(server):
             index = triggered_id.get("index")
             client.remove_feature_filter_button(index)
             feature_filter_list = list_feature_filter(client)
-            feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
+            feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client, is_upload=True)
             apply_filters_state = ['Apply filter']
             collapse_expand_filter_disabled = False 
             currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)

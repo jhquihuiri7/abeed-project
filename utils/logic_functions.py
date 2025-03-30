@@ -332,5 +332,8 @@ def validate_update_data(client, selected_features):
 def format_set(s):
     return ', '.join(f"'{item}'" for item in s)
 
-def get_feature_filter_dropdown_opts(client):
-    return list((set(client.data_features or []) - set(get_feature_filter_name(client) or [])) | set(get_custom_features_names(client, [], True) or []))
+def get_feature_filter_dropdown_opts(client, is_upload=False):
+    if is_upload:
+        return list(set(client.df.columns)-set(get_feature_filter_name(client)))
+    else:    
+        return list((set(client.data_features or []) - set(get_feature_filter_name(client) or [])) | set(get_custom_features_names(client, [], True) or []))

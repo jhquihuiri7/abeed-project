@@ -336,8 +336,11 @@ class Ops:
 
             if cumulative:
                 custom_name = custom_name + "Σ" 
-
-        custom_feature_unit = self.feature_dict[feature_operation_list[0]["Feature"]].units
+        try:
+            custom_feature_unit = self.feature_dict[feature_operation_list[0]["Feature"]].units
+        except:
+            custom_feature_unit = "USD"
+        
         self.created_features.append(
             {
             "feature_name": custom_name,
