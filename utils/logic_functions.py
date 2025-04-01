@@ -1,8 +1,20 @@
 from backend.helper_functions import get_feature_units
 from datetime import timedelta
-
+def get_unit(client, column):
+    unit = "USD"
+    try:
+        unit = client.feature_dict[column].units
+    except:
+        if "(mw)" in column:
+            unit = "MW"
+        else:
+            for feature in client.created_features:
+                if feature["feature_name"] == column:
+                    unit = feature["unit"]
+    return unit
 # Function to determine if a set of columns requires both primary and secondary axes
 def contains_both_axis(client, cols):
+    
     """
     Determines if the features in the given columns have different units,
     which would require both primary and secondary Y-axes.
@@ -17,13 +29,7 @@ def contains_both_axis(client, cols):
     """
     units = []
     for column in cols:
-        unit = "USD"
-        try:
-            unit = client.feature_dict[column].units
-        except:
-            for feature in client.created_features:
-                if feature["feature_name"] == column:
-                    unit = feature["unit"]
+        unit = get_unit(client, column)
         units.append(unit)      
     # Extract unique units from the feature_units_dict for the given columns
     units = set(units)
