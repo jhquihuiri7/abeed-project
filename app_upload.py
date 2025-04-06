@@ -97,6 +97,7 @@ def create_dash_upload_app(server):
         ],
     ),
         dcc.Store(id="client", data=ops_to_json_upload(ops)),
+        dcc.Store(id="init_columns", data=[]),
         ]
     ) 
     
@@ -228,7 +229,16 @@ def create_dash_upload_app(server):
     def cumulative_dropdown(data):
         client = json_to_ops_upload(data)
         return client.df.columns
-
+    @app.callback(
+            Output("init_columns","data"),
+            Input("init_columns","data"),
+            State("client", "data")
+    )
+    def get_initial_features(init_columns,data):
+        client = json_to_ops_upload(data)
+        print("AQUI", client.df.columns)
+        return client.df.columns
+    
     @app.callback(
         Output("client", "data"),
         Output("main_graph", "figure"),
@@ -270,6 +280,7 @@ def create_dash_upload_app(server):
         State("month_dropdown_date_filter", "value"),
         State("day_dropdown_date_filter", "value"),
         State("client", "data"),
+        State("init_columns","data"),
     )
     def update_render(
         update_button,
@@ -298,7 +309,8 @@ def create_dash_upload_app(server):
         year_dropdown_date_filter_state,
         month_dropdown_date_filter_state,
         day_dropdown_date_filter_state,
-        data
+        data,
+        init_columns
     ):
 
         client = json_to_ops_upload(data)
@@ -314,7 +326,7 @@ def create_dash_upload_app(server):
             pass
         
         if triggered_id == "update_graph_button":
-            client.update_data_button(client.start_date, client.end_date, features, overrite_current_df=False)
+            client.update_data_button(client.start_date, client.end_date, features, overrite_current_df=False, init_columns=init_columns)
             currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
             feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client, is_upload=True)
