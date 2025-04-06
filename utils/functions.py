@@ -147,6 +147,8 @@ def ops_to_json_upload(session: Ops):
     filtered_data = {
         "df": df.to_dict(orient='records'),
         "filter_df": filter_df.to_dict(orient='records'),
+        "start_date":session.start_date.strftime('%Y-%m-%d'),
+        "end_date":session.end_date.strftime('%Y-%m-%d'),
         "created_features":session.created_features,
         "hour_filters": session.hour_filters,
         "day_of_week_filters": session.day_of_week_filters,
@@ -164,7 +166,9 @@ def json_to_ops_upload(json_data):
         df = pd.DataFrame(data["df"])
         df.iloc[:, 0] = pd.to_datetime(df.iloc[:, 0])
         df.set_index(df.columns[0], inplace=True)
-
+        
+        start_date = pd.to_datetime(data["start_date"]).date()
+        end_date = pd.to_datetime(data["end_date"]).date()
         filter_df = pd.DataFrame(data["filter_df"])
         if not filter_df.empty:
             filter_df.iloc[:, 0] = pd.to_datetime(filter_df.iloc[:, 0])
@@ -181,6 +185,8 @@ def json_to_ops_upload(json_data):
     # Populate the instance
     ops_instance.df = df
     ops_instance.filter_df = filter_df
+    ops_instance.start_date = start_date
+    ops_instance.end_date = end_date
     ops_instance.created_features = data.get("created_features") 
     ops_instance.hour_filters = data.get("hour_filters")
     ops_instance.day_of_week_filters = data.get("day_of_week_filters")
