@@ -101,7 +101,7 @@ def main_tabs(client, show_custom=True):
                                 className="flex flex-col w-[160px] justify-between",
                             ),
                         ],
-                        className="w-full flex flex-row justify-between",
+                        className="w-full flex flex-row justify-between pt-5",
                     ),
                     html.Div(
                         button(
@@ -109,7 +109,7 @@ def main_tabs(client, show_custom=True):
                             id="apply_selection_hourfilter",
                             style=button_style,
                         ),
-                        className="w-full flex flex-row justify-center",
+                        className="w-full flex flex-row justify-center pt-5",
                     ),
                 ],
             ),

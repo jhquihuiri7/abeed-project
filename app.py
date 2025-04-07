@@ -81,7 +81,6 @@ def create_dash_app(server):
                 expandable_text_id="expandable_text_primary",
                 client=ops
             ),
-            
             # Checkbox component for feature selection
             html.Div(
                 children=[
@@ -89,14 +88,14 @@ def create_dash_app(server):
                     main_daterange(ops),  # Date range component
                     html.Div(
                         children=[
-                            button(text="Update Graph", id="update_graph_button", style=button_style),  # Button to update graph
+                            button(text="Update Graph", id="update_graph_button", style=button_style), 
                             button(text="Download Data", id="download_data_button", style=button_style),
                             button(text="Save Session", id="download_client_button", style=button_style)
                         ],
-                        className="flex flex-row justify-between items-end w-[500px]"
+                        className="flex flex-row justify-between w-[500px]"
                     )
                     ],
-                className="flex flex-row justify-between"    
+                className="flex flex-row justify-between mt-5"    
             ),
             main_tabs(ops),  # Tabs component for layout
             apply_filters_toggle("Collapse", is_upload=False),
