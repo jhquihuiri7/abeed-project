@@ -54,10 +54,11 @@ def restore_session_upload(client, apply_filters_state, collapse_expand_filter_s
     feature_filter_dropdown_default = ""
     feature_filter_list = []
     notification = []
+    init_columns = client.df.columns
     
     currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
         
-    return ops_to_json_upload(client), currentFigure,currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown_default, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled
+    return ops_to_json_upload(client), currentFigure,currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown_default, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled, init_columns
 
 
 

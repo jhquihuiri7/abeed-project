@@ -260,7 +260,9 @@ class Ops:
             else:
                 self.df = self.df[init_columns]
                 self.df = pd.concat([self.df, new_data], axis=1)
-            
+        else:
+                self.df = self.df[init_columns]
+                
         self.add_created_features_to_df() #OJO
 
     def update_date_range(self, new_start, new_end):

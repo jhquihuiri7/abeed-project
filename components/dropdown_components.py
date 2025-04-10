@@ -355,3 +355,15 @@ def cumulative_conversion_dropdown(client):
         ),
         className="w-[28%]",
     )
+
+def delete_features_dropdown(client):
+    return html.Div(
+        dcc.Dropdown(
+            id="delete_features_dropdown",
+            value="",
+            options=client.df.columns,
+            className="w-full flex flex row flex-wrap",
+            multi=True
+        ),
+        className="w-[28%]",
+    )

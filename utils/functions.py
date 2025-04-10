@@ -147,6 +147,7 @@ def ops_to_json_upload(session: Ops):
     filtered_data = {
         "df": df.to_dict(orient='records'),
         "filter_df": filter_df.to_dict(orient='records'),
+        "data_features": session.data_features,
         "start_date":session.start_date.strftime('%Y-%m-%d'),
         "end_date":session.end_date.strftime('%Y-%m-%d'),
         "created_features":session.created_features,
@@ -185,6 +186,7 @@ def json_to_ops_upload(json_data):
     # Populate the instance
     ops_instance.df = df
     ops_instance.filter_df = filter_df
+    ops_instance.data_features = data.get("data_features")
     ops_instance.start_date = start_date
     ops_instance.end_date = end_date
     ops_instance.created_features = data.get("created_features") 
