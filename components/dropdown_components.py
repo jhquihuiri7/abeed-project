@@ -9,7 +9,7 @@ import calendar
 from backend.db_dictionaries import feature_units_dict
 
 
-def main_dropdown(client):
+def main_dropdown(client, width="w-[28%]"):
     """
     Creates a checklist (checkbox group) for selecting features.
 
@@ -31,7 +31,7 @@ def main_dropdown(client):
             persistence=True,
             persistence_type='session'
         ),
-        className="w-[28%]"
+        className=f"{width} mr-5"
     )
 
 
@@ -353,7 +353,7 @@ def cumulative_conversion_dropdown(client):
             options=client.df.columns,
             className="w-full flex flex row flex-wrap",
         ),
-        className="w-[28%]",
+        className="w-[28%] mr-5",
     )
 
 def delete_features_dropdown(client):
@@ -365,5 +365,5 @@ def delete_features_dropdown(client):
             className="w-full flex flex row flex-wrap",
             multi=True
         ),
-        className="w-[28%]",
+        className="w-[56%] mr-5",
     )
