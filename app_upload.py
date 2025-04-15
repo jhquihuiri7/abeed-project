@@ -79,14 +79,14 @@ def create_dash_upload_app(server):
                     html.Div(
                         children=[
                             main_dropdown(ops, "w-[56%]"),  
-                            button(text="Update Graph", id="update_graph_button", style=button_style)      
+                            button(text="Add Features", id="update_graph_button", style=button_style)      
                         ],
                         className="flex flex-row justify-start w-1/2"
                     ),
                     html.Div(
                         children=[
                             delete_features_dropdown(ops),
-                            button(text="Remove uploaded features", id="delete_features_button", style=button_style)      
+                            button(text="Remove Features", id="delete_features_button", style=button_style)      
                         ],
                         className="flex flex-row justify-start w-1/2"
                     ),
@@ -249,7 +249,7 @@ def create_dash_upload_app(server):
     )
     def delete_feature_dropdown(data):
         client = json_to_ops_upload(data)
-        return list(set(client.df.columns) - set(client.data_features))
+        return client.df.columns
     
     @app.callback(
         Output("client", "data"),
@@ -264,6 +264,7 @@ def create_dash_upload_app(server):
         Output("apply_filters", "value"),
         Output("collapse_expand_filter", "disabled"),
         Output("init_columns","data"),
+        Output("main_dropdown", "value"),
         # Inputs and states for callback
         Input("update_graph_button", "n_clicks"),
         Input("delete_features_button", "n_clicks"),
@@ -331,7 +332,7 @@ def create_dash_upload_app(server):
     ):
 
         client = json_to_ops_upload(data)
-        client.data_features =  features
+        #client.data_features =  features
         notification = []
         ctx = callback_context
         triggered_id = ctx.triggered[0]["prop_id"].split(".")[0] if ctx.triggered else None
@@ -344,6 +345,7 @@ def create_dash_upload_app(server):
         
         if triggered_id == "delete_features_button":
             init_columns = list(set(init_columns) - set(delete_features_dropdown))
+            client.data_features = list(set(client.data_features) - set(delete_features_dropdown))
             custom_features = list(set(delete_features_dropdown) & set(get_custom_features_names(client,[],True, True)))
             if custom_features != []:
                 for custom_feature in custom_features:
@@ -354,14 +356,18 @@ def create_dash_upload_app(server):
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
             feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client, is_upload=True)
             
-            return ops_to_json_upload(client),currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled, init_columns
+            return ops_to_json_upload(client),currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled, init_columns, []
         
         if triggered_id == "update_graph_button":
-            client.update_data_button(client.start_date, client.end_date, client.data_features, overrite_current_df=False, init_columns=init_columns)
-            currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
-            currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
-            feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client, is_upload=True)
-            return ops_to_json_upload(client),currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled, init_columns
+            if features != []:
+                client.data_features = list(set(client.data_features) | set(features))
+                client.update_data_button(client.start_date, client.end_date, client.data_features, overrite_current_df=False, init_columns=init_columns)
+                currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
+                currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
+                feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client, is_upload=True)
+            else:
+                notification = show_notification("Select at least one feature")
+            return ops_to_json_upload(client),currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled, init_columns, []
         
         if triggered_id == "make_cumulative_button":
             dropdown_operation = [
@@ -372,7 +378,7 @@ def create_dash_upload_app(server):
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
             feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client, is_upload=True)
             
-            return ops_to_json_upload(client),currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled, init_columns
+            return ops_to_json_upload(client),currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled, init_columns, []
         
         # Add graph when add button is clicked
         if triggered_id == "add_graph_button":
@@ -381,13 +387,13 @@ def create_dash_upload_app(server):
                   ]
             client.add_graph_button(sub_features)
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
-            return ops_to_json_upload(client),currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled, init_columns
+            return ops_to_json_upload(client),currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled, init_columns, []
             
         # Remove graph when remove button is clicked
         elif isinstance(triggered_id, dict) and triggered_id.get("type") == "remove_button":
             client.remove_graph_button(triggered_id.get("index"))
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)            
-            return ops_to_json_upload(client),currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled, init_columns
+            return ops_to_json_upload(client),currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled, init_columns, []
                
         if triggered_id == "feature_filter_add":
             is_valid, message, feature_filter_min_range, feature_filter_max_range = validateFeatureFilterData(client, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range)
@@ -401,7 +407,7 @@ def create_dash_upload_app(server):
                 currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)     
             else:
                 notification = show_notification(message)
-            return ops_to_json_upload(client), currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, "", "", feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled, init_columns       
+            return ops_to_json_upload(client), currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, "", "", feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled, init_columns, []       
         
         if isinstance(triggered_id, dict) and triggered_id.get("type") == "feature_filter_remove":
             index = triggered_id.get("index")
@@ -412,7 +418,7 @@ def create_dash_upload_app(server):
             collapse_expand_filter_disabled = False 
             currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)  
-            return ops_to_json_upload(client), currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, "", "", feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled, init_columns
+            return ops_to_json_upload(client), currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, "", "", feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled, init_columns, []
          
         if (triggered_id == "apply_selection_datefilter") or (triggered_id == "apply_selection_hourfilter"):
             hours_to_include = [index for index, hour in enumerate(hour_button) if hour["backgroundColor"] != "white"]
@@ -426,7 +432,7 @@ def create_dash_upload_app(server):
             else:
                 notification = show_notification(message)
                 
-            return ops_to_json_upload(client), currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled, init_columns
+            return ops_to_json_upload(client), currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled, init_columns, []
         
         if triggered_id == "apply_filters":
             is_valid, message = validateApplyFilterToggle(client, apply_filters_state, collapse_expand_filter_state)
@@ -440,12 +446,12 @@ def create_dash_upload_app(server):
             else:
                 notification = show_notification(message)
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state) 
-            return ops_to_json_upload(client), currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled, init_columns
+            return ops_to_json_upload(client), currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled, init_columns, []
           
         if triggered_id == "collapse_expand_filter":
             currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
             currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state) 
-            return ops_to_json_upload(client), currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled, init_columns
+            return ops_to_json_upload(client), currentFigure, currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown, feature_filter_min_range, feature_filter_max_range, feature_filter_list, [], apply_filters_state, collapse_expand_filter_disabled, init_columns, []
         
         if not currentFigure:
             
