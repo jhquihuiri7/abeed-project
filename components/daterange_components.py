@@ -13,7 +13,6 @@ def main_daterange(client):
         html.Div: A Dash HTML Div containing a DatePickerRange component.
     """
     return html.Div(
-        className="mt-10",  # CSS class to apply a top margin for spacing
         children=[
             # Create a DatePickerRange component
             dcc.DatePickerRange(

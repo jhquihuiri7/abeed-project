@@ -50,7 +50,7 @@ def expandable_container(toggle_button_id, expandable_text_id, client):
                         children=[
                             html.Button("Expand Feature Menu", id=toggle_button_id, n_clicks=0, className="btn btn-primary font-bold"),
                             dcc.Checklist(
-                                options=["Select all features"],
+                                options=["DB features"],
                                 value=[],  # Default selected values (none selected initially)
                                 className="flex flex-row justify-between flex-wrap mx-10",  # CSS classes for layout styling
                                 inputClassName="mr-5",

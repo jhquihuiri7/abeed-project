@@ -53,7 +53,7 @@ def hourButton(hours):
     )
 
 # Define a function to create a toggle switch for applying filters
-def apply_filters_toggle(action):
+def apply_filters_toggle(action, is_upload = False):
     """
     Creates a toggle switch component for applying filters with an optional checklist.
 
@@ -63,6 +63,7 @@ def apply_filters_toggle(action):
     Returns:
         dash.html.Div: A div containing a checklist and a toggle switch for filter application.
     """
+    
     return html.Div(
         children=[
             # Checklist to indicate whether the filters should be applied
@@ -70,20 +71,21 @@ def apply_filters_toggle(action):
                 options=["Apply filter"],  # Option displayed in the checklist
                 value=[],  # Default value (unchecked)
                 className="mb-2",  # CSS class for margin styling
-                id="apply_filters"  # ID for the checklist
+                id="apply_filters" + ("_upload" if is_upload else "")  # ID for the checklist
             ),
             # Toggle switch with a label
             html.Div(
                 daq.ToggleSwitch(
-                    id='collapse_expand_filter',  # Unique ID for the toggle switch
+                    id='collapse_expand_filter' + ("_upload" if is_upload else ""),  # Unique ID for the toggle switch
                     value=True,  # Default value (enabled)
                     label=action,  # Label displayed next to the switch
                     labelPosition='right',  # Position of the label
                     color="#1975fa",  # Color of the toggle switch
-                    disabled=True  # Disable interaction by default
+                    disabled=False if is_upload else False  # Disable interaction by default
                 ),
                 className="ml-5 w-[150px]"  # CSS class for layout and width
             )
         ],
         className="flex flex-col"  # CSS class for column layout
     )
+

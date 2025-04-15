@@ -65,7 +65,7 @@ def create_dash_app(server):
     app = Dash(
         __name__,
         server=server, 
-        url_base_pathname='/dash/',
+        url_base_pathname='/home/',
         external_scripts=external_scripts,
         external_stylesheets=external_stylesheets,
         meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}],
@@ -88,17 +88,17 @@ def create_dash_app(server):
                     main_daterange(ops),  # Date range component
                     html.Div(
                         children=[
-                            button(text="Update Graph", id="update_graph_button", style=button_style),  # Button to update graph
+                            button(text="Update Graph", id="update_graph_button", style=button_style), 
                             button(text="Download Data", id="download_data_button", style=button_style),
                             button(text="Save Session", id="download_client_button", style=button_style)
                         ],
-                        className="flex flex-row justify-between items-end w-[500px]"
+                        className="flex flex-row justify-between w-[500px]"
                     )
                     ],
-                className="flex flex-row justify-between"    
+                className="flex flex-row justify-between mt-5"    
             ),
             main_tabs(ops),  # Tabs component for layout
-            apply_filters_toggle("Collapse"),
+            apply_filters_toggle("Collapse", is_upload=False),
             dcc.Graph(id="main_graph"),  # Graph for displaying data
             button(text="Add Graph", id="add_graph_button", style=button_style),  # Button to add new graph
             html.Div(id="dynamic_div", children=[], className="flex flex-wrap"),  # Dynamic div for additional content

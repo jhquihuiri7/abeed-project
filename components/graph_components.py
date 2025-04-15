@@ -3,7 +3,7 @@ import plotly.graph_objects as go  # For creating Plotly charts
 from plotly.subplots import make_subplots  # For creating charts with subplots and multiple axes
 from components.button_components import button  # Custom button component
 from backend.helper_functions import get_feature_units
-from utils.logic_functions import contains_both_axis, group_consecutive, get_first_consecutive_datetime  # Function to check for double axis requirements
+from utils.logic_functions import contains_both_axis, group_consecutive, get_first_consecutive_datetime, get_unit  # Function to check for double axis requirements
 from dash import dcc, html  # Dash components for UI
 from styles.styles import button_style  # Custom button styling
 import pandas as pd
@@ -50,13 +50,7 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False, show_title=
     for column in columns:
         # Calculate the maximum value in the column
         max_val = max(data[column])
-        unit = "MW"
-        try:
-            unit = client.feature_dict[column].units
-        except:
-            for feature in client.created_features:
-                if feature["feature_name"] == column:
-                    unit = feature["unit"]
+        unit = get_unit(client, column)
             
         # Append the value to the appropriate axis based on the feature's unit
         (

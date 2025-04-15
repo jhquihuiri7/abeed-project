@@ -1,8 +1,20 @@
 from backend.helper_functions import get_feature_units
 from datetime import timedelta
-
+def get_unit(client, column):
+    unit = "USD"
+    try:
+        unit = client.feature_dict[column].units
+    except:
+        if "(mw)" in column:
+            unit = "MW"
+        else:
+            for feature in client.created_features:
+                if feature["feature_name"] == column:
+                    unit = feature["unit"]
+    return unit
 # Function to determine if a set of columns requires both primary and secondary axes
 def contains_both_axis(client, cols):
+    
     """
     Determines if the features in the given columns have different units,
     which would require both primary and secondary Y-axes.
@@ -17,12 +29,7 @@ def contains_both_axis(client, cols):
     """
     units = []
     for column in cols:
-        try:
-            unit = client.feature_dict[column].units
-        except:
-            for feature in client.created_features:
-                if feature["feature_name"] == column:
-                    unit = feature["unit"]
+        unit = get_unit(client, column)
         units.append(unit)      
     # Extract unique units from the feature_units_dict for the given columns
     units = set(units)
@@ -322,7 +329,7 @@ def validate_update_data(client, selected_features):
         dependent_custom_features = set(get_custom_features_names(client, missing_features,show_cumulative=True))
         message = f"Cannot have {format_set(dependent_custom_features)} custom feature without {format_set(missing_features)} data feature (Hint: delete {format_set(dependent_custom_features)} or reselect {format_set(missing_features)} data feature)"
         return False, message
-    if not feature_filter.issubset(selected_features):
+    if not feature_filter.issubset(set(selected_features) | set(get_custom_features_names(client, [],show_all=True, show_cumulative=True))):
         missing_features = set(feature_filter) - set(selected_features)
         message = f"Cannot have {format_set(feature_filter)} feature filter without {format_set(missing_features)} data feature (Hint: delete {format_set(feature_filter)} filter or reselect {format_set(missing_features)} data feature)"
         return False, message
@@ -331,5 +338,8 @@ def validate_update_data(client, selected_features):
 def format_set(s):
     return ', '.join(f"'{item}'" for item in s)
 
-def get_feature_filter_dropdown_opts(client):
-    return list((set(client.data_features or []) - set(get_feature_filter_name(client) or [])) | set(get_custom_features_names(client, [], True) or []))
+def get_feature_filter_dropdown_opts(client, is_upload=False):
+    if is_upload:
+        return list(set(client.df.columns)-set(get_feature_filter_name(client)))
+    else:    
+        return list((set(client.data_features or []) - set(get_feature_filter_name(client) or [])) | set(get_custom_features_names(client, [], True) or []))

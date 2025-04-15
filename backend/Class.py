@@ -130,7 +130,7 @@ class Ops:
         self.scatter_graphs = []
         # single dictionary ex. {"graph_uid": '6da8871a-2860-474d-a8bf-4efa7383e26b', "graph_data_features": ["MISO pjm RT", "MISO pjm DA"]}
     
-    def update_data_button(self, start_date_input: str, end_date_input: str, data_features_input: list[str]):
+    def update_data_button(self, start_date_input: str, end_date_input: str, data_features_input: list[str], overrite_current_df=True, init_columns = []):
         # Input Validation TODO before running this function:
         #   Validate that a start_date and end_date are selected and that there is at least one entry in the data_features_input list
         #       - right now if you don't have at least one entry in the data_features_input list we get an error message but the app breaks
@@ -150,7 +150,7 @@ class Ops:
 
         self.update_date_range(start_date_input, end_date_input)
         self.update_data_features(data_features_input)
-        self.update_data()
+        self.update_data(overrite_current_df=overrite_current_df, init_columns = init_columns)
         self.add_created_features_to_df()
         self.update_datetimes_to_exclude()
         self.update_filter_df()
@@ -245,13 +245,24 @@ class Ops:
 
         # after running this function we need to update the component that displays all the graphs in the self.graphs value
 
-    def update_data(self): # TODO: used to be update_df
+    def update_data(self, overrite_current_df=True, init_columns = []): # TODO: used to be update_df
         if self.data_features and self.start_date and self.end_date:
             db_names = []
+            
             for feature in self.data_features:
                 db_names.append(self.feature_dict[feature].db_name)
-            self.df = simple_feature_request(self.start_date, self.end_date, db_names)[0]
-            self.df.rename(columns=self.db_to_display_names_dict, inplace=True) # TODO
+            
+            new_data = simple_feature_request(self.start_date, self.end_date, db_names)[0]
+            new_data.rename(columns=self.db_to_display_names_dict, inplace=True) # TODO
+            
+            if overrite_current_df:
+                self.df = new_data
+            else:
+                self.df = self.df[init_columns]
+                self.df = pd.concat([self.df, new_data], axis=1)
+        else:
+                self.df = self.df[init_columns]
+                
         self.add_created_features_to_df() #OJO
 
     def update_date_range(self, new_start, new_end):
@@ -328,8 +339,11 @@ class Ops:
 
             if cumulative:
                 custom_name = custom_name + "Σ" 
-
-        custom_feature_unit = self.feature_dict[feature_operation_list[0]["Feature"]].units
+        try:
+            custom_feature_unit = self.feature_dict[feature_operation_list[0]["Feature"]].units
+        except:
+            custom_feature_unit = "USD"
+        
         self.created_features.append(
             {
             "feature_name": custom_name,
