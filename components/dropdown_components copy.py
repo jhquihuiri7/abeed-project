@@ -1,10 +1,9 @@
 from dash import dcc, html
-from styles.styles import button_dropdown_style, button_style
+from styles.styles import button_dropdown_style
 from components.button_components import button
 from utils.functions import list_custom_filter_children
 from backend.helper_functions import get_feature_units
 import calendar
-from backend.Class import Ops
 
 # Import a dictionary of feature units from the backend module
 from backend.db_dictionaries import feature_units_dict
@@ -63,18 +62,15 @@ def custom_features_head():
                 ],
                 className="flex flex-row my-4",  # Styling for the layout
             ),
-            html.Div(
-                dcc.Input(
+            dcc.Input(
                         id="custon_operation",
                         type="text",
                         value="",
                         placeholder="Write the operation",
                         className="mx-5",
                     ),
-                className="w-[500px] mb-4"
-            ),
         ],
-        className="flex flex-col w-[40%]"
+        className="flex flex-col"
     )
 
 # Function to dynamically create dropdowns and buttons for custom features
@@ -95,22 +91,142 @@ def custom_dropdow(client, current_dropdown):
     dropdown_children = []
     dropdown_children_second_level = []
     options = client.df.columns
-    id = 0
-    return html.Div(
-        children=[
-            html.P("Feature Requirements:", className="font-bold"),
-            html.Div(
-                id="custom_dropdown",
-                children=[
-                    alias_feature(options=options, id=id),
-                    button(text="Remove last", id="remove_last_alias", style=button_style+" hidden")
-                ],
-                className="w-full mt-3"
-            )
-        ],
-        className="w-[60%] mt-4"
+    
+    
+    try:
+        first_feature_unit = get_feature_units(current_dropdown[0]["Feature"])
+    except:
+        pass
+    
+    
+    dropdown_children.append(
+        html.Div(
+            children=[
+                dcc.Dropdown(
+                    options= options, # Dropdown options
+                    value= "" if current_dropdown == [] else current_dropdown[0]["Feature"],  # Current selected value
+                    id={"type": "dynamic-dropdown", "index": 0},
+                    className="w-[400px]",
+                ),
+            ],
+            # Layout styling for the dropdown and buttons
+            className=f"flex flex-row my-4 mr-5",
+        )    
     )
+    
+    if current_dropdown != []:
+        for index, data in enumerate(current_dropdown):
+            feature_unit = first_feature_unit
+            if index == 0:
+                pass        
+            else:
+                try:
+                    feature_unit = get_feature_units(data["Feature"])
+                except:
+                    for feature in client.created_features:
+                        if feature["feature_name"]==data["Feature"]:
+                            feature_unit = get_feature_units(feature["equation"][0]["Feature"])
+        
+                dropdown_children_second_level.append(
+                html.Div(
+                    children=[
+                        # Radio buttons to select an operation (Add/Subtract)
+                        dcc.RadioItems(
+                            id={"type": "operation_custom_feature_op", "index": index},
+                            options=[
+                                {"label": "+", "value": "Add"},
+                                {"label": "-", "value": "Sub"},
+                            ],
+                            value="Sub" if (data['Operation']== "-") else "Add",  # Current selected operation
+                            labelStyle={"display": "block"},
+                            inputClassName="mr-2",
+                            labelClassName="mr-5",
+                        ),
+                        # Dropdown menu to select feature options
+                        dcc.Dropdown(
+                            options= options if index == 0 else [option for option in options if feature_unit == first_feature_unit], # Dropdown options
+                            value=data['Feature'],  # Current selected value
+                            id={"type": "dynamic-dropdown", "index": index},
+                            className="w-[400px]",
+                        ),
+                        # Button to add a new feature
+                        button(
+                            text="ADD",
+                            id={"type": "operation_custom_feature_add", "index": index},
+                            style=button_dropdown_style,
+                        ),
+                        # Button to remove the feature if an operation is defined
+                        (
+                            html.Div()
+                            if index == 1  # Check if an operation exists
+                            else button(
+                                text="REMOVE",
+                                id={"type": "operation_custom_feature_remove", "index": index},
+                                style=button_dropdown_style,
+                            )
+                        ),
+                    ],
+                    # Layout styling for the dropdown and buttons
+                    className=f"flex flex-row my-4",
+                )    
+            ) 
+    else:
+        dropdown_children_second_level.append(
+                html.Div(
+                    children=[
+                        # Radio buttons to select an operation (Add/Subtract)
+                        dcc.RadioItems(
+                            id={"type": "operation_custom_feature_op", "index": 1},
+                            options=[
+                                {"label": "+", "value": "Add"},
+                                {"label": "-", "value": "Sub"},
+                            ],
+                            value='Sub',  # Current selected operation
+                            labelStyle={"display": "block"},
+                            inputClassName="mr-2",
+                            labelClassName="mr-5",
+                        ),
+                        # Dropdown menu to select feature options
+                        dcc.Dropdown(
+                            options= [option for option in options], # Dropdown options
+                            value='',  # Current selected value
+                            id={"type": "dynamic-dropdown", "index": 1},
+                            className="w-[400px]",
+                        ),
+                        # Button to add a new feature
+                        button(
+                            text="ADD",
+                            id={"type": "operation_custom_feature_add", "index": 1},
+                            style=button_dropdown_style,
+                        ),
+                    ],
+                    # Layout styling for the dropdown and buttons
+                    className=f"flex flex-row my-4",
+                )    
+            ) 
 
+            
+    
+    dropdown_children.append(html.Div(dropdown_children_second_level, className=""))
+    
+    return dropdown_children
+
+
+# Function to list custom features for a client
+def list_custom_features(client):
+    """
+    Creates a Div containing a list of custom features for the client.
+
+    Args:
+        client: An object managing custom features.
+
+    Returns:
+        html.Div: A Div containing the list of custom features.
+    """
+    return html.Div(
+        id="list_custom_features",  # Unique ID for the Div
+        children=list_custom_filter_children(client)  # List of child elements from client features
+    )
 
 # Function to generate a date filter dropdown
 def date_filter_dropdown():
@@ -263,56 +379,3 @@ def delete_features_dropdown(client):
         ),
         className="w-[56%] mr-5",
     )
-
-def custom_features_children(options, currentDropdownChildren):
-    children = currentDropdownChildren
-    id = len(children) if children != [] else 0
-    alias = alias_feature(options=options, id=id)
-
-    children = children[:-1]
-    
-    children.append(alias)
-
-    if currentDropdownChildren != [] and len(currentDropdownChildren) >= 2:
-        children.append(button(text="Remove last", id="remove_last_alias", style=button_style))
-    else:
-        children.append(button(text="Remove last", id="remove_last_alias", style=button_style+" hidden"))
-    return children
-
-def remove_features_children(currentDropdownChildren): 
-    if len(currentDropdownChildren) >= 3:
-        print("ok")
-        currentDropdownChildren = currentDropdownChildren[:-2]
-    
-    if currentDropdownChildren != [] and len(currentDropdownChildren) >= 2:
-        currentDropdownChildren.append(button(text="Remove last", id="remove_last_alias", style=button_style))
-    else:
-        currentDropdownChildren.append(button(text="Remove last", id="remove_last_alias", style=button_style+" hidden"))
-    return currentDropdownChildren
-
-def alias_feature(options, id):
-    id_add_button = {"type": "add_custom_alias", "index": id}
-    id_feature_dropdown = {"type": "feature_dropdown", "index": id}
-    id_feature_alias = {"type": "feature_alias", "index": id}
-    return html.Div(
-                children=[
-                    html.P("Alias"),
-                    dcc.Input(
-                        id=id_feature_alias,
-                        type="text",
-                        value="",
-                        placeholder="Write an alias",
-                        className="w-[150px]",
-                    ),
-                    html.P("Feature"),
-                    dcc.Dropdown(
-                        options= options,
-                        value=[],
-                        multi=False,
-                        className="w-[300px]",
-                        id=id_feature_dropdown
-                    ),
-                    button(text="+", id=id_add_button, style=button_style),
-                ],
-                className="flex flex-row justify-between my-4 items-end"
-            )
