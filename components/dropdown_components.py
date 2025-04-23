@@ -10,7 +10,7 @@ from backend.Class import Ops
 from backend.db_dictionaries import feature_units_dict
 
 
-def main_dropdown(client, width="w-[28%]"):
+def main_dropdown(client:Ops, width="w-[28%]"):
     """
     Creates a checklist (checkbox group) for selecting features.
 
@@ -22,7 +22,7 @@ def main_dropdown(client, width="w-[28%]"):
         dcc.Dropdown(
             # Generate the options for the checklist dynamically
             # Extracts the keys (features) from the feature_units_dict
-            options=[item for item in client.available_readable_names],
+            options=[item for item in client.display_features_dict],
             value="",  # Default selected values (none selected initially)
             className="w-full flex flex row flex-wrap",  # CSS classes for layout styling
             id="main_dropdown",  # Unique identifier for the checklist component
@@ -184,7 +184,7 @@ def date_filter_dropdown():
     ]
 
 # Function to generate a feature filter dropdown
-def feature_filter_dropdown(client):
+def feature_filter_dropdown(client:Ops):
     """
     Creates a feature filter dropdown with input fields for range and a button to add filters.
 
@@ -201,7 +201,7 @@ def feature_filter_dropdown(client):
                 children=[
                     # Dropdown for selecting features
                     dcc.Dropdown(
-                        options=[feature for feature in client.data_features] if (client.data_features != []) else [],  # Feature options
+                        options=[feature for feature in client.session_data_features] if (client.session_data_features != []) else [],  # Feature options
                         value=[],  # Default selected value
                         id="feature_filter_dropdown",  # Unique ID for the dropdown
                         multi=False,  # Allow single selection
@@ -281,7 +281,6 @@ def custom_features_children(options, currentDropdownChildren):
 
 def remove_features_children(currentDropdownChildren): 
     if len(currentDropdownChildren) >= 3:
-        print("ok")
         currentDropdownChildren = currentDropdownChildren[:-2]
     
     if currentDropdownChildren != [] and len(currentDropdownChildren) >= 2:

@@ -3,6 +3,7 @@ from backend.db_dictionaries import feature_units_dict
 
 # Import necessary Dash components for building the user interface
 from dash import html, dcc
+from backend.Class import Ops
 
 # Define a function to create a checkbox component
 def main_checkbox(client, id):
@@ -43,7 +44,7 @@ def pagination(page_store_id, features_id, prev_id, next_id, pagination_id, is_m
     ]
 )
     
-def expandable_container(toggle_button_id, expandable_text_id, client):
+def expandable_container(toggle_button_id, expandable_text_id, client: Ops):
     return html.Div(
                 children= [
                     html.Div(
@@ -63,11 +64,11 @@ def expandable_container(toggle_button_id, expandable_text_id, client):
                         html.Div(
                             html.Div(
                                 [html.Div(i, className="w-[300px] overflow-hidden mt-1") 
-                                 for i in client.available_readable_names], 
+                                 for i in client.db_name_dict], 
                                 className="flex flex-row flex-wrap justify-between"),
                             className="w-full h-fit shadows-lg"
                         ),
                     id=expandable_text_id, style={"display": "none"}, className="p-3 text-gray-700 shadow-lg rounded-lg")
                 ],
-                className="flex flex-col justify-center items-center w-full h-fit"    
+                className="flex flex-col justify-center items-center w-[60%] h-fit"    
             )

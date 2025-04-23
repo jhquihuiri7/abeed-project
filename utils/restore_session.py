@@ -5,16 +5,15 @@ from components.graph_components import bar_chart, multi_chart
 import plotly.graph_objects as go
 from dash import html
 from components.button_components import button
+from backend.Class import Ops
 # Styles
 from styles.styles import button_dropdown_style
 
 
-def restore_session(client, apply_filters_state, collapse_expand_filter_state, collapse_expand_filter_disabled, feature_filter_min_range, feature_filter_max_range, currentDropdownChildren):
+def restore_session(client: Ops, apply_filters_state, collapse_expand_filter_state, collapse_expand_filter_disabled, feature_filter_min_range, feature_filter_max_range, currentDropdownChildren):
     
     currentFigure = go.Figure()
-    custom_feature = []
     currentChildren = []
-    custom_dropdow_children = custom_features_children(client, [])
     custom_name = ""
     feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
     feature_filter_dropdown_default = ""
@@ -23,11 +22,9 @@ def restore_session(client, apply_filters_state, collapse_expand_filter_state, c
         apply_filters_state = ["Apply filter"]
         collapse_expand_filter_disabled = False
     
-    if client.data_features != []:
+    if client.session_data_features:
         currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
-        #custom_feature = [{"Feature": client.data_features[0]}]
-        #custom_dropdow_children = custom_dropdow(client,current_dropdown)
-    
+        
     if client.graphs != []:
         currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
         
@@ -38,12 +35,10 @@ def restore_session(client, apply_filters_state, collapse_expand_filter_state, c
                                 style=button_dropdown_style,
                             )], className="mb-4") for feature_filter in client.feature_filters]
         
-    return ops_to_json(client), currentFigure,currentChildren, custom_name, feature_filter_dropdown_opts, feature_filter_dropdown_default, feature_filter_min_range, feature_filter_max_range, feature_filter_list,[], apply_filters_state, collapse_expand_filter_disabled, []
-
-
-
-def restore_session_upload(client, apply_filters_state, collapse_expand_filter_state, collapse_expand_filter_disabled, feature_filter_min_range, feature_filter_max_range):
+    return ops_to_json(client), currentFigure,currentChildren, custom_name, feature_filter_dropdown_opts, feature_filter_dropdown_default, feature_filter_min_range, feature_filter_max_range, feature_filter_list,[], apply_filters_state, collapse_expand_filter_disabled, client.df.columns
     
+
+def restore_session_upload(client: Ops, apply_filters_state, collapse_expand_filter_state, collapse_expand_filter_disabled, feature_filter_min_range, feature_filter_max_range):
     currentFigure = go.Figure()
     currentChildren = []
     feature_filter_dropdown_opts = client.df.columns
@@ -51,8 +46,7 @@ def restore_session_upload(client, apply_filters_state, collapse_expand_filter_s
     feature_filter_list = []
     notification = []
     init_columns = client.df.columns
-    main_dropdown = []
-    
+    main_dropdown = []    
     currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
         
     return ops_to_json_upload(client), currentFigure,currentChildren, feature_filter_dropdown_opts, feature_filter_dropdown_default, feature_filter_min_range, feature_filter_max_range, feature_filter_list, notification, apply_filters_state, collapse_expand_filter_disabled, init_columns, main_dropdown

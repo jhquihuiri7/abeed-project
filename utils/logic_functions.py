@@ -1,19 +1,17 @@
 from backend.helper_functions import get_feature_units
 from datetime import timedelta
+from backend.Class import Ops
+
 def get_unit(client, column):
     unit = "USD"
     try:
-        unit = client.feature_dict[column].units
+        unit = client.session_data_features[column].units
     except:
         if "(mw)" in column:
             unit = "MW"
-        else:
-            for feature in client.created_features:
-                if feature["feature_name"] == column:
-                    unit = feature["unit"]
     return unit
 # Function to determine if a set of columns requires both primary and secondary axes
-def contains_both_axis(client, cols):
+def contains_both_axis(client: Ops, cols):
     
     """
     Determines if the features in the given columns have different units,
@@ -29,7 +27,7 @@ def contains_both_axis(client, cols):
     """
     units = []
     for column in cols:
-        unit = get_unit(client, column)
+        unit = get_unit(client, column) #get_unit(client, column)
         units.append(unit)      
     # Extract unique units from the feature_units_dict for the given columns
     units = set(units)
@@ -224,11 +222,16 @@ def extract_values_custom_feature(data):
 def get_feature_filter_name(client):
     return [feature["feature_name"] for feature in client.feature_filters]
 
-def get_custom_features_dependence(client):
-    dependence_features = []
-    for cf in client.created_features:
-        for eq in cf["equation"]:
-            dependence_features.append(eq["Feature"])
+def get_custom_features_dependence(client:Ops, selected_features) -> dict:
+    dependence_features = {}
+    for key, value in client.session_data_features.items():
+        if value.alias_map:
+            common_filter = []
+            for k,v in value.alias_map.items():
+                if v in selected_features:
+                    common_filter.append(v) 
+            if common_filter:
+                dependence_features[key] = common_filter
     return dependence_features
     
 def get_custom_features_names(client, missing_features, show_all = False, show_cumulative = False):
@@ -335,11 +338,34 @@ def validate_update_data(client, selected_features):
         return False, message
     return True, message
 
+def validate_add_features(selected_features):
+    message = ""
+    if selected_features == []:
+        message = "Cannot create update data (Hint: select at least one data feature)"
+        return False, message
+    return True, message
+def validate_delete_features(client:Ops, selected_features):
+    message = ""
+    if selected_features == []:
+        message = "Cannot create delete feature (Hint: select at least one data feature)"
+        return False, message
+    common_filter = list(set(selected_features) & set(get_feature_filter_name(client)))
+    common_custom = get_custom_features_dependence(client, selected_features)
+    if common_custom:
+        custom_features = common_custom.keys()
+        dependent_features = common_custom.values()
+        message = f"Cannot have {format_set(custom_features)} custom feature without {format_set(dependent_features)} data feature (Hint: delete {format_set(custom_features)} or reselect {format_set(dependent_features)} data feature)"
+        return False, message
+    if common_filter:
+        message = f"Cannot have {format_set(common_filter)} feature filter without {format_set(common_filter)} data feature (Hint: delete {format_set(common_filter)} filter or reselect {format_set(common_filter)} data feature)"
+        return False, message
+    return True, message
+    
 def format_set(s):
     return ', '.join(f"'{item}'" for item in s)
 
-def get_feature_filter_dropdown_opts(client, is_upload=False):
+def get_feature_filter_dropdown_opts(client: Ops, is_upload=False):
     if is_upload:
         return list(set(client.df.columns)-set(get_feature_filter_name(client)))
     else:    
-        return list((set(client.data_features or []) - set(get_feature_filter_name(client) or [])) | set(get_custom_features_names(client, [], True) or []))
+        return list(set(client.session_data_features.keys() or []) - set(get_feature_filter_name(client) or []))
