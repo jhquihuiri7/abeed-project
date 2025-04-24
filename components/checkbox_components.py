@@ -3,6 +3,7 @@ from backend.db_dictionaries import feature_units_dict
 
 # Import necessary Dash components for building the user interface
 from dash import html, dcc
+from backend.Class import Ops
 
 # Define a function to create a checkbox component
 def main_checkbox(client, id):
@@ -39,23 +40,35 @@ def pagination(page_store_id, features_id, prev_id, next_id, pagination_id, is_m
         
         html.Div(id=features_id, className="flex flex-row flex-wrap justify-between"),
 
-        html.Div(
-            className=f"{display} flex-row justify-center mt-5",
-            children=[
-                html.Button("Prev", id=prev_id, n_clicks=0, style={"marginRight": "10px"}),
-                html.Button("Next", id=next_id, n_clicks=0),
-            ],
-        ),
-        html.Div(id=pagination_id, className=f"{display} flex-row flex-wrap mt-5")
+
     ]
 )
     
-def expandable_container(toggle_button_id, expandable_text_id, page_store_id, features_id, prev_id, next_id, pagination_id, is_main=False):
+def expandable_container(toggle_button_id, expandable_text_id, client: Ops):
     return html.Div(
                 children= [
-                    html.Button("Expand Main Features" if is_main else "Expand DB Features", id=toggle_button_id, n_clicks=0, className="btn btn-primary font-bold"),
-                    html.Div(pagination(page_store_id, features_id, prev_id, next_id, pagination_id, is_main),
+                    html.Div(
+                        children=[
+                            html.Button("Expand Feature Menu", id=toggle_button_id, n_clicks=0, className="btn btn-primary font-bold"),
+                            dcc.Checklist(
+                                options=["DB features"],
+                                value=[],  # Default selected values (none selected initially)
+                                className="flex flex-row justify-between flex-wrap mx-10",  # CSS classes for layout styling
+                                inputClassName="mr-5",
+                                id="all_features_checkbox",  # Unique identifier for the checklist component
+                            ),
+                        ],
+                        className="flex flex-row"    
+                    ),
+                    html.Div(
+                        html.Div(
+                            html.Div(
+                                [html.Div(i, className="w-[300px] overflow-hidden mt-1") 
+                                 for i in client.db_name_dict], 
+                                className="flex flex-row flex-wrap justify-between"),
+                            className="w-full h-fit shadows-lg"
+                        ),
                     id=expandable_text_id, style={"display": "none"}, className="p-3 text-gray-700 shadow-lg rounded-lg")
                 ],
-                className="flex flex-col justify-center items-center w-full h-fit"    
+                className="flex flex-col justify-center items-center w-[60%] h-fit"    
             )

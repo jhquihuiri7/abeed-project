@@ -2,9 +2,9 @@
 from dash import dcc, html
 from components.dropdown_components import (
     custom_features_head,
+    list_custom_features,
     date_filter_dropdown,
     feature_filter_dropdown,
-    custom_dropdow
 )
 from components.button_components import button, hourButton
 from styles.styles import button_style, button_dropdown_style
@@ -28,11 +28,15 @@ def main_tabs(client, show_custom=True):
                 label="Custom Feature",
                 value="custom-feature-tab",
                 children=[
+                    custom_features_head(),  # Heading for custom features
                     html.Div(
                         children=[
-                            custom_features_head(),
-                            custom_dropdow(client=client, current_dropdown=[]),
-                            
+                            html.Div(
+                                id="custom_dropdown",
+                                children=[],
+                                className="w-[1200px] flex flex-row justify-left",
+                            ),  # Dropdown for custom features
+                            list_custom_features(client),
                         ],
                         className="flex flex-row justify-between",
                     ),

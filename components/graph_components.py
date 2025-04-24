@@ -3,15 +3,16 @@ import plotly.graph_objects as go  # For creating Plotly charts
 from plotly.subplots import make_subplots  # For creating charts with subplots and multiple axes
 from components.button_components import button  # Custom button component
 from backend.helper_functions import get_feature_units
-from utils.logic_functions import contains_both_axis, group_consecutive, get_first_consecutive_datetime  # Function to check for double axis requirements
+from utils.logic_functions import contains_both_axis, group_consecutive, get_first_consecutive_datetime, get_unit  # Function to check for double axis requirements
 from dash import dcc, html  # Dash components for UI
 from styles.styles import button_style  # Custom button styling
 import pandas as pd
 import numpy as np
+from backend.Class import Ops
 
 
 # Function to create a bar chart with optional dual axes
-def bar_chart(client, cols=None, apply_filter=False, collapse=False, show_title=True):
+def bar_chart(client: Ops, cols=None, apply_filter=False, collapse=False, show_title=True):
     """
     Generates a bar chart with support for a secondary Y-axis if needed.
 
@@ -28,16 +29,16 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False, show_title=
     
     custom_df = client.df
     filter_df = client.filter_df
-    if apply_filter and collapse:
-        if client.created_features != []:
-            custom_features = [ feature["feature_name"] for feature in client.created_features if feature["cumulative?"] == True]
-            df_1 = client.df.loc[:, ~client.df.columns.isin(custom_features)]
-            df_2 = client.filter_df[custom_features]
-            custom_df = pd.concat([df_1, df_2], axis=1)
-            custom_df[custom_features] = custom_df[custom_features].ffill()
+    #if apply_filter and collapse:
+    #    if client.created_features != []:
+    #        custom_features = [ feature["feature_name"] for feature in client.created_features if feature["cumulative?"] == True]
+    #        df_1 = client.df.loc[:, ~client.df.columns.isin(custom_features)]
+    #        df_2 = client.filter_df[custom_features]
+    #        custom_df = pd.concat([df_1, df_2], axis=1)
+    #        custom_df[custom_features] = custom_df[custom_features].ffill()
                 
     # Determine the columns to use for the chart
-    data = (custom_df if collapse else filter_df) if apply_filter else client.df 
+    data = client.filter_df if apply_filter else client.df   #(custom_df if collapse else filter_df) if apply_filter else client.df 
     columns = data.columns if cols is None else data[cols].columns
     # Check if dual axes are needed and get axis names
     double_axis, axis_names = contains_both_axis(client,columns)
@@ -50,13 +51,7 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False, show_title=
     for column in columns:
         # Calculate the maximum value in the column
         max_val = max(data[column])
-        unit = "MW"
-        try:
-            unit = client.feature_dict[column].units
-        except:
-            for feature in client.created_features:
-                if feature["feature_name"] == column:
-                    unit = feature["unit"]
+        unit = get_unit(client, column)
             
         # Append the value to the appropriate axis based on the feature's unit
         (
@@ -81,7 +76,6 @@ def bar_chart(client, cols=None, apply_filter=False, collapse=False, show_title=
             ),  # Assign trace to secondary Y-axis if applicable
         )
         
-    
     if client.datetimes_to_exclude and apply_filter and collapse:
         margin_top = pd.Timedelta(minutes=55)
         margin_bottom = pd.Timedelta(minutes=5)
