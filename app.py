@@ -545,14 +545,10 @@ def create_dash_app(server):
                 notification = show_notification(message)
         
         if triggered_id == "update_date_range_button":
-            is_valid = True
-            if is_valid:
-                client.update_date_range_button(client.start_date, client.end_date)
-                currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
-                currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
-                feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
-            else:
-                notification = show_notification(message)
+            client.update_date_range_button(client.start_date, client.end_date)
+            currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)
+            currentChildren = multi_chart(client, apply_filters_state!=[], collapse_expand_filter_state)
+            feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
             
         elif triggered_id == "add_graph_button":
             sub_features = [
@@ -567,12 +563,11 @@ def create_dash_app(server):
             
         elif triggered_id == "add_custom_feature":
             alias_map = {}
+            custom_cumulative = len(custom_cumulative) == 2
             for alias, feature in zip(custom_alias, custom_feature):
                 alias_map[alias] = feature
-        #    is_valid, message = validate_add_custom_feature(client, custom_feature, custom_cumulative[-1] != "", custom_name)
-            is_valid=True
+            is_valid, message = validate_add_custom_feature(client, custon_operation,alias_map, custom_name, custom_cumulative)
             if is_valid:
-                custom_cumulative = len(custom_cumulative) == 2
                 custom_name = None if custom_name == "" else custom_name
                 client.create_custom_feature_button(custon_operation,alias_map,custom_cumulative,custom_name)
                 currentFigure = bar_chart(client, None, apply_filters_state!=[], collapse_expand_filter_state)

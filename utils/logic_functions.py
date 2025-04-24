@@ -1,6 +1,6 @@
 from backend.helper_functions import get_feature_units
 from datetime import timedelta
-from backend.Class import Ops
+from backend.Class import Ops, session_features
 
 def get_unit(client, column):
     unit = "USD"
@@ -255,36 +255,33 @@ def get_feature_fitler_name_by_id(client, index):
             break
     return name
 
-def validate_add_custom_feature(client, custom_feature, cumulative, custom_name):
+def validate_add_custom_feature(client:Ops,equation, alias_map, custom_name, cumulative):
     message = ""
-    if len(client.data_features) < 2:
-        message = "Cannot create custom feature (Hint: select at least two data features)"
+    if equation == "" or equation == None:
+        message = "Cannot leave the equation as empty (Hint: fill with a valid equation)"
         return False, message
-    if len(custom_feature) < 2:
-        message = "Cannot create custom feature 2 (Hint: select at least two data features)"
+    try:
+        session = session_features()
+        session.alias_map = alias_map
+        session.equation = equation
+        client.create_custom_feature_column(client.df, session)
+    except:
+        message = "Cannot validate equation (Hint: fill with a valid equation)"
         return False, message
-    for cf in custom_feature:
-        if cf["Feature"] == "" or cf["Feature"]==None:
-            message = "Cannot create custom feature (Hint: Dont leave an operation without selection)"
-            return False, message      
-    if not custom_name or custom_name == '':
-        for idx, features in enumerate(custom_feature):
-            if idx == 0:
-                custom_name = "(" + features["Feature"]
-            
-            else:
-                custom_name = custom_name + " " + features["Operation"] + " " + str(features["Feature"])
-        custom_name = custom_name + ")"
-        if cumulative:
-            custom_name = custom_name + "Σ" 
-    if custom_name in client.data_features:
-        message = "Cannot create custom feature (Hint: Feature name already exists in data_features)"
-        return False, message
-    if custom_name in [feature["feature_name"] for feature in client.created_features]:
-            
-            message = "Cannot create custom feature (Hint: Feature name already exists in created_features)"
+    
+    for k, v in alias_map.items():
+        if k is None or k == "" or v is None or v == "":
+            message = "Cannot create a custom feature with missing values in the alias map (Hint: fill al the fields in the alias map)"
             return False, message
-                
+          
+    if not custom_name or custom_name == '':
+        custom_name = equation
+        if cumulative:
+            custom_name = f'({custom_name})∑'
+    if custom_name in client.session_data_features.keys():
+        message = "Cannot create custom feature (Hint: Feature name already exists)"
+        return False, message
+    
     return True, message
 
 def validate_delete_custom_feature(client, feature_to_remove):
