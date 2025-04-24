@@ -96,7 +96,7 @@ def validateFeatureFilterData(client, feature, min_range, max_range):
     if feature == "":
         reason = f"Cannot create a feature filter because the is no feature selected (Hint: select a feature)"
         return False, reason, min_range, max_range
-    if min_range == "" and max_range == "":
+    if (min_range == "" and max_range == "") or (min_range == None and max_range == None):
         reason = f"Cannot create a feature filter because the is no values in the input range (Hint: provide at least one input range)"
         return False, reason, min_range, max_range
     try:
@@ -319,24 +319,6 @@ def validateApplyFilterToggle(client, apply_filter, toggle):
             message = "No filters to apply"
     
     return is_valid, message
-
-def validate_update_data(client, selected_features):
-    message= ""
-    if len(selected_features) < 1:
-        message = "Cannot create update data (Hint: select at least one data feature)"
-        return False, message
-    feature_filter = set(get_feature_filter_name(client))
-    dependence_features =  set(get_custom_features_dependence(client))
-    if not dependence_features.issubset(selected_features):
-        missing_features = dependence_features - set(selected_features)
-        dependent_custom_features = set(get_custom_features_names(client, missing_features,show_cumulative=True))
-        message = f"Cannot have {format_set(dependent_custom_features)} custom feature without {format_set(missing_features)} data feature (Hint: delete {format_set(dependent_custom_features)} or reselect {format_set(missing_features)} data feature)"
-        return False, message
-    if not feature_filter.issubset(set(selected_features) | set(get_custom_features_names(client, [],show_all=True, show_cumulative=True))):
-        missing_features = set(feature_filter) - set(selected_features)
-        message = f"Cannot have {format_set(feature_filter)} feature filter without {format_set(missing_features)} data feature (Hint: delete {format_set(feature_filter)} filter or reselect {format_set(missing_features)} data feature)"
-        return False, message
-    return True, message
 
 def validate_add_features(selected_features):
     message = ""
