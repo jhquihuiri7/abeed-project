@@ -1,7 +1,7 @@
 from components.button_components import button
 from styles.styles import button_dropdown_style
 from dash import html
-from backend.Class import Ops
+from backend.Class import Ops, session_features
 import pandas as pd
 import json
 from datetime import date, datetime
@@ -49,10 +49,9 @@ def list_custom_filter_children(client):
 
 
 def ops_to_json(session: Ops):
-    
     def default_serializer(obj):
         if isinstance(obj, pd.Timestamp):
-            return obj.strftime('%Y-%m-%d')  # Convert Timestamp to string in 'YYYY-MM-DD' format
+           return obj.strftime('%Y-%m-%d')  # Convert Timestamp to string in 'YYYY-MM-DD' format
         if isinstance(obj, (pd.DatetimeIndex, pd.Series, pd.DataFrame)):
             return obj.to_json()
         if isinstance(obj, (datetime, date)):
@@ -67,20 +66,22 @@ def ops_to_json(session: Ops):
                 if filter['range'][1] == math.inf:
                     filter['range'][1] = 99999
     
+    data_features_serialized: dict[str, session_features] = {}
+    if session.session_data_features:
+        for key, feature in session.session_data_features.items():
+            data_features_serialized[key] = feature.to_dict()
+
     filtered_data = {
         "start_date": session.start_date,
         "end_date": session.end_date,
-        "data_features": session.data_features,
+        "session_data_features": data_features_serialized,
         "graphs": session.graphs,
         "hour_filters": session.hour_filters,
         "day_of_week_filters": session.day_of_week_filters,
         "month_filters": session.month_filters,
         "year_filters": session.year_filters,
         "feature_filters": session.feature_filters,
-        "created_features": session.created_features,
-        "scatter_graphs": session.scatter_graphs
     }
-
     return json.dumps(filtered_data, default=default_serializer, indent=4)
 
 def json_to_ops(json_data):
@@ -105,23 +106,27 @@ def json_to_ops(json_data):
         datetime.strptime(data.get("end_date"), date_format).date()
         if data.get("end_date") else None
     )
-    
+    session_dict = data.get("session_data_features")
+    session_features_dict: dict[str, session_features] = {}
+    if session_dict:
+        for key, value in session_dict.items():
+            session_instance = session_features()
+            session_instance.from_dict(value)
+            session_features_dict[key] = session_instance
+
     # Populate the instance
-    ops_instance.data_features = data.get("data_features")
+    ops_instance.session_data_features = session_features_dict
     ops_instance.graphs = data.get("graphs")
     ops_instance.hour_filters = data.get("hour_filters")
     ops_instance.day_of_week_filters = data.get("day_of_week_filters")
     ops_instance.month_filters = data.get("month_filters")
     ops_instance.year_filters = data.get("year_filters")
     ops_instance.feature_filters = data.get("feature_filters")
-    ops_instance.created_features = data.get("created_features")
-    ops_instance.scatter_graphs = data.get("scatter_graphs")
-
     # Run the update methods
     ops_instance.update_data()
     ops_instance.update_datetimes_to_exclude()
     ops_instance.update_filter_df()
-
+    
     return ops_instance
 
 def ops_to_json_upload(session: Ops):
@@ -144,20 +149,24 @@ def ops_to_json_upload(session: Ops):
     except:
         pass
     
+    data_features_serialized: dict[str, session_features] = {}
+    if session.session_data_features:
+        for key, feature in session.session_data_features.items():
+            data_features_serialized[key] = feature.to_dict()
+
     filtered_data = {
         "df": df.to_dict(orient='records'),
         "filter_df": filter_df.to_dict(orient='records'),
-        "data_features": session.data_features,
         "start_date":session.start_date.strftime('%Y-%m-%d'),
         "end_date":session.end_date.strftime('%Y-%m-%d'),
-        "created_features":session.created_features,
+        "session_data_features": data_features_serialized,
+        "graphs": session.graphs,
         "hour_filters": session.hour_filters,
         "day_of_week_filters": session.day_of_week_filters,
         "month_filters": session.month_filters,
         "year_filters": session.year_filters,
-        "feature_filters": session.feature_filters
+        "feature_filters": session.feature_filters,
     }
-
     return json.dumps(filtered_data, indent=4)
 
 def json_to_ops_upload(json_data):
@@ -183,21 +192,29 @@ def json_to_ops_upload(json_data):
     # Create a new instance of Ops
     ops_instance = Ops()
     
+    session_dict = data.get("session_data_features")
+    session_features_dict: dict[str, session_features] = {}
+    if session_dict:
+        for key, value in session_dict.items():
+            session_instance = session_features()
+            session_instance.from_dict(value)
+            session_features_dict[key] = session_instance
+
     # Populate the instance
     ops_instance.df = df
     ops_instance.filter_df = filter_df
-    ops_instance.data_features = data.get("data_features")
+    ops_instance.session_data_features = session_features_dict
     ops_instance.start_date = start_date
     ops_instance.end_date = end_date
-    ops_instance.created_features = data.get("created_features") 
+    ops_instance.graphs = data.get("graphs")
     ops_instance.hour_filters = data.get("hour_filters")
     ops_instance.day_of_week_filters = data.get("day_of_week_filters")
     ops_instance.month_filters = data.get("month_filters")
     ops_instance.year_filters = data.get("year_filters")
     ops_instance.feature_filters = data.get("feature_filters")
     # Run the update methods
-    #ops_instance.update_data()
     ops_instance.update_datetimes_to_exclude()
     ops_instance.update_filter_df()
 
     return ops_instance
+

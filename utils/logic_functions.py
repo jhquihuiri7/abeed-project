@@ -1,19 +1,17 @@
 from backend.helper_functions import get_feature_units
 from datetime import timedelta
+from backend.Class import Ops, session_features
+
 def get_unit(client, column):
     unit = "USD"
     try:
-        unit = client.feature_dict[column].units
+        unit = client.session_data_features[column].units
     except:
         if "(mw)" in column:
             unit = "MW"
-        else:
-            for feature in client.created_features:
-                if feature["feature_name"] == column:
-                    unit = feature["unit"]
     return unit
 # Function to determine if a set of columns requires both primary and secondary axes
-def contains_both_axis(client, cols):
+def contains_both_axis(client: Ops, cols):
     
     """
     Determines if the features in the given columns have different units,
@@ -29,7 +27,7 @@ def contains_both_axis(client, cols):
     """
     units = []
     for column in cols:
-        unit = get_unit(client, column)
+        unit = get_unit(client, column) #get_unit(client, column)
         units.append(unit)      
     # Extract unique units from the feature_units_dict for the given columns
     units = set(units)
@@ -98,7 +96,7 @@ def validateFeatureFilterData(client, feature, min_range, max_range):
     if feature == "":
         reason = f"Cannot create a feature filter because the is no feature selected (Hint: select a feature)"
         return False, reason, min_range, max_range
-    if min_range == "" and max_range == "":
+    if (min_range == "" and max_range == "") or (min_range == None and max_range == None):
         reason = f"Cannot create a feature filter because the is no values in the input range (Hint: provide at least one input range)"
         return False, reason, min_range, max_range
     try:
@@ -224,11 +222,16 @@ def extract_values_custom_feature(data):
 def get_feature_filter_name(client):
     return [feature["feature_name"] for feature in client.feature_filters]
 
-def get_custom_features_dependence(client):
-    dependence_features = []
-    for cf in client.created_features:
-        for eq in cf["equation"]:
-            dependence_features.append(eq["Feature"])
+def get_custom_features_dependence(client:Ops, selected_features) -> dict:
+    dependence_features = {}
+    for key, value in client.session_data_features.items():
+        if value.alias_map:
+            common_filter = []
+            for k,v in value.alias_map.items():
+                if v in selected_features:
+                    common_filter.append(v) 
+            if common_filter:
+                dependence_features[key] = common_filter
     return dependence_features
     
 def get_custom_features_names(client, missing_features, show_all = False, show_cumulative = False):
@@ -252,36 +255,33 @@ def get_feature_fitler_name_by_id(client, index):
             break
     return name
 
-def validate_add_custom_feature(client, custom_feature, cumulative, custom_name):
+def validate_add_custom_feature(client:Ops,equation, alias_map, custom_name, cumulative):
     message = ""
-    if len(client.data_features) < 2:
-        message = "Cannot create custom feature (Hint: select at least two data features)"
+    if equation == "" or equation == None:
+        message = "Cannot leave the equation as empty (Hint: fill with a valid equation)"
         return False, message
-    if len(custom_feature) < 2:
-        message = "Cannot create custom feature 2 (Hint: select at least two data features)"
+    try:
+        session = session_features()
+        session.alias_map = alias_map
+        session.equation = equation
+        client.create_custom_feature_column(client.df, session)
+    except:
+        message = "Cannot validate equation (Hint: fill with a valid equation)"
         return False, message
-    for cf in custom_feature:
-        if cf["Feature"] == "" or cf["Feature"]==None:
-            message = "Cannot create custom feature (Hint: Dont leave an operation without selection)"
-            return False, message      
-    if not custom_name or custom_name == '':
-        for idx, features in enumerate(custom_feature):
-            if idx == 0:
-                custom_name = "(" + features["Feature"]
-            
-            else:
-                custom_name = custom_name + " " + features["Operation"] + " " + str(features["Feature"])
-        custom_name = custom_name + ")"
-        if cumulative:
-            custom_name = custom_name + "Σ" 
-    if custom_name in client.data_features:
-        message = "Cannot create custom feature (Hint: Feature name already exists in data_features)"
-        return False, message
-    if custom_name in [feature["feature_name"] for feature in client.created_features]:
-            
-            message = "Cannot create custom feature (Hint: Feature name already exists in created_features)"
+    
+    for k, v in alias_map.items():
+        if k is None or k == "" or v is None or v == "":
+            message = "Cannot create a custom feature with missing values in the alias map (Hint: fill al the fields in the alias map)"
             return False, message
-                
+          
+    if not custom_name or custom_name == '':
+        custom_name = equation
+        if cumulative:
+            custom_name = f'({custom_name})∑'
+    if custom_name in client.session_data_features.keys():
+        message = "Cannot create custom feature (Hint: Feature name already exists)"
+        return False, message
+    
     return True, message
 
 def validate_delete_custom_feature(client, feature_to_remove):
@@ -317,29 +317,34 @@ def validateApplyFilterToggle(client, apply_filter, toggle):
     
     return is_valid, message
 
-def validate_update_data(client, selected_features):
-    message= ""
-    if len(selected_features) < 1:
+def validate_add_features(selected_features):
+    message = ""
+    if selected_features == []:
         message = "Cannot create update data (Hint: select at least one data feature)"
         return False, message
-    feature_filter = set(get_feature_filter_name(client))
-    dependence_features =  set(get_custom_features_dependence(client))
-    if not dependence_features.issubset(selected_features):
-        missing_features = dependence_features - set(selected_features)
-        dependent_custom_features = set(get_custom_features_names(client, missing_features,show_cumulative=True))
-        message = f"Cannot have {format_set(dependent_custom_features)} custom feature without {format_set(missing_features)} data feature (Hint: delete {format_set(dependent_custom_features)} or reselect {format_set(missing_features)} data feature)"
+    return True, message
+def validate_delete_features(client:Ops, selected_features):
+    message = ""
+    if selected_features == []:
+        message = "Cannot create delete feature (Hint: select at least one data feature)"
         return False, message
-    if not feature_filter.issubset(set(selected_features) | set(get_custom_features_names(client, [],show_all=True, show_cumulative=True))):
-        missing_features = set(feature_filter) - set(selected_features)
-        message = f"Cannot have {format_set(feature_filter)} feature filter without {format_set(missing_features)} data feature (Hint: delete {format_set(feature_filter)} filter or reselect {format_set(missing_features)} data feature)"
+    common_filter = list(set(selected_features) & set(get_feature_filter_name(client)))
+    common_custom = get_custom_features_dependence(client, selected_features)
+    if common_custom:
+        custom_features = common_custom.keys()
+        dependent_features = common_custom.values()
+        message = f"Cannot have {format_set(custom_features)} custom feature without {format_set(dependent_features)} data feature (Hint: delete {format_set(custom_features)} or reselect {format_set(dependent_features)} data feature)"
+        return False, message
+    if common_filter:
+        message = f"Cannot have {format_set(common_filter)} feature filter without {format_set(common_filter)} data feature (Hint: delete {format_set(common_filter)} filter or reselect {format_set(common_filter)} data feature)"
         return False, message
     return True, message
-
+    
 def format_set(s):
     return ', '.join(f"'{item}'" for item in s)
 
-def get_feature_filter_dropdown_opts(client, is_upload=False):
+def get_feature_filter_dropdown_opts(client: Ops, is_upload=False):
     if is_upload:
         return list(set(client.df.columns)-set(get_feature_filter_name(client)))
     else:    
-        return list((set(client.data_features or []) - set(get_feature_filter_name(client) or [])) | set(get_custom_features_names(client, [], True) or []))
+        return list(set(client.session_data_features.keys() or []) - set(get_feature_filter_name(client) or []))

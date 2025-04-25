@@ -21,6 +21,7 @@ def main_daterange(client):
                 max_date_allowed=date(2027, 9, 19),  # Latest date that can be selected
                 start_date=client.start_date,  # Default start date (5 days ago)
                 end_date=client.end_date,  # Default end date (today)
-            )
+            ),
         ],
+        className="mr-5"
     )
