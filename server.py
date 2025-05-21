@@ -24,6 +24,17 @@ def index():
 def launcher():
     return render_template("launcher.html")
 
+@server.route("/predefined/<file_name>")
+def predefined(file_name):
+    file_path = f"./assets/predefined/{file_name}"
+    try:
+        with open(file_path, 'r') as f:
+            json_data = json.load(f)
+            session['json_data'] = json_data  # Store in Flask session
+            return "OK", 200
+    except FileNotFoundError:
+        return f"File {file_name} not found", 404
+
 @server.route('/save-json', methods=['POST'])
 def save_json():
     try:

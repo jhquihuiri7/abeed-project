@@ -1,0 +1,75 @@
+{
+    "start_date": "2025-05-14",
+    "end_date": "2025-05-23",
+    "session_data_features": {
+        "PJ ny DA": {
+            "feature_name": "PJ ny DA",
+            "id": "41ee943e-c913-41db-a787-18b9702b8ebf",
+            "db_name": "5413134.0;lmp;da",
+            "requirements": [],
+            "equation": "",
+            "alias_map": {},
+            "units": "USD",
+            "cumulative": false
+        }
+    },
+    "graphs": [],
+    "hour_filters": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+    ],
+    "day_of_week_filters": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+    ],
+    "month_filters": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+    ],
+    "year_filters": [
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+    ],
+    "feature_filters": []
+}

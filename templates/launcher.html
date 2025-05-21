@@ -8,7 +8,6 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='css/launcher.css') }}"
     />
-    <script src="{{ url_for('static', filename='js/launcher.js') }}"></script>
   </head>
   <body>
     <div class="main">
@@ -19,7 +18,7 @@
         <div class="user-row" id="new">
           <span class="user-name">Start New Session / Import file</span>
           <div class="buttons">
-            <button id="new-session">Start New Session</button>
+            <button id="new-session" onclick="window.location.href='/home'">Start New Session</button>
             <input
               type="file"
               id="file-input"
@@ -31,28 +30,29 @@
         <div class="user-row" id="jb">
           <span class="user-name">Jason Brandt</span>
           <div class="buttons">
-            <button id="one.json">One</button>
-            <button id="two.json">Two</button>
-            <button id="three.json">Three</button>
-            <button id="four.json">Four</button>
+            <button data-filename="ae_TEXAS.json">One</button>
+            <button data-filename="two.json">Two</button>
+            <button data-filename="three.json">Three</button>
+            <button data-filename="four.json">Four</button>
           </div>
         </div>
         <div class="user-row" id="ae">
-          <span class="user-name">Abraham Escalante</span>
+          <span class="user-name">Day-Ahead</span>
           <div class="buttons">
-            <button id="one.json">One</button>
-            <button id="two.json">Two</button>
-            <button id="three.json">Three</button>
+            <button data-filename="one.json">One</button>
+            <button data-filename="two.json">Two</button>
+            <button data-filename="three.json">Three</button>
           </div>
         </div>
         <div class="user-row" id="dr">
-          <span class="user-name">Daniel Rodrigues</span>
+          <span class="user-name">Real-Time</span>
           <div class="buttons">
-            <button id="one.json">One</button>
-            <button id="two.json">Two</button>
+            <button data-filename="one.json">One</button>
+            <button data-filename="two.json">Two</button>
           </div>
         </div>
       </div>
     </div>
+    <script src="{{ url_for('static', filename='js/launcher.js') }}"></script>
   </body>
 </html>
