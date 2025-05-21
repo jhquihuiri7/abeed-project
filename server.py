@@ -52,15 +52,15 @@ def home():
             return "Invalid JSON format", 400
     else:
         empty_data =  ops_to_json(Ops())
-        new_app.layout.children[1].data = empty_data 
+        new_app.layout.children[1].data = empty_data
         return new_app.index()
-    
+
 uploaded_data = pd.DataFrame()
 
 @server.route('/upload', methods=['POST'])
 def home_upload():
     global uploaded_data
-    
+
     if 'file' not in request.files:
         return jsonify({'error': 'No se envió ningún archivo'}), 400
 
@@ -74,12 +74,12 @@ def home_upload():
             uploaded_data = pd.read_csv(io.StringIO(file.stream.read().decode('utf-8')))
             uploaded_data.iloc[:, 0] = pd.to_datetime(uploaded_data.iloc[:, 0])
             uploaded_data.set_index(uploaded_data.columns[0], inplace=True)
-           
+
             # Enviar la respuesta con los datos procesados
             return jsonify({'message': 'Archivo CSV recibido'}), 200
         except Exception as e:
             return jsonify({'error': f'Error al procesar el archivo CSV: {str(e)}'}), 500
-        
+
     # Si no es un CSV válido
     return jsonify({'error': 'Archivo no válido. Solo se aceptan archivos CSV.'}), 400
 
@@ -98,11 +98,11 @@ def custom_dash():
         uploaded_data = pd.DataFrame()
         # Aquí puedes actualizar la aplicación de Dash con los nuevos datos
         new_app2.layout.children[1].data = json_data
-        
+
         return new_app2.index()
     else:
         return render_template("not_found.html")
-        
+
 
 if __name__ == '__main__':
     server.run(debug=False, host= "0.0.0.0", port=8000)

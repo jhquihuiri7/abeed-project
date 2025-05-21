@@ -63,7 +63,7 @@ def apply_filters_toggle(action, is_upload = False):
     Returns:
         dash.html.Div: A div containing a checklist and a toggle switch for filter application.
     """
-    
+
     return html.Div(
         children=[
             # Checklist to indicate whether the filters should be applied

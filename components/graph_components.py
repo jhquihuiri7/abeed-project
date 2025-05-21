@@ -18,7 +18,7 @@ def bar_chart(client: Ops, cols=None, apply_filter=False, collapse=False, show_t
 
     Args:
         client: An object containing the dataframe and other metadata.
-        cols (list, optional): Specific columns to include in the chart. 
+        cols (list, optional): Specific columns to include in the chart.
                                If None, all columns in the client's dataframe are used.
 
     Returns:
@@ -26,7 +26,7 @@ def bar_chart(client: Ops, cols=None, apply_filter=False, collapse=False, show_t
     """
     # Create a figure with support for a secondary Y-axis
     fig = make_subplots(specs=[[{"secondary_y": True}]])
-    
+
     custom_df = client.df
     filter_df = client.filter_df
     #if apply_filter and collapse:
@@ -36,30 +36,30 @@ def bar_chart(client: Ops, cols=None, apply_filter=False, collapse=False, show_t
     #        df_2 = client.filter_df[custom_features]
     #        custom_df = pd.concat([df_1, df_2], axis=1)
     #        custom_df[custom_features] = custom_df[custom_features].ffill()
-                
+
     # Determine the columns to use for the chart
-    data = client.filter_df if apply_filter else client.df   #(custom_df if collapse else filter_df) if apply_filter else client.df 
+    data = client.filter_df if apply_filter else client.df   #(custom_df if collapse else filter_df) if apply_filter else client.df
     columns = data.columns if cols is None else data[cols].columns
     # Check if dual axes are needed and get axis names
     double_axis, axis_names = contains_both_axis(client,columns)
-    
+
     # Initialize lists to store maximum Y values for each axis
     max_y_primary = []
     max_y_secondary = []
-    
+
     # Iterate over the columns to add data traces to the chart
     for column in columns:
         # Calculate the maximum value in the column
         max_val = max(data[column])
         unit = get_unit(client, column)
-            
+
         # Append the value to the appropriate axis based on the feature's unit
         (
             max_y_secondary.append(max_val)
             if double_axis and unit == "MW"  # Secondary Y-axis for "MW" units
             else max_y_primary.append(max_val)  # Primary Y-axis for other units
         )
-        
+
         # Add a trace to the chart
         fig.add_trace(
             go.Scatter(
@@ -75,7 +75,7 @@ def bar_chart(client: Ops, cols=None, apply_filter=False, collapse=False, show_t
                 True if double_axis and unit == "MW" else False
             ),  # Assign trace to secondary Y-axis if applicable
         )
-        
+
     if client.datetimes_to_exclude and apply_filter and collapse:
         margin_top = pd.Timedelta(minutes=55)
         margin_bottom = pd.Timedelta(minutes=5)
@@ -96,15 +96,15 @@ def bar_chart(client: Ops, cols=None, apply_filter=False, collapse=False, show_t
         result = get_first_consecutive_datetime(data.index)
         for highlight_date in result:
             fig.add_vline(x=highlight_date, line_dash="solid", line_color="red", opacity=0.3, line_width=3)
-        
+
         formatted_dates = [timestamp.strftime("%b %d") for timestamp in result]
         fig.update_xaxes(type="category", tickvals= result, ticktext=formatted_dates)
-    
+
     # Update the layout of the chart
     fig.update_layout(
         title=dict(
         text=f"Hours: {client.filter_df.shape[0]}" if show_title else "",
-        x=0.85,  
+        x=0.85,
         xanchor="right"
         ),
         xaxis_title="datetime",  # X-axis title
@@ -126,7 +126,7 @@ def bar_chart(client: Ops, cols=None, apply_filter=False, collapse=False, show_t
             spikesnap="cursor",  # Spikes snap to cursor
         ),
     )
-    
+
     # If dual axes are required, configure the secondary Y-axis
     if double_axis:
         fig.update_layout(
@@ -137,7 +137,7 @@ def bar_chart(client: Ops, cols=None, apply_filter=False, collapse=False, show_t
                 overlaying="y",  # Overlay on the primary Y-axis
             )
         )
-    
+
     return fig  # Return the complete figure
 
 # Function to generate multiple charts and associate them with remove buttons
@@ -152,7 +152,7 @@ def multi_chart(client, apply_filter=False, collapse=False):
         list: A list of Dash HTML Div components, each containing a chart and a remove button.
     """
     list = []  # Initialize an empty list to store chart components
-    
+
     # Iterate through the graphs in reverse order
     for index, graph in enumerate(client.graphs[::-1]):
         # Append a Div containing a chart and a remove button to the list
@@ -175,6 +175,6 @@ def multi_chart(client, apply_filter=False, collapse=False):
                 className=f"w-[49%] rounded-lg border mt-10 p-4 {'ml-[1%]' if index % 2 != 0 else 'mr-[1%]'}",
             )
         )
-    
+
     # Return the list of chart components if it is not empty, otherwise return an empty list
     return list if list else []

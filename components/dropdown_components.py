@@ -123,24 +123,24 @@ def date_filter_dropdown():
     years = [2020, 2025]  # Year range
     months = [1, 12]  # Month range
     days = [0, 7]  # Day range (0=Monday, 6=Sunday)
-    
+
     # Generate month options for the dropdown
     month_names = [
         {'label': calendar.month_name[month], 'value': month}
         for month in range(months[0], months[1] + 1)
     ]
-    
+
     # Generate day options for the dropdown
     day_options = [
         {'label': calendar.day_name[day], 'value': day}
         for day in range(days[0], days[1])
     ]
-    
+
     # Ranges for dropdown selections
     year_range = [year for year in range(years[0], years[1] + 1)]
     month_range = [month["value"] for month in month_names]
     day_range = [day["value"] for day in day_options]
-    
+
     return [
         html.Div(
             children=[
@@ -220,7 +220,7 @@ def feature_filter_dropdown(client:Ops):
                             type="text",  # Input type
                             placeholder="+ Infinity",  # Placeholder text
                             className="mx-5 w-[65px]",  # Styling for the input
-                        )    
+                        )
                     ]),
                     # Button to add the filter
                     html.Div(
@@ -270,7 +270,7 @@ def custom_features_children(options, currentDropdownChildren):
     alias = alias_feature(options=options, id=id)
 
     children = children[:-1]
-    
+
     children.append(alias)
 
     if currentDropdownChildren != [] and len(currentDropdownChildren) >= 2:
@@ -279,10 +279,10 @@ def custom_features_children(options, currentDropdownChildren):
         children.append(button(text="Remove last", id="remove_last_alias", style=button_style+" hidden"))
     return children
 
-def remove_features_children(currentDropdownChildren): 
+def remove_features_children(currentDropdownChildren):
     if len(currentDropdownChildren) >= 3:
         currentDropdownChildren = currentDropdownChildren[:-2]
-    
+
     if currentDropdownChildren != [] and len(currentDropdownChildren) >= 2:
         currentDropdownChildren.append(button(text="Remove last", id="remove_last_alias", style=button_style))
     else:

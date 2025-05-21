@@ -32,8 +32,8 @@ def list_custom_filter_children(client):
             children=[
                 # Display the custom feature name
                 html.H4(
-                    feature["feature_name"], 
-                    className="mr-4 text-base font-bold text-slate-500", 
+                    feature["feature_name"],
+                    className="mr-4 text-base font-bold text-slate-500",
                     style={"white-space": "nowrap", "overflow": "hidden", "text-overflow": "ellipsis"}
                 ),
                 # Add a button to remove the custom feature
@@ -56,16 +56,16 @@ def ops_to_json(session: Ops):
             return obj.to_json()
         if isinstance(obj, (datetime, date)):
             return obj.strftime('%Y-%m-%d')  # Convert date or datetime to string in 'YYYY-MM-DD' format
-        
+
         raise TypeError(f"Type {type(obj)} not serializable")
-    
+
     if session.feature_filters != []:
             for filter in session.feature_filters:
                 if filter['range'][0] == -math.inf:
                     filter['range'][0] = -99999
                 if filter['range'][1] == math.inf:
                     filter['range'][1] = 99999
-    
+
     data_features_serialized: dict[str, session_features] = {}
     if session.session_data_features:
         for key, feature in session.session_data_features.items():
@@ -126,7 +126,7 @@ def json_to_ops(json_data):
     ops_instance.update_data()
     ops_instance.update_datetimes_to_exclude()
     ops_instance.update_filter_df()
-    
+
     return ops_instance
 
 def ops_to_json_upload(session: Ops):
@@ -148,7 +148,7 @@ def ops_to_json_upload(session: Ops):
        filter_df['index'] = filter_df['index'].astype(str)
     except:
         pass
-    
+
     data_features_serialized: dict[str, session_features] = {}
     if session.session_data_features:
         for key, feature in session.session_data_features.items():
@@ -176,14 +176,14 @@ def json_to_ops_upload(json_data):
         df = pd.DataFrame(data["df"])
         df.iloc[:, 0] = pd.to_datetime(df.iloc[:, 0])
         df.set_index(df.columns[0], inplace=True)
-        
+
         start_date = pd.to_datetime(data["start_date"]).date()
         end_date = pd.to_datetime(data["end_date"]).date()
         filter_df = pd.DataFrame(data["filter_df"])
         if not filter_df.empty:
             filter_df.iloc[:, 0] = pd.to_datetime(filter_df.iloc[:, 0])
             filter_df.set_index(filter_df.columns[0], inplace=True)
-        
+
     elif isinstance(json_data, dict):  # If it's already a dictionary, use it directly
         data = json_data
     else:
@@ -191,7 +191,7 @@ def json_to_ops_upload(json_data):
 
     # Create a new instance of Ops
     ops_instance = Ops()
-    
+
     session_dict = data.get("session_data_features")
     session_features_dict: dict[str, session_features] = {}
     if session_dict:

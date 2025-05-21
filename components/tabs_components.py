@@ -32,7 +32,7 @@ def main_tabs(client, show_custom=True):
                         children=[
                             custom_features_head(),
                             custom_dropdow(client=client, current_dropdown=[]),
-                            
+
                         ],
                         className="flex flex-row justify-between",
                     ),
