@@ -4,56 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Drag and Drop</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin: 20px;
-    }
-
-    h1 {
-      color: #333;
-    }
-
-    .button-container {
-      margin: 20px;
-      display: flex;
-      gap: 10px;
-    }
-
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-
-    button:hover {
-      background-color: #ddd;
-    }
-
-    button:active {
-      background-color: #ccc;
-    }
-
-    .dropzone {
-      width: 300px;
-      height: 300px;
-      border: 2px dashed #ccc;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 20px;
-    }
-
-    .dropzone.dragover {
-      border-color: #4CAF50;
-      background-color: #f9f9f9;
-    }
-  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='/css/index.css') }}">
 </head>
 <body>
   <h1>Market Operation Dashboard</h1>
@@ -66,6 +17,6 @@
     Drop Here
   </div>
 
-  <script src="{{ url_for('static', filename='index.js') }}"></script>
+  <script src="{{ url_for('static', filename='/js/index.js') }}"></script>
 </body>
 </html>
