@@ -21,7 +21,7 @@ dropZone.addEventListener('drop', (e) => {
   if (files.length > 0) {
     const file = files[0];
     const fileName = file.name.toLowerCase();
-    
+
     if (file.type === 'application/json' || fileName.endsWith('.json')) {
       const reader = new FileReader();
       reader.onload = (event) => {
