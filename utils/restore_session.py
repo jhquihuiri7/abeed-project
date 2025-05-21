@@ -7,7 +7,7 @@ from dash import html
 from components.button_components import button
 from backend.Class import Ops, session_features
 # Styles
-from styles.styles import button_dropdown_style
+from utils.styles import button_dropdown_style
 
 
 def restore_session(client: Ops, apply_filters_state, collapse_expand_filter_state, collapse_expand_filter_disabled, feature_filter_min_range, feature_filter_max_range, currentDropdownChildren):

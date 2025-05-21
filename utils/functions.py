@@ -1,5 +1,5 @@
 from components.button_components import button
-from styles.styles import button_dropdown_style
+from utils.styles import button_dropdown_style
 from dash import html
 from backend.Class import Ops, session_features
 import pandas as pd

@@ -33,7 +33,7 @@ from utils.functions import (
 from backend.Class import Ops, session_features
 
 # Styles
-from styles.styles import button_style
+from utils.styles import button_style
 
 # React version setting
 _dash_renderer._set_react_version("18.2.0")

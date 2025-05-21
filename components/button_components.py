@@ -1,5 +1,5 @@
 # Import custom styles from the styles module
-from styles.styles import button_style, hourButtonStyle
+from utils.styles import button_style, hourButtonStyle
 import dash_daq as daq
 
 # Import the HTML module from Dash

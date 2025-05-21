@@ -45,7 +45,7 @@ from utils.functions import (
 from backend.Class import Ops
 
 # Styles
-from styles.styles import button_style, hourButtonStyle
+from utils.styles import button_style, hourButtonStyle
 
 # React version setting
 _dash_renderer._set_react_version("18.2.0")

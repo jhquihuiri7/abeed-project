@@ -5,7 +5,7 @@ from components.button_components import button  # Custom button component
 from backend.helper_functions import get_feature_units
 from utils.logic_functions import contains_both_axis, group_consecutive, get_first_consecutive_datetime, get_unit  # Function to check for double axis requirements
 from dash import dcc, html  # Dash components for UI
-from styles.styles import button_style  # Custom button styling
+from utils.styles import button_style  # Custom button styling
 import pandas as pd
 import numpy as np
 from backend.Class import Ops

@@ -7,7 +7,7 @@ from components.dropdown_components import (
     feature_filter_dropdown,
 )
 from components.button_components import button, hourButton
-from styles.styles import button_style, button_dropdown_style
+from utils.styles import button_style, button_dropdown_style
 
 
 # Define a function to create the main tabs layout

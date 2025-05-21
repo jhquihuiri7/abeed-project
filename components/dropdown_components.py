@@ -1,5 +1,5 @@
 from dash import dcc, html
-from styles.styles import button_dropdown_style, button_style
+from utils.styles import button_dropdown_style, button_style
 from components.button_components import button
 from utils.functions import list_custom_filter_children
 from backend.helper_functions import get_feature_units
