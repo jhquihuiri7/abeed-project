@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Centrelane - Market Operations Dashboard</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/launcher.css') }}"
+    />
+    <script src="{{ url_for('static', filename='js/launcher.js') }}"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="header">
+        <h1>Market Operations Dashboard</h1>
+      </div>
+      <div class="content">
+        <div class="user-row" id="new">
+          <span class="user-name">Start New Session / Import file</span>
+          <div class="buttons">
+            <button id="new-session">Start New Session</button>
+            <input
+              type="file"
+              id="file-input"
+              class="dropzone"
+              name="file-input"
+            />
+          </div>
+        </div>
+        <div class="user-row" id="jb">
+          <span class="user-name">Jason Brandt</span>
+          <div class="buttons">
+            <button id="one.json">One</button>
+            <button id="two.json">Two</button>
+            <button id="three.json">Three</button>
+            <button id="four.json">Four</button>
+          </div>
+        </div>
+        <div class="user-row" id="ae">
+          <span class="user-name">Abraham Escalante</span>
+          <div class="buttons">
+            <button id="one.json">One</button>
+            <button id="two.json">Two</button>
+            <button id="three.json">Three</button>
+          </div>
+        </div>
+        <div class="user-row" id="dr">
+          <span class="user-name">Daniel Rodrigues</span>
+          <div class="buttons">
+            <button id="one.json">One</button>
+            <button id="two.json">Two</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

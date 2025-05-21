@@ -20,6 +20,10 @@ app_upload = create_dash_upload_app(server)
 def index():
     return render_template("index.html")
 
+@server.route("/launcher")
+def launcher():
+    return render_template("launcher.html")
+
 @server.route('/save-json', methods=['POST'])
 def save_json():
     try:
@@ -105,4 +109,4 @@ def custom_dash():
 
 
 if __name__ == '__main__':
-    server.run(debug=False, host= "0.0.0.0", port=8000)
+    server.run(debug=True, host= "0.0.0.0", port=8000)
