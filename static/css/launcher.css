@@ -5,7 +5,7 @@ body {
   flex-direction: column;
   align-items: center;
   margin: 0;
-  overflow:hidden;
+  overflow: hidden;
 }
 
 .main {
@@ -28,6 +28,7 @@ body {
   align-items: center;
   justify-content: center;
   margin: 0 auto;
+  text-align: center;
 }
 
 .content {
