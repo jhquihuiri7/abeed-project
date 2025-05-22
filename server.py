@@ -120,4 +120,4 @@ def custom_dash():
 
 
 if __name__ == '__main__':
-    server.run(debug=True, host= "0.0.0.0", port=8000)
+    server.run(debug=False, host= "0.0.0.0", port=8000)
