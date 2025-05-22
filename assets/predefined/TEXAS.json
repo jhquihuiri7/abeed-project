@@ -1,0 +1,101 @@
+{
+    "start_date": "2025-01-01",
+    "end_date": "2025-05-21",
+    "session_data_features": {
+        "MI TEXAS.HUB DA": {
+            "feature_name": "MI TEXAS.HUB DA",
+            "id": "3ebd9f6f-a647-4ccd-bd89-76483f50fcee",
+            "db_name": "TEXAS.HUB;lmp;da",
+            "requirements": [],
+            "equation": "",
+            "alias_map": {},
+            "units": "USD",
+            "cumulative": false
+        },
+        "MI TEXAS.HUB RT": {
+            "feature_name": "MI TEXAS.HUB RT",
+            "id": "6aa9e111-5ede-43c0-b7e6-27a0807aa8d7",
+            "db_name": "TEXAS.HUB;lmp;rt",
+            "requirements": [],
+            "equation": "",
+            "alias_map": {},
+            "units": "USD",
+            "cumulative": false
+        },
+        "TEXAS.HUB Spread": {
+            "feature_name": "TEXAS.HUB Spread",
+            "id": null,
+            "db_name": null,
+            "requirements": [
+                "MI TEXAS.HUB DA",
+                "MI TEXAS.HUB RT"
+            ],
+            "equation": "RT - DA",
+            "alias_map": {
+                "DA": "MI TEXAS.HUB DA",
+                "RT": "MI TEXAS.HUB RT"
+            },
+            "units": "USD",
+            "cumulative": false
+        }
+    },
+    "graphs": [],
+    "hour_filters": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+    ],
+    "day_of_week_filters": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+    ],
+    "month_filters": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+    ],
+    "year_filters": [
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+    ],
+    "feature_filters": []
+}
