@@ -11,7 +11,6 @@
  */
 init();
 
-
 function init() {
   document.addEventListener("DOMContentLoaded", () => {
     add_listeners();
