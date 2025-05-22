@@ -33,6 +33,10 @@ body {
   text-align: center;
 }
 
+.header h1 {
+  font-size: clamp(1.1rem, 3vw, 2.5rem);
+}
+
 .content {
   display: flex;
   flex-direction: column;
