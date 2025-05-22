@@ -58,7 +58,7 @@ dropZone.addEventListener("drop", (e) => {
       const formData = new FormData();
       formData.append("file", file);
 
-      fetch("/upload", {
+      fetch("/save-csv", {
         method: "POST",
         body: formData,
       })

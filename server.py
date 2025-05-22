@@ -72,7 +72,7 @@ def home():
 
 uploaded_data = pd.DataFrame()
 
-@server.route('/upload', methods=['POST'])
+@server.route('/save-csv', methods=['POST'])
 def home_upload():
     global uploaded_data
 
