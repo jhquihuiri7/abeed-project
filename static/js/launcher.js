@@ -1,6 +1,16 @@
-// launcher.js
-
+/**
+ * Initializes the launcher script when the DOM content is fully loaded.
+ *
+ * This script sets up event listeners for:
+ * - Creating a new session via the "#new-session" button.
+ * - Handling clicks on predefined session buttons within the ".content" container.
+ * - Uploading and processing session files (JSON or CSV) via the "#session-upload" input.
+ *
+ * The initialization is triggered immediately when the script is loaded,
+ * ensuring all listeners are registered as soon as the DOM is ready.
+ */
 init();
+
 
 function init() {
   document.addEventListener("DOMContentLoaded", () => {
