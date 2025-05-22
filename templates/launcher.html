@@ -8,6 +8,7 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='css/launcher.css') }}"
     />
+    <script src="{{ url_for('static', filename='js/launcher.js') }}"></script>
   </head>
   <body>
     <div class="main">
@@ -18,7 +19,7 @@
         <div class="user-row" id="new">
           <span class="user-name">Start New Session / Import file</span>
           <div class="buttons">
-            <button id="new-session" onclick="window.location.href='/home'">Start New Session</button>
+            <button id="new-session">New Session</button>
             <input
               type="file"
               id="file-input"
@@ -53,6 +54,5 @@
         </div>
       </div>
     </div>
-    <script src="{{ url_for('static', filename='js/launcher.js') }}"></script>
   </body>
 </html>
