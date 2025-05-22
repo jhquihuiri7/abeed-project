@@ -1,22 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Drag and Drop</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
-</head>
-<body>
-  <h1>Market Operation Dashboard</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Drag and Drop</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/index.css') }}"
+    />
+  </head>
+  <body>
+    <h1>Market Operation Dashboard</h1>
 
-  <div class="button-container">
-    <button id="new-session">Start New Session</button>
-  </div>
+    <div class="button-container">
+      <button id="new-session">Start New Session</button>
+    </div>
 
-  <div class="dropzone" id="drop-zone">
-    Drop Here
-  </div>
+    <div class="dropzone" id="drop-zone">Drop Here</div>
 
-  <script src="{{ url_for('static', filename='js/index.js') }}"></script>
-</body>
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+  </body>
 </html>
