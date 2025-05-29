@@ -1,0 +1,174 @@
+{
+    "start_date": "2025-04-30",
+    "end_date": "2025-05-09",
+    "session_data_features": {
+        "4017;isne_nyis_v2.0.1;lmp_pred;da": {
+            "feature_name": "4017;isne_nyis_v2.0.1;lmp_pred;da",
+            "id": "7f07e4cd-689b-4db7-b84d-88ee4e4bd1f6",
+            "db_name": "4017;isne_nyis_v2.0.1;lmp_pred;da",
+            "requirements": [],
+            "equation": "",
+            "alias_map": {},
+            "units": "USD",
+            "cumulative": false
+        },
+        "4017;lmp;da": {
+            "feature_name": "4017;lmp;da",
+            "id": "c16935c1-2a10-4b7d-bf85-c25dc3def975",
+            "db_name": "4017;lmp;da",
+            "requirements": [],
+            "equation": "",
+            "alias_map": {},
+            "units": "USD",
+            "cumulative": false
+        },
+        "323591;lmp;da": {
+            "feature_name": "323591;lmp;da",
+            "id": "be8d54b7-b13d-4c9e-aa49-cb7dcfaa8bc2",
+            "db_name": "323591;lmp;da",
+            "requirements": [],
+            "equation": "",
+            "alias_map": {},
+            "units": "USD",
+            "cumulative": false
+        },
+        "323591;nyis_isne_v2.0.1;lmp_pred;da": {
+            "feature_name": "323591;nyis_isne_v2.0.1;lmp_pred;da",
+            "id": "6b1c984f-b344-4d55-a62d-d7c9aaa3e90e",
+            "db_name": "323591;nyis_isne_v2.0.1;lmp_pred;da",
+            "requirements": [],
+            "equation": "",
+            "alias_map": {},
+            "units": "USD",
+            "cumulative": false
+        },
+        "NE-NY Spread": {
+            "feature_name": "NE-NY Spread",
+            "id": null,
+            "db_name": null,
+            "requirements": [
+                "4017;lmp;da",
+                "323591;lmp;da"
+            ],
+            "equation": "NY da - NE da - 2.88",
+            "alias_map": {
+                "NE da": "4017;lmp;da",
+                "NY da": "323591;lmp;da"
+            },
+            "units": "USD",
+            "cumulative": false
+        },
+        "(NE-NY Spread (cum))\u2211": {
+            "feature_name": "(NE-NY Spread (cum))\u2211",
+            "id": null,
+            "db_name": null,
+            "requirements": [
+                "4017;lmp;da",
+                "323591;lmp;da"
+            ],
+            "equation": "NY da - NE da - 2.88",
+            "alias_map": {
+                "NE da": "4017;lmp;da",
+                "NY da": "323591;lmp;da"
+            },
+            "units": "USD",
+            "cumulative": true
+        },
+        "(NY-NE Spread)\u2211": {
+            "feature_name": "(NY-NE Spread)\u2211",
+            "id": null,
+            "db_name": null,
+            "requirements": [
+                "4017;lmp;da",
+                "323591;lmp;da"
+            ],
+            "equation": "NE da - NY da - 4.61",
+            "alias_map": {
+                "NE da": "4017;lmp;da",
+                "NY da": "323591;lmp;da"
+            },
+            "units": "USD",
+            "cumulative": true
+        }
+    },
+    "graphs": [
+        {
+            "graph_uid": "d4180785-c73f-4a49-8cd1-c7807ecab340",
+            "graph_data_features": [
+                "4017;isne_nyis_v2.0.1;lmp_pred;da",
+                "4017;lmp;da"
+            ]
+        },
+        {
+            "graph_uid": "49fd7c3a-f229-41ec-9b4b-47ff801bda95",
+            "graph_data_features": [
+                "323591;lmp;da",
+                "323591;nyis_isne_v2.0.1;lmp_pred;da"
+            ]
+        },
+        {
+            "graph_uid": "8d7e9267-1d88-47bd-ad3d-4d0130bc7864",
+            "graph_data_features": [
+                "(NE-NY Spread (cum))\u2211"
+            ]
+        }
+    ],
+    "hour_filters": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+    ],
+    "day_of_week_filters": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+    ],
+    "month_filters": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+    ],
+    "year_filters": [
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+    ],
+    "feature_filters": []
+}

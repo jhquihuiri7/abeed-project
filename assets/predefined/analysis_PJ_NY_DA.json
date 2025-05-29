@@ -1,0 +1,197 @@
+{
+    "start_date": "2025-05-02",
+    "end_date": "2025-05-08",
+    "session_data_features": {
+        "PJ ny DA": {
+            "feature_name": "PJ ny DA",
+            "id": "41ee943e-c913-41db-a787-18b9702b8ebf",
+            "db_name": "5413134.0;lmp;da",
+            "requirements": [],
+            "equation": "",
+            "alias_map": {},
+            "units": "USD",
+            "cumulative": false
+        },
+        "NY pj DA": {
+            "feature_name": "NY pj DA",
+            "id": "388da23e-2b08-433a-ab08-ec5d09599974",
+            "db_name": "24065;lmp;da",
+            "requirements": [],
+            "equation": "",
+            "alias_map": {},
+            "units": "USD",
+            "cumulative": false
+        },
+        "PJ ny DA Model": {
+            "feature_name": "PJ ny DA Model",
+            "id": "156a322f-fec7-4ee8-b186-ada8eaa94d76",
+            "db_name": "5413134.0;pjm_nyiso_v2.0.0;lmp_pred;da",
+            "requirements": [],
+            "equation": "",
+            "alias_map": {},
+            "units": "USD",
+            "cumulative": false
+        },
+        "NY pj DA Model": {
+            "feature_name": "NY pj DA Model",
+            "id": "a32d9542-a917-48f7-bb30-b8d47adaa32e",
+            "db_name": "24065;nyiso_pjm_v2.0.0;lmp_pred;da",
+            "requirements": [],
+            "equation": "",
+            "alias_map": {},
+            "units": "USD",
+            "cumulative": false
+        },
+        "Model Spread": {
+            "feature_name": "Model Spread",
+            "id": null,
+            "db_name": null,
+            "requirements": [
+                "PJ ny DA Model",
+                "NY pj DA"
+            ],
+            "equation": "NY pj DA - (PJ ny DA Model * 1.1) - 2.5",
+            "alias_map": {
+                "PJ ny DA Model": "PJ ny DA Model",
+                "NY pj DA": "NY pj DA"
+            },
+            "units": "USD",
+            "cumulative": false
+        },
+        "DA Spread": {
+            "feature_name": "DA Spread",
+            "id": null,
+            "db_name": null,
+            "requirements": [
+                "PJ ny DA",
+                "NY pj DA"
+            ],
+            "equation": "NY pj DA - PJ ny DA - 2.5",
+            "alias_map": {
+                "PJ ny DA": "PJ ny DA",
+                "NY pj DA": "NY pj DA"
+            },
+            "units": "USD",
+            "cumulative": false
+        },
+        "MI Meteologica Wind": {
+            "feature_name": "MI Meteologica Wind",
+            "id": "4d1f2d0c-f54b-4fc0-a81e-95c5bdbe8dab",
+            "db_name": "miso_wind_total_mw",
+            "requirements": [],
+            "equation": "",
+            "alias_map": {},
+            "units": "MW",
+            "cumulative": false
+        },
+        "(Cum Spread)\u2211": {
+            "feature_name": "(Cum Spread)\u2211",
+            "id": null,
+            "db_name": null,
+            "requirements": [
+                "PJ ny DA",
+                "NY pj DA"
+            ],
+            "equation": "NY pj DA - PJ ny DA - 2.5",
+            "alias_map": {
+                "PJ ny DA": "PJ ny DA",
+                "NY pj DA": "NY pj DA"
+            },
+            "units": "USD",
+            "cumulative": true
+        }
+    },
+    "graphs": [
+        {
+            "graph_uid": "b8d650ba-3b3c-4d53-9d6f-89568617c049",
+            "graph_data_features": [
+                "NY pj DA",
+                "NY pj DA Model"
+            ]
+        },
+        {
+            "graph_uid": "f131a062-7cc4-4072-a186-d225455b2053",
+            "graph_data_features": [
+                "PJ ny DA",
+                "PJ ny DA Model"
+            ]
+        },
+        {
+            "graph_uid": "8f101a57-5bfd-4afd-85c4-7d2a1763079c",
+            "graph_data_features": [
+                "MI Meteologica Wind"
+            ]
+        },
+        {
+            "graph_uid": "b92c220b-d2dc-4164-9a7c-72ad67fd0047",
+            "graph_data_features": [
+                "Model Spread",
+                "DA Spread"
+            ]
+        },
+        {
+            "graph_uid": "f54cc36d-e324-47fb-be45-33c3a637d4de",
+            "graph_data_features": [
+                "(Cum Spread)\u2211"
+            ]
+        }
+    ],
+    "hour_filters": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+    ],
+    "day_of_week_filters": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+    ],
+    "month_filters": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+    ],
+    "year_filters": [
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+    ],
+    "feature_filters": []
+}
