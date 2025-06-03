@@ -17,10 +17,6 @@ app = create_dash_app(server)
 app_upload = create_dash_upload_app(server)
 
 @server.route("/")
-def index():
-    return render_template("index.html")
-
-@server.route("/launcher")
 def launcher():
     return render_template("launcher.html")
 
