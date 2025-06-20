@@ -7,20 +7,19 @@ import copy
 import numexpr as ne
 
 
-class DB_features:
+class Feature:
     # This class will be used to hold all features that are available in the database
-    def __init__(self) -> None:
-        # Start date for the range of dates the user wants data for
-        self.id: str = ""
-        self.db_name: str = ""
-        self.units: str = ""
-        self.display_name: str = ""
-
-    def read_data(self, id_input, db_name_input, display_name_input, units_input):
+    def __init__(self, id_input, db_name_input, display_name_input, units_input):
         self.id = id_input
         self.db_name = db_name_input
         self.units = units_input
         self.display_name = display_name_input
+
+    def from_qz(self, qz_feature: dict):
+        self.id = qz_feature["id"]
+        self.db_name = qz_feature["name"]
+        self.display_name = qz_feature["display_name"]
+        self.units = qz_feature["unit"]
 
 
 class session_features:
@@ -80,33 +79,18 @@ class session_features:
 
 
 class Ops:
-
     def __init__(self) -> None:
         db_features_json = simple_request_entities("feature", 20000)
-        db_feature_list: list[DB_features] = []
-        for entry in db_features_json:
-            feature = DB_features()
-            feature.read_data(
-                entry["id"], entry["name"], entry["display_name"], entry["unit"]
-            )
-            db_feature_list.append(feature)
-
-        display_features_dict = {
-            feature.display_name: feature
-            for feature in db_feature_list
-            if feature.display_name
+        db_feature_list: list[Feature] = [
+            Feature(qz_feature) for qz_feature in db_features_json
+        ]
+        self.display_features_dict = {
+            f.display_name: f for f in db_feature_list if f.display_name
         }
-
-        db_name_to_display_names_dict = {
-            feature.db_name: feature.display_name
-            for feature in db_feature_list
-            if feature.display_name
+        self.db_name_to_display_names_dict = {
+            f.db_name: f.display_name for f in db_feature_list if f.display_name
         }
-
-        db_name_dict = {feature.db_name: feature for feature in db_feature_list}
-        self.db_name_to_display_names_dict = db_name_to_display_names_dict
-        self.display_features_dict = display_features_dict
-        self.db_name_dict = db_name_dict
+        self.db_name_dict = {f.db_name: f for f in db_feature_list}
 
         # Start date for the range of dates the user wants data for
         self.start_date = date.today() - timedelta(7)
@@ -319,7 +303,7 @@ class Ops:
     def update_db_data_features(self, overwrite_df=False, init_columns=[]):
         db_session_features = [
             value.db_name
-            for key, value in self.session_data_features.items()
+            for value in self.session_data_features.values()
             if value.equation == ""
         ]
 
