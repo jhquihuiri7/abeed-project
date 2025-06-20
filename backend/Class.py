@@ -15,11 +15,14 @@ class Feature:
         self.units = units_input
         self.display_name = display_name_input
 
-    def from_qz(self, qz_feature: dict):
-        self.id = qz_feature["id"]
-        self.db_name = qz_feature["name"]
-        self.display_name = qz_feature["display_name"]
-        self.units = qz_feature["unit"]
+    @classmethod
+    def from_qz(cls, qz_feature: dict):
+        return cls(
+            id_input=qz_feature["id"],
+            db_name_input=qz_feature["name"],
+            display_name_input=qz_feature["display_name"],
+            units_input=qz_feature["unit"],
+        )
 
 
 class session_features:
@@ -82,7 +85,7 @@ class Ops:
     def __init__(self) -> None:
         db_features_json = simple_request_entities("feature", 20000)
         db_feature_list: list[Feature] = [
-            Feature(qz_feature) for qz_feature in db_features_json
+            Feature.from_qz(qz_feature) for qz_feature in db_features_json
         ]
         self.display_features_dict = {
             f.display_name: f for f in db_feature_list if f.display_name
