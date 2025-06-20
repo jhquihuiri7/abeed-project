@@ -4,7 +4,7 @@ from components.dropdown_components import (
     custom_features_head,
     date_filter_dropdown,
     feature_filter_dropdown,
-    custom_dropdow
+    custom_dropdow,
 )
 from components.button_components import button, hourButton
 from utils.styles import button_style, button_dropdown_style
@@ -32,7 +32,6 @@ def main_tabs(client, show_custom=True):
                         children=[
                             custom_features_head(),
                             custom_dropdow(client=client, current_dropdown=[]),
-
                         ],
                         className="flex flex-row justify-between",
                     ),

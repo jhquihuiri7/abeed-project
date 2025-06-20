@@ -100,6 +100,7 @@ def simple_request_entity_by_name(entity_type: str, name: str):
     client = QZeroClient(base_url, endpoint)
     return client.request_entities().json()
 
+
 class ExampleFeatureRequest:
     def __init__(self):
         base_url = "https://quantum-zero-dev-eu8cy.ondigitalocean.app"
@@ -218,6 +219,7 @@ class ExampleRequestEntity:
         response = self.request_entities()
         print(response.json())
 
+
 class ExampleRequestEntities:
     def __init__(self):
         base_url = "https://quantum-zero-dev-eu8cy.ondigitalocean.app"
@@ -239,6 +241,7 @@ class ExampleRequestEntities:
     def main(self):
         response = self.request_entities()
         print(response.json())
+
 
 ## Helper functions below, feel free to ignore
 class FeatureRequest:
