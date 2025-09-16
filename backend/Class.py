@@ -462,6 +462,7 @@ class Ops:
         }  # TODO does not work with filter_df_implementation when trying to recalculate cumulative features because it always calculates based on the self.df, not the self.filter_df
         result = ne.evaluate(equation, local_dict)
         if session_feature_obj.cumulative:
+            np.nan_to_num(result, nan=0, copy=False)
             result = result.cumsum()
 
         return result
