@@ -4,7 +4,6 @@ from dash import html, dcc
 # Import date and time utilities for managing and formatting dates
 from datetime import date, datetime, timedelta
 
-
 # Define a function to create a date range picker component
 def main_daterange(client):
     """
@@ -24,5 +23,5 @@ def main_daterange(client):
                 end_date=client.end_date,  # Default end date (today)
             ),
         ],
-        className="mr-5",
+        className="mr-5"
     )

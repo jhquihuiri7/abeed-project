@@ -2,7 +2,6 @@ from backend.helper_functions import get_feature_units
 from datetime import timedelta
 from backend.Class import Ops, session_features
 
-
 def get_unit(client, column):
     unit = "USD"
     try:
@@ -11,10 +10,9 @@ def get_unit(client, column):
         if "(mw)" in column:
             unit = "MW"
     return unit
-
-
 # Function to determine if a set of columns requires both primary and secondary axes
 def contains_both_axis(client: Ops, cols):
+    
     """
     Determines if the features in the given columns have different units,
     which would require both primary and secondary Y-axes.
@@ -23,21 +21,18 @@ def contains_both_axis(client: Ops, cols):
         cols (list): List of column names representing features.
 
     Returns:
-        tuple:
+        tuple: 
             - (bool): True if there are multiple units (dual axes required), False otherwise.
             - (list): Sorted list of unique units present in the columns.
     """
     units = []
     for column in cols:
-        unit = get_unit(client, column)  # get_unit(client, column)
-        units.append(unit)
+        unit = get_unit(client, column) #get_unit(client, column)
+        units.append(unit)      
     # Extract unique units from the feature_units_dict for the given columns
     units = set(units)
     # Check if there is more than one unique unit
-    return len(units) > 1, sorted(
-        units, reverse=True
-    )  # Return a boolean and a sorted list of units
-
+    return len(units) > 1, sorted(units, reverse=True)  # Return a boolean and a sorted list of units
 
 # Function to manage checkbox selection, ensuring only one item remains selected
 def select_one_checkbox(last_selection):
@@ -54,7 +49,6 @@ def select_one_checkbox(last_selection):
         # If more than one item is selected, keep only the last one
         return [last_selection[-1]]
     return last_selection  # Return the selection as is if it contains one or no items
-
 
 # Function to update a custom feature dictionary with operations and feature values
 def update_custom_feature(features, custom_features, values):
@@ -75,7 +69,7 @@ def update_custom_feature(features, custom_features, values):
         if index > 0:
             # For features after the first one, set the operation based on the value
             feature["Operation"] = "+" if value == "Add" else "-"
-
+        
         feature["Feature"] = f  # Assign the feature name to the "Feature" key
         updated_features.append(feature)  # Add the updated feature to the list
 
@@ -93,37 +87,34 @@ def validateFeatureFilterData(client, feature, min_range, max_range):
         max_range (str): Maximum range value.
 
     Returns:
-        tuple:
+        tuple: 
             - (bool): True if valid, False otherwise.
             - (str): Reason for invalidation, if applicable.
     """
     reason = ""
-
+    
     if feature == "":
         reason = f"Cannot create a feature filter because the is no feature selected (Hint: select a feature)"
         return False, reason, min_range, max_range
-    if (min_range == "" and max_range == "") or (
-        min_range == None and max_range == None
-    ):
+    if (min_range == "" and max_range == "") or (min_range == None and max_range == None):
         reason = f"Cannot create a feature filter because the is no values in the input range (Hint: provide at least one input range)"
         return False, reason, min_range, max_range
     try:
-        min_range = float(min_range)
+        min_range = float(min_range) 
     except:
         min_range = None
-
+    
     try:
         max_range = float(max_range)
     except:
         max_range = None
-
+    
     if isinstance(min_range, float) and isinstance(max_range, float):
         if min_range > max_range:
             reason = f"Cannot create a feature filter because the the min_input_range is greater than the max_input_range (Hint: min_input_range must be lesser than max_input_range)"
             return False, reason, min_range, max_range
-
+    
     return True, reason, min_range, max_range
-
 
 def validateApplyDatetimeSelection(client):
     """
@@ -140,17 +131,11 @@ def validateApplyDatetimeSelection(client):
     """
     is_valid = True
     message = ""
-
-    if (
-        client.hour_filters == []
-        or client.day_of_week_filters == []
-        or client.month_filters == []
-        or client.year_filters == []
-    ):
+    
+    if client.hour_filters == [] or client.day_of_week_filters == [] or client.month_filters == [] or client.year_filters == []:
         is_valid = False
-        message = "Cannot apply datetime filter (Hint: select at least one year, one month, one day of the week and one hour of the day)"
+        message = "Cannot apply datetime filter (Hint: select at least one year, one month, one day of the week and one hour of the day)"    
     return is_valid, message
-
 
 # Function to get the last consecutive datetime in a list
 def get_last_consecutive_datetime(datetime_axis):
@@ -167,20 +152,15 @@ def get_last_consecutive_datetime(datetime_axis):
 
     # Initialize with the first element
     current_group_last = datetime_axis[0]
-
+    
     # Iterate to identify consecutive groups
     for i in range(1, len(datetime_axis)):
-        if datetime_axis[i] - datetime_axis[i - 1] > timedelta(
-            hours=1
-        ):  # Adjust interval if needed
-            result.append(
-                current_group_last
-            )  # Save the last element of the current group
+        if datetime_axis[i] - datetime_axis[i - 1] > timedelta(hours=1):  # Adjust interval if needed
+            result.append(current_group_last)  # Save the last element of the current group
         current_group_last = datetime_axis[i]
-
+    
     result.append(current_group_last)  # Add the last element of the last group
     return result
-
 
 def get_first_consecutive_datetime(datetime_axis):
     """
@@ -199,17 +179,10 @@ def get_first_consecutive_datetime(datetime_axis):
     result.append(current_group_first)  # Save the first element of the first group
     # Iterate to identify consecutive groups
     for i in range(1, len(datetime_axis)):
-        if datetime_axis[i] - datetime_axis[i - 1] > timedelta(
-            hours=1
-        ):  # Adjust interval if needed
-            current_group_first = datetime_axis[
-                i
-            ]  # Update to the start of the next group
-            result.append(
-                current_group_first
-            )  # Save the first element of the new group
+        if datetime_axis[i] - datetime_axis[i - 1] > timedelta(hours=1):  # Adjust interval if needed
+            current_group_first = datetime_axis[i]  # Update to the start of the next group
+            result.append(current_group_first)  # Save the first element of the new group
     return result
-
 
 def group_consecutive(datetime_axis):
     groups = []
@@ -221,12 +194,10 @@ def group_consecutive(datetime_axis):
     groups.append([start, datetime_axis[-1]])
     return groups
 
-
 def returnValidFeatures(client):
-    if len(client.created_features) > 0:
-        return client.df.columns[: -len(client.created_features)]
+    if len(client.created_features) > 0 :
+        return client.df.columns[:-len(client.created_features)]    
     return client.df.columns
-
 
 def get_value_range(value, sign):
     if value == None:
@@ -236,52 +207,37 @@ def get_value_range(value, sign):
             return "-Inf"
     else:
         return value
-
-
+    
 def extract_values_custom_feature(data):
     custom_feature = []
     for i in data:
-        temp = i["props"]["children"]
+        temp= i["props"]["children"]
         try:
-            custom_feature.append({"Feature": temp[0]["props"]["value"]})
+            custom_feature.append({"Feature": temp[0]['props']['value']})
         except:
-            for j in temp:
-                custom_feature.append(
-                    {
-                        "Operation": (
-                            "-"
-                            if j["props"]["children"][0]["props"]["value"] == "Sub"
-                            else "+"
-                        ),
-                        "Feature": j["props"]["children"][1]["props"]["value"],
-                    }
-                )
+            for j in temp:    
+                custom_feature.append({"Operation": "-" if j['props']['children'][0]['props']['value'] == "Sub" else "+", "Feature": j['props']['children'][1]['props']['value']})
     return custom_feature
-
 
 def get_feature_filter_name(client):
     return [feature["feature_name"] for feature in client.feature_filters]
 
-
-def get_custom_features_dependence(client: Ops, selected_features) -> dict:
+def get_custom_features_dependence(client:Ops, selected_features) -> dict:
     dependence_features = {}
     for key, value in client.session_data_features.items():
         if value.alias_map:
             common_filter = []
-            for k, v in value.alias_map.items():
+            for k,v in value.alias_map.items():
                 if v in selected_features:
-                    common_filter.append(v)
+                    common_filter.append(v) 
             if common_filter:
                 dependence_features[key] = common_filter
     return dependence_features
-
-
-def get_custom_features_names(
-    client, missing_features, show_all=False, show_cumulative=False
-):
+    
+def get_custom_features_names(client, missing_features, show_all = False, show_cumulative = False):
     names = []
     for cf in client.created_features:
-        if show_cumulative or not cf["cumulative?"]:
+        if show_cumulative  or not cf["cumulative?"]:
             for eq in cf["equation"]:
                 if show_all:
                     names.append(cf["feature_name"])
@@ -290,25 +246,19 @@ def get_custom_features_names(
                         names.append(cf["feature_name"])
                         break
     return names
-
-
+    
 def get_feature_fitler_name_by_id(client, index):
-    name = ""
+    name = ''
     for feature in client.feature_filters:
         if feature["filter_uid"] == index:
             name = feature["feature_name"]
             break
     return name
 
-
-def validate_add_custom_feature(
-    client: Ops, equation, alias_map, custom_name, cumulative
-):
+def validate_add_custom_feature(client:Ops,equation, alias_map, custom_name, cumulative):
     message = ""
     if equation == "" or equation == None:
-        message = (
-            "Cannot leave the equation as empty (Hint: fill with a valid equation)"
-        )
+        message = "Cannot leave the equation as empty (Hint: fill with a valid equation)"
         return False, message
     try:
         session = session_features()
@@ -318,22 +268,21 @@ def validate_add_custom_feature(
     except:
         message = "Cannot validate equation (Hint: fill with a valid equation)"
         return False, message
-
+    
     for k, v in alias_map.items():
         if k is None or k == "" or v is None or v == "":
             message = "Cannot create a custom feature with missing values in the alias map (Hint: fill al the fields in the alias map)"
             return False, message
-
-    if not custom_name or custom_name == "":
+          
+    if not custom_name or custom_name == '':
         custom_name = equation
         if cumulative:
-            custom_name = f"({custom_name})∑"
+            custom_name = f'({custom_name})∑'
     if custom_name in client.session_data_features.keys():
         message = "Cannot create custom feature (Hint: Feature name already exists)"
         return False, message
-
+    
     return True, message
-
 
 def validate_delete_custom_feature(client, feature_to_remove):
     message = ""
@@ -341,7 +290,6 @@ def validate_delete_custom_feature(client, feature_to_remove):
         message = f"Cannot delete {feature_to_remove} because it has a 'Feature Filter' (Hint: delete {feature_to_remove} filter first)"
         return False, message
     return True, message
-
 
 def validateApplyFilterToggle(client, apply_filter, toggle):
     """
@@ -361,14 +309,13 @@ def validateApplyFilterToggle(client, apply_filter, toggle):
     """
     is_valid = True
     message = ""
-
+    
     if apply_filter != []:
         if client.datetimes_to_exclude == []:
             is_valid = False
             message = "No filters to apply"
-
+    
     return is_valid, message
-
 
 def validate_add_features(selected_features):
     message = ""
@@ -376,14 +323,10 @@ def validate_add_features(selected_features):
         message = "Cannot create update data (Hint: select at least one data feature)"
         return False, message
     return True, message
-
-
-def validate_delete_features(client: Ops, selected_features):
+def validate_delete_features(client:Ops, selected_features):
     message = ""
     if selected_features == []:
-        message = (
-            "Cannot create delete feature (Hint: select at least one data feature)"
-        )
+        message = "Cannot create delete feature (Hint: select at least one data feature)"
         return False, message
     common_filter = list(set(selected_features) & set(get_feature_filter_name(client)))
     common_custom = get_custom_features_dependence(client, selected_features)
@@ -396,17 +339,12 @@ def validate_delete_features(client: Ops, selected_features):
         message = f"Cannot have {format_set(common_filter)} feature filter without {format_set(common_filter)} data feature (Hint: delete {format_set(common_filter)} filter or reselect {format_set(common_filter)} data feature)"
         return False, message
     return True, message
-
-
+    
 def format_set(s):
-    return ", ".join(f"'{item}'" for item in s)
-
+    return ', '.join(f"'{item}'" for item in s)
 
 def get_feature_filter_dropdown_opts(client: Ops, is_upload=False):
     if is_upload:
-        return list(set(client.df.columns) - set(get_feature_filter_name(client)))
-    else:
-        return list(
-            set(client.session_data_features.keys() or [])
-            - set(get_feature_filter_name(client) or [])
-        )
+        return list(set(client.df.columns)-set(get_feature_filter_name(client)))
+    else:    
+        return list(set(client.session_data_features.keys() or []) - set(get_feature_filter_name(client) or []))
