@@ -1,6 +1,7 @@
 import dash_mantine_components as dmc
 from dash_iconify import DashIconify
 
+
 # Function to display a notification
 def show_notification(message):
     """
@@ -20,9 +21,25 @@ def show_notification(message):
         icon=DashIconify(
             icon="meteocons:code-yellow-fill",  # Icon to display in the notification
             height=50,  # Height of the icon
-            color="yellow"  # Color of the icon
+            color="yellow",  # Color of the icon
         ),
         withBorder=True,  # Whether to display a border around the notification
         color="red",  # Color of the notification (red in this case)
-        autoClose=2000  # Time (in milliseconds) before the notification auto-closes
+        autoClose=False,  # Time (in milliseconds) before the notification auto-closes
+    )
+
+
+def show_modal():
+    return dmc.Modal(
+        id="input-modal",
+        children=[
+            dmc.TextInput(
+                id="user-session",
+                label="Name your session",
+                placeholder="Type here...",
+            ),
+            dmc.Space(h=10),
+            dmc.Button("Save", id="save-button"),
+        ],
+        opened=False,  # Initially closed
     )

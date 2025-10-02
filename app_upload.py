@@ -1,74 +1,46 @@
-# Python packages
-import math
-import io
-import pandas as pd
-from datetime import date
-
 # Dash imports
 from dash import Dash, _dash_renderer
-from dash import (
-    dcc,
-    html,
-    Input,
-    Output,
-    State,
-    callback,
-    callback_context,
-    ALL,
-    MATCH,
-    exceptions,
-)
+from dash import dcc, html, Input, Output, State, callback_context, ALL, exceptions
 
 # Components
 import dash_mantine_components as dmc
 from components.checkbox_components import expandable_container
-from components.daterange_components import main_daterange
+
 from components.tabs_components import main_tabs
 from components.button_components import button, apply_filters_toggle
-from components.notification_components import show_notification, show_modal
+from components.notification_components import show_notification
 from components.graph_components import multi_chart, bar_chart
 from components.dropdown_components import (
     main_dropdown,
     date_filter_dropdown,
-    custom_features_children,
-    remove_features_children,
+    cumulative_conversion_dropdown,
     delete_features_dropdown,
 )
 
 
 # Utilities
-from utils.restore_session import restore_session
+from utils.restore_session import restore_session_upload
 from utils.logic_functions import (
-    update_custom_feature,
     validateFeatureFilterData,
-    returnValidFeatures,
-    extract_values_custom_feature,
     get_feature_filter_dropdown_opts,
     validateApplyDatetimeSelection,
-    validate_add_custom_feature,
-    validate_delete_custom_feature,
     validateApplyFilterToggle,
-    validate_add_features,
     validate_delete_features,
+    validate_add_features,
 )
-from utils.functions import (
-    list_custom_filter_children,
-    ops_to_json,
-    json_to_ops,
-    list_feature_filter,
-)
+from utils.functions import ops_to_json_upload, json_to_ops_upload, list_feature_filter
 
 # Backend
-from backend.Class import Ops
+from backend.Class import Ops, session_features
 
 # Styles
-from utils.styles import button_style, hourButtonStyle
+from utils.styles import button_style
 
 # React version setting
 _dash_renderer._set_react_version("18.2.0")
 
 
-def create_dash_app(server):
+def create_dash_upload_app(server):
 
     # External scripts (e.g., TailwindCSS)
     external_stylesheets = [dmc.styles.NOTIFICATIONS]
@@ -80,7 +52,9 @@ def create_dash_app(server):
     app = Dash(
         __name__,
         server=server,
-        url_base_pathname="/home/",
+        assets_folder="upload",
+        url_base_pathname="/custom_dash/",
+        # suppress_callback_exceptions=True,
         external_scripts=external_scripts,
         external_stylesheets=external_stylesheets,
         meta_tags=[
@@ -88,67 +62,58 @@ def create_dash_app(server):
         ],
     )
     app.title = "Market Operation Dashboard"
+
     # app._favicon = "favicon.ico"
     app.layout = dmc.MantineProvider(
         children=[
             html.Div(
                 className="p-10 w-full",
                 children=[
-                    html.Div(
-                        className="w-full flex flex-row justify-around",
-                        children=[
-                            expandable_container(
-                                toggle_button_id="toggle_exapandable_button_primary",
-                                expandable_text_id="expandable_text_primary",
-                                client=ops,
-                            ),
-                            button(
-                                text="Download Data",
-                                id="download_data_button",
-                                style=button_style,
-                            ),
-                            button(
-                                text="Save Session",
-                                id="download_client_button",
-                                style=button_style,
-                            ),
-                        ],
+                    expandable_container(
+                        toggle_button_id="toggle_exapandable_button_primary",
+                        expandable_text_id="expandable_text_primary",
+                        client=ops,
                     ),
                     html.Div(
                         children=[
-                            main_dropdown(ops, "w-[56%]"),
-                            button(
-                                text="Add Features",
-                                id="add_feature_button",
-                                style=button_style,
+                            html.Div(
+                                children=[
+                                    main_dropdown(ops, "w-[56%]"),
+                                    button(
+                                        text="Add Features",
+                                        id="add_feature_button",
+                                        style=button_style,
+                                    ),
+                                ],
+                                className="flex flex-row justify-start w-1/2",
+                            ),
+                            html.Div(
+                                children=[
+                                    delete_features_dropdown(ops),
+                                    button(
+                                        text="Remove Features",
+                                        id="delete_features_button",
+                                        style=button_style,
+                                    ),
+                                ],
+                                className="flex flex-row justify-start w-1/2",
                             ),
                         ],
-                        className="flex flex-row justify-start w-1/2 mb-5",
+                        className="flex flex-row justify-between mt-5",
                     ),
                     html.Div(
                         children=[
-                            delete_features_dropdown(ops),
+                            cumulative_conversion_dropdown(ops),
                             button(
-                                text="Remove Features",
-                                id="delete_features_button",
+                                text="Make cumulative",
+                                id="make_cumulative_button",
                                 style=button_style,
                             ),
                         ],
-                        className="flex flex-row justify-start w-1/2 mb-5",
+                        className="flex flex-row justify-start my-10",
                     ),
-                    html.Div(
-                        children=[
-                            main_daterange(ops),
-                            button(
-                                text="Update Dates",
-                                id="update_date_range_button",
-                                style=button_style,
-                            ),
-                        ],
-                        className="flex flex-row justify-start w-1/2",
-                    ),
-                    main_tabs(ops),  # Tabs component for layout
-                    apply_filters_toggle("Collapse", is_upload=False),
+                    main_tabs(ops, show_custom=False),  # Tabs component for layout
+                    apply_filters_toggle("Collapse"),
                     dcc.Graph(id="main_graph"),  # Graph for displaying data
                     button(
                         text="Add Graph", id="add_graph_button", style=button_style
@@ -158,36 +123,12 @@ def create_dash_app(server):
                     ),  # Dynamic div for additional content
                     dmc.NotificationProvider(position="top-center"),
                     html.Div(id="notifications-container"),
-                    show_modal(),
-                    dcc.Download(id="download-data"),
-                    dcc.Download(id="download-client"),
-                    dcc.Store(id="temp_feature", data=[]),
-                    dcc.Store(id="restore_session", data=""),
-                    dcc.Store(id="custom_feature_options", data=[]),
-                    dcc.Store(id="alias_map", data={}),
                 ],
             ),
-            dcc.Store(id="client", data=ops_to_json(ops)),
+            dcc.Store(id="client", data=ops_to_json_upload(ops)),
+            dcc.Store(id="init_columns", data=[]),
         ]
     )
-
-    @app.callback(
-        Output("delete_features_dropdown", "options"), Input("client", "data")
-    )
-    def delete_feature_dropdown(data):
-        client = json_to_ops(data)
-        return client.df.columns
-
-    @app.callback(
-        Output("main-date-picker-range", "start_date"),
-        Output("main-date-picker-range", "end_date"),
-        Output("main_dropdown", "value"),
-        Input("restore_session", "data"),
-        State("client", "data"),
-    )
-    def restore_session_call(session, data):
-        client = json_to_ops(data)
-        return client.start_date, client.end_date, []  # OJO client.data_features
 
     @app.callback(
         Output("main_dropdown", "options"),
@@ -201,10 +142,12 @@ def create_dash_app(server):
         ctx = callback_context
         if not ctx.triggered:
             raise exceptions.PreventUpdate
-        options = [item for item in ops.display_features_dict]
+        options = ops.available_readable_names
         if n_clicks % 2 == 1:
             if expandable_text_primary["display"] == "block":
-                options = list(set(options) | set([item for item in ops.db_name_dict]))
+                options = list(
+                    set(ops.available_readable_names) | set(ops.available_db_names)
+                )
             return options, {"display": "block"}, "Collapse Feature Menu"
         return options, {"display": "none"}, "Expand Feature Menu"
 
@@ -217,79 +160,29 @@ def create_dash_app(server):
         ctx = callback_context
         if not ctx.triggered:
             raise exceptions.PreventUpdate
-
-        options = [item for item in ops.display_features_dict]
+        options = ops.available_readable_names
         if value != []:
-            options = list(set(options) | set([item for item in ops.db_name_dict]))
+            options = list(set(options) | set(ops.available_db_names))
         return options
-
-    @app.callback(
-        Output("download-client", "data"),
-        Output("input-modal", "opened"),
-        Input("download_client_button", "n_clicks"),
-        Input("save-button", "n_clicks"),
-        State("client", "data"),
-        State("user-session", "value"),
-        prevent_initial_call=True,
-    )
-    def download_client(download_client_button, save_button, data, value):
-        ctx = callback_context
-        if not ctx.triggered:
-            raise exceptions.PreventUpdate
-        triggered_id = callback_context.triggered[0]["prop_id"].split(".")[0]
-        if triggered_id == "download_client_button":
-            return None, True
-
-        client = json_to_ops(data)
-        client_json = ops_to_json(client)
-        if value == None:
-            value = date.today().strftime("%Y-%m-%d")
-        return dict(content=client_json, filename=f"{value}.json"), False
-
-    @app.callback(
-        Output("download-data", "data"),
-        Input("download_data_button", "n_clicks"),
-        State("main_graph", "figure"),
-        State("client", "data"),
-        prevent_initial_call=True,
-    )
-    def download_logic(n_clicks, currentFigure, data):
-        client = json_to_ops(data)
-        export_df = pd.DataFrame()
-        if currentFigure:  # Ensure the figure is not None
-            sub_features = [
-                i["name"] for i in currentFigure["data"] if i["visible"] == True
-            ]
-            export_df = client.df[sub_features]
-
-        buffer = io.StringIO()
-        export_df.reset_index(inplace=True)
-        export_df.rename(columns={"datetime": "Datetime (HB)"}, inplace=True)
-        export_df.to_csv(buffer, index=False, encoding="utf-8")
-        buffer.seek(0)
-
-        return dict(content=buffer.getvalue(), filename="data.csv")
 
     @app.callback(
         Output("collapse_expand_filter", "label"),
         Input("collapse_expand_filter", "value"),
+        prevent_initial_call=True,
     )
     def update_apply_filters(collapse_expand_filter):
-        ctx = callback_context
-        if not ctx.triggered:
-            raise exceptions.PreventUpdate
+
         return "Collapse" if collapse_expand_filter else "Expand"
 
     @app.callback(
         Output("date_filter_dropdown", "children"),
         Input("select_all_datefilter", "n_clicks"),
         State("date_filter_dropdown", "children"),
-        prevent_initial_call=True,  # Prevent initial callback call
+        prevent_initial_call=True,
     )
     def update_date_filter(select_all_datefilter, datefilter_dropdown):
         ctx = callback_context
-        if not ctx.triggered:
-            raise exceptions.PreventUpdate
+
         triggered_id = (
             ctx.triggered[0]["prop_id"].split(".")[0] if ctx.triggered else None
         )
@@ -309,51 +202,6 @@ def create_dash_app(server):
         return datefilter_dropdown
 
     @app.callback(
-        Output("hour_filter_buttons", "children"),
-        Output("year_dropdown_date_filter", "value"),
-        Output("month_dropdown_date_filter", "value"),
-        Output("day_dropdown_date_filter", "value"),
-        Input("restore_session", "data"),
-        State("client", "data"),
-    )
-    def reset_session_hourfilter(session, data):
-        ctx = callback_context
-        if not ctx.triggered:
-            raise exceptions.PreventUpdate
-        client = json_to_ops(data)
-        hour_filter_buttons = []
-        for hour in range(0, 24):
-            hour_filter_buttons.append(
-                html.Button(
-                    hour,  # Text displayed on the button
-                    id={
-                        "type": "hour_button",
-                        "index": hour,
-                    },  # Unique ID for the button
-                    n_clicks=0,  # Initial click count set to 0
-                    style={
-                        "backgroundColor": (
-                            "#d9d9d9" if hour in client.hour_filters else "white"
-                        )
-                    },  # Default background color
-                    className=hourButtonStyle,  # CSS class for styling the button
-                )
-            )
-        return (
-            hour_filter_buttons,
-            client.year_filters,
-            client.month_filters,
-            client.day_of_week_filters,
-        )
-
-    @app.callback(
-        Output("custon_operation", "value"),
-        Input("add_custom_feature", "n_clicks"),
-    )
-    def reset_custom_tab(add_custom_feature):
-        return ""
-
-    @app.callback(
         Output({"type": "hour_button", "index": ALL}, "style"),
         Input({"type": "hour_button", "index": ALL}, "n_clicks"),
         Input("apply_hour_range", "n_clicks"),
@@ -371,9 +219,9 @@ def create_dash_app(server):
         hour_button_style,
         hour_filter_slider,
     ):
+
         ctx = callback_context
-        if not ctx.triggered:
-            raise exceptions.PreventUpdate
+
         triggered_id = (
             ctx.triggered[0]["prop_id"].split(".")[0] if ctx.triggered else None
         )
@@ -418,80 +266,27 @@ def create_dash_app(server):
 
         return hour_button_style
 
-    import time
+    @app.callback(Output("cumulative_dropdown", "options"), Input("client", "data"))
+    def cumulative_dropdown(data):
+        client = json_to_ops_upload(data)
+        cumulative = [col for col in client.df.columns if "∑" in col]
+        return [
+            col
+            for col in client.df.columns
+            if not any(col in cum for cum in cumulative)
+        ]
 
     @app.callback(
-        Output({"type": "feature_dropdown", "index": ALL}, "options"),
-        Input("custom_feature_options", "data"),
-        State("custom_dropdown", "children"),
+        Output("delete_features_dropdown", "options"), Input("client", "data")
     )
-    def update_custom_dropdown_options(options, custom_dropdown):
-        output = []
-        for i in range(len(custom_dropdown) - 1):
-            output.append(options)
-        return output
-
-    @app.callback(
-        Output({"type": "feature_alias", "index": MATCH}, "value"),
-        Input({"type": "feature_dropdown", "index": MATCH}, "value"),
-        State({"type": "feature_alias", "index": MATCH}, "value"),
-        prevent_initial_call=True,
-    )
-    def update_custom_dropdown_alias(triggered_value, current_alias):
-        ctx = callback_context
-        if not ctx.triggered:
-            raise exceptions.PreventUpdate
-        if current_alias != "":
-            raise exceptions.PreventUpdate
-        return triggered_value
-
-    @app.callback(
-        Output("custom_dropdown", "children"),
-        Input({"type": "add_custom_alias", "index": ALL}, "n_clicks"),
-        Input("remove_last_alias", "n_clicks"),
-        Input("add_custom_feature", "n_clicks"),
-        Input("client", "data"),
-        State("custom_dropdown", "children"),
-        prevent_initial_call=True,
-    )
-    def custom_dropdown_children(
-        add_custom_alias,
-        remove_last_alias,
-        add_custom_feature,
-        data,
-        currentDropdownChildren,
-    ):
-        ctx = callback_context
-        triggered_id = (
-            ctx.triggered[0]["prop_id"].split(".")[0] if ctx.triggered else None
-        )
-
-        try:
-            if "type" in triggered_id:
-                triggered_id = eval(triggered_id)
-        except:
-            pass
-
-        if (
-            isinstance(triggered_id, dict)
-            and triggered_id.get("type") == "add_custom_alias"
-        ):
-            currentDropdownChildren = custom_features_children(
-                [], currentDropdownChildren
-            )
-
-        elif triggered_id == "remove_last_alias":
-            currentDropdownChildren = remove_features_children(currentDropdownChildren)
-
-        elif triggered_id == "add_custom_feature":
-            currentDropdownChildren = custom_features_children([], [])
-        return currentDropdownChildren
+    def delete_feature_dropdown(data):
+        client = json_to_ops_upload(data)
+        return client.df.columns
 
     @app.callback(
         Output("client", "data"),
         Output("main_graph", "figure"),
         Output("dynamic_div", "children"),
-        Output("custon_name", "value"),
         Output("feature_filter_dropdown", "options"),
         Output("feature_filter_dropdown", "value"),
         Output("feature_filter_min_range", "value"),
@@ -500,32 +295,25 @@ def create_dash_app(server):
         Output("notifications-container", "children"),
         Output("apply_filters", "value"),
         Output("collapse_expand_filter", "disabled"),
-        Output("custom_feature_options", "data"),
+        Output("init_columns", "data"),
+        Output("main_dropdown", "value"),
         # Inputs and states for callback
         Input("add_feature_button", "n_clicks"),
-        Input("delete_features_button", "n_clicks"),  # update_date_range_button
-        Input("update_date_range_button", "n_clicks"),
+        Input("delete_features_button", "n_clicks"),
+        Input("make_cumulative_button", "n_clicks"),
         Input("add_graph_button", "n_clicks"),
         Input({"type": "remove_button", "index": ALL}, "n_clicks"),
-        Input({"type": "dynamic-dropdown", "index": ALL}, "value"),
-        Input("add_custom_feature", "n_clicks"),
         Input("feature_filter_add", "n_clicks"),
         Input({"type": "feature_filter_remove", "index": ALL}, "n_clicks"),
         Input("apply_selection_hourfilter", "n_clicks"),
         Input("apply_filters", "value"),
         Input("collapse_expand_filter", "value"),
         Input("apply_selection_datefilter", "n_clicks"),
-        # Input("remove_last_alias", "n_clicks"),
         # Input({"type": "hour_button", "index": ALL}, "n_clicks"),
         State("main_dropdown", "value"),
-        State("delete_features_dropdown", "value"),
-        State("main-date-picker-range", "start_date"),
-        State("main-date-picker-range", "end_date"),
+        State("cumulative_dropdown", "value"),
         State("main_graph", "figure"),
         State("dynamic_div", "children"),
-        State("custom_dropdown", "children"),
-        State("custon_name", "value"),
-        State("custom_cumulative", "value"),
         State("feature_filter_dropdown", "options"),
         State("feature_filter_dropdown", "value"),
         State("feature_filter_min_range", "value"),
@@ -539,34 +327,25 @@ def create_dash_app(server):
         State("month_dropdown_date_filter", "value"),
         State("day_dropdown_date_filter", "value"),
         State("client", "data"),
-        State("custon_operation", "value"),
-        State({"type": "feature_alias", "index": ALL}, "value"),
-        State({"type": "feature_dropdown", "index": ALL}, "value"),
+        State("init_columns", "data"),
+        State("delete_features_dropdown", "value"),
     )
     def update_render(
         add_feature_button,
-        delete_feature_button,
-        update_date_range_button,
+        delete_features_button,
+        make_cumulative,
         add_button,
         remove_button,
-        dynamic_dropdown,
-        add_custom_feature,
         feature_filter_add,
         feature_filter_remove,
         apply_selection_hourfilter,
         apply_filters,
         collapse_expand_filter,
         apply_selection_datefilter,
-        # remove_last_alias,
         features,
-        delete_features_dropdown,
-        start_date,
-        end_date,
+        cumulative_dropdown,
         currentFigure,
         currentChildren,
-        currentDropdownChildren,
-        custom_name,
-        custom_cumulative,
         feature_filter_dropdown_opts,
         feature_filter_dropdown,
         feature_filter_min_range,
@@ -580,11 +359,11 @@ def create_dash_app(server):
         month_dropdown_date_filter_state,
         day_dropdown_date_filter_state,
         data,
-        custon_operation,
-        custom_alias,
-        custom_feature,
+        init_columns,
+        delete_features_dropdown,
     ):
-        client = json_to_ops(data)
+
+        client = json_to_ops_upload(data)
         notification = []
         ctx = callback_context
         triggered_id = (
@@ -597,13 +376,13 @@ def create_dash_app(server):
         except:
             pass
 
-        client.start_date = start_date
-        client.end_date = end_date
-
         if triggered_id == "add_feature_button":
             is_valid, message = validate_add_features(features)
             if is_valid:
-                client.add_db_data_features_button(features)
+                client.add_db_data_features_button(
+                    features, overwrite_df=True, init_columns=init_columns
+                )
+                print(client.df.columns)
                 currentFigure = bar_chart(
                     client,
                     None,
@@ -613,7 +392,9 @@ def create_dash_app(server):
                 currentChildren = multi_chart(
                     client, apply_filters_state != [], collapse_expand_filter_state
                 )
-                feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
+                feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(
+                    client, is_upload=True
+                )
             else:
                 notification = show_notification(message)
 
@@ -623,6 +404,7 @@ def create_dash_app(server):
             )
             if is_valid:
                 client.remove_data_features_button(delete_features_dropdown)
+                init_columns = list(set(init_columns) - set(delete_features_dropdown))
                 currentFigure = bar_chart(
                     client,
                     None,
@@ -632,21 +414,43 @@ def create_dash_app(server):
                 currentChildren = multi_chart(
                     client, apply_filters_state != [], collapse_expand_filter_state
                 )
-                feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
+                feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(
+                    client, is_upload=True
+                )
             else:
                 notification = show_notification(message)
 
-        if triggered_id == "update_date_range_button":
-            client.update_date_range_button(client.start_date, client.end_date)
+        if triggered_id == "make_cumulative_button":
+            alias_map = {cumulative_dropdown: cumulative_dropdown}
+            if cumulative_dropdown in init_columns:
+                session = session_features()
+                session.alias_map = alias_map
+                session.equation = cumulative_dropdown
+                session.feature_name = cumulative_dropdown
+                session.cumulative = True
+                new_col_name = f"({cumulative_dropdown})∑"
+                client.df[new_col_name] = client.create_custom_feature_column(
+                    client.df, session
+                )
+                client.update_datetimes_to_exclude()
+                client.update_filter_df()
+                init_columns.append(new_col_name)
+            else:
+                client.create_custom_feature_button(
+                    cumulative_dropdown, alias_map, True, cumulative_dropdown
+                )
+
             currentFigure = bar_chart(
                 client, None, apply_filters_state != [], collapse_expand_filter_state
             )
             currentChildren = multi_chart(
                 client, apply_filters_state != [], collapse_expand_filter_state
             )
-            feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
+            feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(
+                client, is_upload=True
+            )
 
-        elif triggered_id == "add_graph_button":
+        if triggered_id == "add_graph_button":
             sub_features = [
                 i["name"] for i in currentFigure["data"] if i["visible"] == True
             ]
@@ -655,6 +459,7 @@ def create_dash_app(server):
                 client, apply_filters_state != [], collapse_expand_filter_state
             )
 
+        # Remove graph when remove button is clicked
         elif (
             isinstance(triggered_id, dict)
             and triggered_id.get("type") == "remove_button"
@@ -663,30 +468,6 @@ def create_dash_app(server):
             currentChildren = multi_chart(
                 client, apply_filters_state != [], collapse_expand_filter_state
             )
-
-        elif triggered_id == "add_custom_feature":
-            alias_map = {}
-            custom_cumulative = len(custom_cumulative) == 2
-            for alias, feature in zip(custom_alias, custom_feature):
-                alias_map[alias] = feature
-            is_valid, message = validate_add_custom_feature(
-                client, custon_operation, alias_map, custom_name, custom_cumulative
-            )
-            if is_valid:
-                custom_name = None if custom_name == "" else custom_name
-                client.create_custom_feature_button(
-                    custon_operation, alias_map, custom_cumulative, custom_name
-                )
-                currentFigure = bar_chart(
-                    client,
-                    None,
-                    apply_filters_state != [],
-                    collapse_expand_filter_state,
-                )
-                feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
-                custom_name = ""
-            else:
-                notification = show_notification(message)
 
         if triggered_id == "feature_filter_add":
             is_valid, message, feature_filter_min_range, feature_filter_max_range = (
@@ -704,7 +485,9 @@ def create_dash_app(server):
                     feature_filter_max_range,
                 )
                 feature_filter_list = list_feature_filter(client)
-                feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
+                feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(
+                    client, is_upload=True
+                )
                 apply_filters_state = ["Apply filter"]
                 collapse_expand_filter_disabled = False
                 currentFigure = bar_chart(
@@ -728,7 +511,9 @@ def create_dash_app(server):
             index = triggered_id.get("index")
             client.remove_feature_filter_button(index)
             feature_filter_list = list_feature_filter(client)
-            feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
+            feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(
+                client, is_upload=True
+            )
             apply_filters_state = ["Apply filter"]
             collapse_expand_filter_disabled = False
             currentFigure = bar_chart(
@@ -799,21 +584,18 @@ def create_dash_app(server):
             )
 
         if not currentFigure:
-            return restore_session(
+            return restore_session_upload(
                 client,
                 apply_filters_state,
                 collapse_expand_filter_state,
                 collapse_expand_filter_disabled,
                 feature_filter_min_range,
                 feature_filter_max_range,
-                currentDropdownChildren,
             )
-
         return (
-            ops_to_json(client),
+            ops_to_json_upload(client),
             currentFigure,
             currentChildren,
-            custom_name,
             feature_filter_dropdown_opts,
             feature_filter_dropdown,
             feature_filter_min_range,
@@ -822,7 +604,8 @@ def create_dash_app(server):
             notification,
             apply_filters_state,
             collapse_expand_filter_disabled,
-            client.df.columns,
+            init_columns,
+            [],
         )
 
     return app
