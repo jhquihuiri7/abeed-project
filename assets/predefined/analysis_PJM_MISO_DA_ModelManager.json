@@ -1,0 +1,218 @@
+{
+    "start_date": "2025-05-21",
+    "end_date": "2025-05-24",
+    "session_data_features": {
+        "MI pj DA": {
+            "feature_name": "MI pj DA",
+            "id": "198f1ae7-42d3-47d7-933c-a12420f0ab83",
+            "db_name": "PJMC;lmp;da",
+            "requirements": [],
+            "equation": "",
+            "alias_map": {},
+            "units": "USD",
+            "cumulative": false
+        },
+        "PJ mi DA Model (Ensemble)": {
+            "feature_name": "PJ mi DA Model (Ensemble)",
+            "id": "2adafbeb-8bdd-48a8-a2c0-6681c8cecf72",
+            "db_name": "40523629.0;pjm_miso_ens;lmp_pred;da",
+            "requirements": [],
+            "equation": "",
+            "alias_map": {},
+            "units": "USD",
+            "cumulative": false
+        },
+        "PJ mi DA": {
+            "feature_name": "PJ mi DA",
+            "id": "15c5d498-3c2c-446b-ab24-83060b5b1b0a",
+            "db_name": "40523629.0;lmp;da",
+            "requirements": [],
+            "equation": "",
+            "alias_map": {},
+            "units": "USD",
+            "cumulative": false
+        },
+        "MI pj DA Model (Ensemble)": {
+            "feature_name": "MI pj DA Model (Ensemble)",
+            "id": "b483a925-43f3-4409-bda2-b92cd4cc2736",
+            "db_name": "PJMC;miso_pjm_ens;lmp_pred;da",
+            "requirements": [],
+            "equation": "",
+            "alias_map": {},
+            "units": "USD",
+            "cumulative": false
+        },
+        "MI Meteologica Load": {
+            "feature_name": "MI Meteologica Load",
+            "id": "433eac3b-4ac1-4e1b-90ee-563aa8e3c45c",
+            "db_name": "miso_load_total_mw",
+            "requirements": [],
+            "equation": "",
+            "alias_map": {},
+            "units": "MW",
+            "cumulative": false
+        },
+        "PJ Meteologica Load": {
+            "feature_name": "PJ Meteologica Load",
+            "id": "6c084e95-91f4-478e-96cd-6555323c3356",
+            "db_name": "pjm_load_total_mw",
+            "requirements": [],
+            "equation": "",
+            "alias_map": {},
+            "units": "MW",
+            "cumulative": false
+        },
+        "MI Meteologica Wind": {
+            "feature_name": "MI Meteologica Wind",
+            "id": "4d1f2d0c-f54b-4fc0-a81e-95c5bdbe8dab",
+            "db_name": "miso_wind_total_mw",
+            "requirements": [],
+            "equation": "",
+            "alias_map": {},
+            "units": "MW",
+            "cumulative": false
+        },
+        "PJ Meteologica Wind": {
+            "feature_name": "PJ Meteologica Wind",
+            "id": "ed912ea0-67ae-4c28-b247-60a53f64aea6",
+            "db_name": "pjm_wind_total_mw",
+            "requirements": [],
+            "equation": "",
+            "alias_map": {},
+            "units": "MW",
+            "cumulative": false
+        },
+        "PJ mi DA Model (Lasso)": {
+            "feature_name": "PJ mi DA Model (Lasso)",
+            "id": "b6642945-23a4-4308-89d2-7de9b5d16c22",
+            "db_name": "40523629.0;pjm_miso_las;lmp_pred;da",
+            "requirements": [],
+            "equation": "",
+            "alias_map": {},
+            "units": "USD",
+            "cumulative": false
+        },
+        "MI pj DA Model (Lasso)": {
+            "feature_name": "MI pj DA Model (Lasso)",
+            "id": "3f479057-1464-4aa3-a720-a0204ef7961d",
+            "db_name": "PJMC;miso_pjm_las;lmp_pred;da",
+            "requirements": [],
+            "equation": "",
+            "alias_map": {},
+            "units": "USD",
+            "cumulative": false
+        },
+        "PJ mi DA Model (XGBoost)": {
+            "feature_name": "PJ mi DA Model (XGBoost)",
+            "id": "31152a2c-9f83-46b3-826a-5a3446aa5439",
+            "db_name": "40523629.0;pjm_miso_xgb;lmp_pred;da",
+            "requirements": [],
+            "equation": "",
+            "alias_map": {},
+            "units": "USD",
+            "cumulative": false
+        },
+        "MI pj DA Model (XGBoost)": {
+            "feature_name": "MI pj DA Model (XGBoost)",
+            "id": "af38ceb5-aacd-49a7-b829-cc5da8218866",
+            "db_name": "PJMC;miso_pjm_xgb;lmp_pred;da",
+            "requirements": [],
+            "equation": "",
+            "alias_map": {},
+            "units": "USD",
+            "cumulative": false
+        }
+    },
+    "graphs": [
+        {
+            "graph_uid": "c493ade9-ab61-4565-856e-0d22023de2c8",
+            "graph_data_features": [
+                "MI Meteologica Wind",
+                "PJ Meteologica Wind"
+            ]
+        },
+        {
+            "graph_uid": "572c8686-3c0d-47ac-a8cf-c5599c253a77",
+            "graph_data_features": [
+                "MI Meteologica Load",
+                "PJ Meteologica Load"
+            ]
+        },
+        {
+            "graph_uid": "92f11660-4d1b-446f-a18d-dc5c7c9ad6bb",
+            "graph_data_features": [
+                "MI pj DA",
+                "MI pj DA Model (Ensemble)",
+                "MI pj DA Model (Lasso)",
+                "MI pj DA Model (XGBoost)"
+            ]
+        },
+        {
+            "graph_uid": "419c9315-b4ce-43ed-9b47-1b413354f2fb",
+            "graph_data_features": [
+                "PJ mi DA Model (Ensemble)",
+                "PJ mi DA",
+                "PJ mi DA Model (Lasso)",
+                "PJ mi DA Model (XGBoost)"
+            ]
+        }
+    ],
+    "hour_filters": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+    ],
+    "day_of_week_filters": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+    ],
+    "month_filters": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+    ],
+    "year_filters": [
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+    ],
+    "feature_filters": []
+}

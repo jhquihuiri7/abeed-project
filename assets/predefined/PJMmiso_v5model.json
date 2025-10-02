@@ -1,0 +1,113 @@
+{
+    "start_date": "2025-08-20",
+    "end_date": "2025-09-08",
+    "session_data_features": {
+        "40523629.0;v5.0.0;lmp_pred;da": {
+            "feature_name": "40523629.0;v5.0.0;lmp_pred;da",
+            "id": "8162a168-e22f-47e7-a379-534b9f53b8b0",
+            "db_name": "40523629.0;v5.0.0;lmp_pred;da",
+            "requirements": [],
+            "equation": "",
+            "alias_map": {},
+            "units": "USD",
+            "cumulative": false
+        },
+        "MISOpjm DA": {
+            "feature_name": "MISOpjm DA",
+            "id": null,
+            "db_name": null,
+            "requirements": [
+                "PJMC;v5.0.0;lmp_pred;da"
+            ],
+            "equation": "da",
+            "alias_map": {
+                "da": "PJMC;v5.0.0;lmp_pred;da"
+            },
+            "units": "USD",
+            "cumulative": false
+        },
+        "PJMC;v5.0.0;lmp_pred;da": {
+            "feature_name": "PJMC;v5.0.0;lmp_pred;da",
+            "id": "e8087545-767d-437d-ad89-eede3db06896",
+            "db_name": "PJMC;v5.0.0;lmp_pred;da",
+            "requirements": [],
+            "equation": "",
+            "alias_map": {},
+            "units": "USD",
+            "cumulative": false
+        },
+        "PJMmiso DA": {
+            "feature_name": "PJMmiso DA",
+            "id": null,
+            "db_name": null,
+            "requirements": [
+                "40523629.0;v5.0.0;lmp_pred;da"
+            ],
+            "equation": "PJMmiso DA",
+            "alias_map": {
+                "PJMmiso DA": "40523629.0;v5.0.0;lmp_pred;da"
+            },
+            "units": "USD",
+            "cumulative": false
+        }
+    },
+    "graphs": [],
+    "hour_filters": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+    ],
+    "day_of_week_filters": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+    ],
+    "month_filters": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+    ],
+    "year_filters": [
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+    ],
+    "feature_filters": []
+}

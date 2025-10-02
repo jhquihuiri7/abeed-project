@@ -1,9 +1,10 @@
 # Import custom styles from the styles module
-from styles.styles import button_style, hourButtonStyle
+from utils.styles import button_style, hourButtonStyle
 import dash_daq as daq
 
 # Import the HTML module from Dash
 from dash import html, dcc
+
 
 # Define a function to create a button using Dash
 def button(text, id, style):
@@ -20,11 +21,12 @@ def button(text, id, style):
     """
     # Create and return an HTML button with the given parameters
     return html.Button(
-        text,        # Text displayed on the button
-        id=id,       # Unique ID for the button
+        text,  # Text displayed on the button
+        id=id,  # Unique ID for the button
         n_clicks=0,  # Initial click count set to 0
-        className=style  # CSS class for styling the button
+        className=style,  # CSS class for styling the button
     )
+
 
 # Define a function to create a row of hour buttons
 def hourButton(hours):
@@ -45,15 +47,17 @@ def hourButton(hours):
                 id={"type": "hour_button", "index": hour},  # Unique ID for the button
                 n_clicks=0,  # Initial click count set to 0
                 style={"backgroundColor": "#d9d9d9"},  # Default background color
-                className=hourButtonStyle  # CSS class for styling the button
-            ) for hour in hours
+                className=hourButtonStyle,  # CSS class for styling the button
+            )
+            for hour in hours
         ],
         className="flex flex-row w-full justify-between",
-        id="hour_filter_buttons"# CSS class for layout styling
+        id="hour_filter_buttons",  # CSS class for layout styling
     )
 
+
 # Define a function to create a toggle switch for applying filters
-def apply_filters_toggle(action, is_upload = False):
+def apply_filters_toggle(action, is_upload=False):
     """
     Creates a toggle switch component for applying filters with an optional checklist.
 
@@ -63,7 +67,7 @@ def apply_filters_toggle(action, is_upload = False):
     Returns:
         dash.html.Div: A div containing a checklist and a toggle switch for filter application.
     """
-    
+
     return html.Div(
         children=[
             # Checklist to indicate whether the filters should be applied
@@ -71,21 +75,26 @@ def apply_filters_toggle(action, is_upload = False):
                 options=["Apply filter"],  # Option displayed in the checklist
                 value=[],  # Default value (unchecked)
                 className="mb-2",  # CSS class for margin styling
-                id="apply_filters" + ("_upload" if is_upload else "")  # ID for the checklist
+                id="apply_filters"
+                + ("_upload" if is_upload else ""),  # ID for the checklist
             ),
             # Toggle switch with a label
             html.Div(
                 daq.ToggleSwitch(
-                    id='collapse_expand_filter' + ("_upload" if is_upload else ""),  # Unique ID for the toggle switch
+                    id="collapse_expand_filter"
+                    + (
+                        "_upload" if is_upload else ""
+                    ),  # Unique ID for the toggle switch
                     value=True,  # Default value (enabled)
                     label=action,  # Label displayed next to the switch
-                    labelPosition='right',  # Position of the label
+                    labelPosition="right",  # Position of the label
                     color="#1975fa",  # Color of the toggle switch
-                    disabled=False if is_upload else False  # Disable interaction by default
+                    disabled=(
+                        False if is_upload else False
+                    ),  # Disable interaction by default
                 ),
-                className="ml-5 w-[150px]"  # CSS class for layout and width
-            )
+                className="ml-5 w-[150px]",  # CSS class for layout and width
+            ),
         ],
-        className="flex flex-col"  # CSS class for column layout
+        className="flex flex-col",  # CSS class for column layout
     )
-

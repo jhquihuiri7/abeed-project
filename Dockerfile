@@ -13,6 +13,8 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Random variable to prevent caching
+ARG RAND
 # Copy the Dash app code
 COPY . .
 
@@ -23,5 +25,13 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 8000
 #
 # Command to start both Nginx and the Dash app
-CMD ["sh", "-c", "service nginx start && python server.py"]
-# CMD ["sh", "-c", "python dash_app.py"]
+CMD ["sh", "-c", "nginx -g 'daemon off;' & python server.py"]
+
+
+# Build command
+# docker buildx build --build-arg RAND=$RANDOM -t dash_app .
+# Run command
+# docker run -d -p 8000:8000 dash_app
+# Build and run command
+# docker ps -q --filter "ancestor=dash_app:latest" | xargs -r docker stop && docker build --build-arg RAND=$RANDOM -t dash_app . && docker run --name dash_app --rm -d --network host dash_app:latest
+
