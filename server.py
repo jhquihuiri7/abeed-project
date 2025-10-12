@@ -4,32 +4,27 @@ from flask import (
     render_template,
     session,
     jsonify,
-    redirect,
-    url_for,
-    g,
 )
 from app import create_dash_app
 from app_upload import create_dash_upload_app
 import json
 from utils.functions import ops_to_json
 from backend.Class import Ops
-from datetime import date
-from utils.functions import json_to_ops, ops_to_json_upload
+from utils.functions import ops_to_json_upload
 import pandas as pd
 import io
 
-# We create the Flask application
 server = Flask(__name__)
 server.secret_key = "your_secret_key"
 
 app = create_dash_app(server)
 app_upload = create_dash_upload_app(server)
 
+uploaded_data = pd.DataFrame()
 
 @server.route("/")
 def launcher():
     return render_template("launcher.html")
-
 
 @server.route("/predefined/<file_name>")
 def predefined(file_name):
@@ -42,23 +37,17 @@ def predefined(file_name):
     except FileNotFoundError:
         return f"File {file_name} not found", 404
 
-
 @server.route("/save-json", methods=["POST"])
 def save_json():
     try:
-        # Get JSON data from the request body
         json_data = request.get_json()
 
-        # Optionally store it in session or process it
         session["json_data"] = json_data  # Store in Flask session
 
-        # Respond with success message
         return jsonify({"status": "success", "message": "OK"}), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 400
 
-
-# Flask function to render the home route
 @server.route("/home")
 def home():
     """
@@ -70,7 +59,6 @@ def home():
     if arg == "restore":
         try:
             new_app.layout.children[1].data = json_data
-
             return new_app.index()
         except json.JSONDecodeError:
             return "Invalid JSON format", 400
@@ -78,10 +66,6 @@ def home():
         empty_data = ops_to_json(Ops())
         new_app.layout.children[1].data = empty_data
         return new_app.index()
-
-
-uploaded_data = pd.DataFrame()
-
 
 @server.route("/save-csv", methods=["POST"])
 def home_upload():
@@ -101,7 +85,6 @@ def home_upload():
             uploaded_data.iloc[:, 0] = pd.to_datetime(uploaded_data.iloc[:, 0])
             uploaded_data.set_index(uploaded_data.columns[0], inplace=True)
 
-            # Enviar la respuesta con los datos procesados
             return jsonify({"message": "Archivo CSV recibido"}), 200
         except Exception as e:
             return (
@@ -109,16 +92,13 @@ def home_upload():
                 500,
             )
 
-    # Si no es un CSV válido
     return jsonify({"error": "Archivo no válido. Solo se aceptan archivos CSV."}), 400
 
-
-# Función para gestionar los datos y actualizar la aplicación de Dash
 @server.route("/custom_dash", methods=["GET"])
 def custom_dash():
     global uploaded_data
     new_app2 = app_upload
-    # Si 'data' contiene datos, actualizamos la app
+
     if not uploaded_data.empty:
         client = Ops()
         client.df = uploaded_data
@@ -126,13 +106,10 @@ def custom_dash():
         client.end_date = client.df.index.max()
         json_data = ops_to_json_upload(client)
         uploaded_data = pd.DataFrame()
-        # Aquí puedes actualizar la aplicación de Dash con los nuevos datos
         new_app2.layout.children[1].data = json_data
-
         return new_app2.index()
     else:
         return render_template("not_found.html")
 
-
 if __name__ == "__main__":
-    server.run(debug=False, host="0.0.0.0", port=8000)
+    server.run(debug=True, host="0.0.0.0", port=8000)

@@ -74,16 +74,20 @@ def expandable_container(toggle_button_id, expandable_text_id, client: Ops):
                 className="flex flex-row",
             ),
             html.Div(
-                html.Div(
+                children=[
                     html.Div(
-                        [
-                            html.Div(i, className="w-[300px] overflow-hidden mt-1")
-                            for i in client.db_name_dict
-                        ],
-                        className="flex flex-row flex-wrap justify-between",
-                    ),
-                    className="w-full h-fit shadows-lg",
-                ),
+                        html.Div(
+                            children = [],
+                            #[
+                            #    html.Div(i, className="w-[300px] overflow-hidden mt-1")
+                            #    for i in client.db_name_dict
+                            #],
+                            className="flex flex-row flex-wrap justify-between",
+                            #id=f"{expandable_text_id}_div",
+                        ),
+                        className="w-full h-fit shadows-lg",
+                    )
+                ],
                 id=expandable_text_id,
                 style={"display": "none"},
                 className="p-3 text-gray-700 shadow-lg rounded-lg",

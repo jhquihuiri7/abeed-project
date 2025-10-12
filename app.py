@@ -67,6 +67,7 @@ from utils.styles import button_style, hourButtonStyle
 # React version setting
 _dash_renderer._set_react_version("18.2.0")
 
+ops = Ops()
 
 def create_dash_app(server):
 
@@ -75,7 +76,6 @@ def create_dash_app(server):
 
     external_scripts = ["https://cdn.tailwindcss.com"]
 
-    ops = Ops()
     # Initialize the Dash app
     app = Dash(
         __name__,
@@ -168,14 +168,28 @@ def create_dash_app(server):
                 ],
             ),
             dcc.Store(id="client", data=ops_to_json(ops)),
+            dcc.Store(id="init_flag", data=False),
         ]
     )
+    @app.callback(
+        Output("init_flag", "data"),
+        Output("main_dropdown", "options", allow_duplicate=True),
+        Input("client", "data"),
+        State("init_flag", "data"),
+        prevent_initial_call='initil_duplicate'
+    )
+    def initial_call(client, init_flag):
+        global ops, books
+        if init_flag:  
+            raise exceptions.PreventUpdate
+        ops = Ops(load_features=True)
+        return True, [item for item in ops.display_features_dict]
 
     @app.callback(
         Output("delete_features_dropdown", "options"), Input("client", "data")
     )
     def delete_feature_dropdown(data):
-        client = json_to_ops(data)
+        client = json_to_ops(data, db_features_json=ops.db_features_json)
         return client.df.columns
 
     @app.callback(
@@ -186,8 +200,8 @@ def create_dash_app(server):
         State("client", "data"),
     )
     def restore_session_call(session, data):
-        client = json_to_ops(data)
-        return client.start_date, client.end_date, []  # OJO client.data_features
+        client = json_to_ops(data, db_features_json=ops.db_features_json)
+        return client.start_date, client.end_date, []  
 
     @app.callback(
         Output("main_dropdown", "options"),
@@ -214,13 +228,13 @@ def create_dash_app(server):
         prevent_initial_call=True,
     )
     def toggle_all_features(value):
+        global ops
         ctx = callback_context
         if not ctx.triggered:
             raise exceptions.PreventUpdate
-
         options = [item for item in ops.display_features_dict]
         if value != []:
-            options = list(set(options) | set([item for item in ops.db_name_dict]))
+            options = list(set(options) | set(ops.db_name_dict))
         return options
 
     @app.callback(
@@ -240,7 +254,7 @@ def create_dash_app(server):
         if triggered_id == "download_client_button":
             return None, True
 
-        client = json_to_ops(data)
+        client = json_to_ops(data, db_features_json=ops.db_features_json)
         client_json = ops_to_json(client)
         if value == None:
             value = date.today().strftime("%Y-%m-%d")
@@ -254,7 +268,7 @@ def create_dash_app(server):
         prevent_initial_call=True,
     )
     def download_logic(n_clicks, currentFigure, data):
-        client = json_to_ops(data)
+        client = json_to_ops(data, db_features_json=ops.db_features_json)
         export_df = pd.DataFrame()
         if currentFigure:  # Ensure the figure is not None
             sub_features = [
@@ -320,7 +334,7 @@ def create_dash_app(server):
         ctx = callback_context
         if not ctx.triggered:
             raise exceptions.PreventUpdate
-        client = json_to_ops(data)
+        client = json_to_ops(data, db_features_json=ops.db_features_json)
         hour_filter_buttons = []
         for hour in range(0, 24):
             hour_filter_buttons.append(
@@ -413,12 +427,10 @@ def create_dash_app(server):
             for index in range(hour_filter_slider[0], hour_filter_slider[1] + 1):
                 hour_button_style[index]["backgroundColor"] = (
                     "#d9d9d9" if triggered_id == "apply_hour_range" else "white"
-                )  # Toggle the background color when the hour button is clicked
+                )
             return hour_button_style
 
         return hour_button_style
-
-    import time
 
     @app.callback(
         Output({"type": "feature_dropdown", "index": ALL}, "options"),
@@ -584,7 +596,7 @@ def create_dash_app(server):
         custom_alias,
         custom_feature,
     ):
-        client = json_to_ops(data)
+        client = json_to_ops(data, db_features_json=ops.db_features_json)
         notification = []
         ctx = callback_context
         triggered_id = (
@@ -603,17 +615,22 @@ def create_dash_app(server):
         if triggered_id == "add_feature_button":
             is_valid, message = validate_add_features(features)
             if is_valid:
-                client.add_db_data_features_button(features)
-                currentFigure = bar_chart(
-                    client,
-                    None,
-                    apply_filters_state != [],
-                    collapse_expand_filter_state,
-                )
-                currentChildren = multi_chart(
-                    client, apply_filters_state != [], collapse_expand_filter_state
-                )
-                feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
+                try:
+                    client.add_db_data_features_button(features)
+                    currentFigure = bar_chart(
+                        client,
+                        None,
+                        apply_filters_state != [],
+                        collapse_expand_filter_state,
+                    )
+                    currentChildren = multi_chart(
+                        client, apply_filters_state != [], collapse_expand_filter_state
+                    )
+                    feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(client)
+                except ValueError as e:
+                    message = str(e)
+                    notification = show_notification(message)
+                
             else:
                 notification = show_notification(message)
 
