@@ -6,7 +6,6 @@ from datetime import date, timedelta
 import copy
 import numexpr as ne
 
-
 class Feature:
     # This class will be used to hold all features that are available in the database
     def __init__(self, id_input, db_name_input, display_name_input, units_input):
@@ -23,7 +22,6 @@ class Feature:
             display_name_input=qz_feature["display_name"],
             units_input=qz_feature["unit"],
         )
-
 
 class session_features:
     # This class will be used to hold the features that are in the session (from the database or created by the user)
@@ -80,20 +78,19 @@ class session_features:
         self.units = data.get("units", "")
         self.cumulative = data.get("cumulative", False)
 
-
 class Ops:
-    def __init__(self) -> None:
-        db_features_json = simple_request_entities("feature", 20000)
-        db_feature_list: list[Feature] = [
-            Feature.from_qz(qz_feature) for qz_feature in db_features_json
+    def __init__(self, load_features=False, db_features_json = {}) -> None:
+        self.db_features_json = simple_request_entities("feature", 20000) if load_features else db_features_json
+        self.db_feature_list: list[Feature] = [
+            Feature.from_qz(qz_feature) for qz_feature in self.db_features_json
         ]
         self.display_features_dict = {
-            f.display_name: f for f in db_feature_list if f.display_name
+            f.display_name: f for f in self.db_feature_list if f.display_name
         }
         self.db_name_to_display_names_dict = {
-            f.db_name: f.display_name for f in db_feature_list if f.display_name
+            f.db_name: f.display_name for f in self.db_feature_list if f.display_name
         }
-        self.db_name_dict = {f.db_name: f for f in db_feature_list}
+        self.db_name_dict = {f.db_name: f for f in self.db_feature_list}
 
         # Start date for the range of dates the user wants data for
         self.start_date = date.today() - timedelta(7)
@@ -168,6 +165,8 @@ class Ops:
                     False,
                 )
             self.session_data_features[feature] = feature_obj
+            for k, v in self.session_data_features.items():
+                print(k," =",v)
 
         self.update_data(overwrite_df, init_columns)
         # after running this function we need to update the graph's to reflect the updated self.df, self.filter_df
@@ -309,17 +308,28 @@ class Ops:
             for value in self.session_data_features.values()
             if value.equation == ""
         ]
-
         current_df = self.df.copy()
         self.df = simple_feature_request(
             self.start_date, self.end_date, db_session_features
         )[0]
-        self.df.rename(columns=self.db_name_to_display_names_dict, inplace=True)
+
+        rename_dict = {}
+        for feature in self.session_data_features:
+            if feature in self.display_features_dict:
+                rename_dict[self.display_features_dict[feature].db_name] = feature
+        #self.db_name_to_display_names_dict
+        self.df.rename(columns=rename_dict, inplace=True)
         if overwrite_df:
             init_columns = list(
                 set(init_columns) - set(self.session_data_features.keys())
             )
             self.df = pd.concat([current_df[init_columns], self.df], axis=1)
+        features_to_remove = set([feature for feature in self.session_data_features]) - set(self.df.columns.tolist())
+        features_to_remove = [feature for feature in features_to_remove if self.session_data_features[feature].equation == ""]
+        if features_to_remove:
+            for feature in features_to_remove:
+                del self.session_data_features[feature]
+            raise ValueError(f"No data for {', '.join(features_to_remove)} in the selected date range")
 
     def update_created_data_features(self):
         dependent_features = [
@@ -356,8 +366,6 @@ class Ops:
         self.update_filter_df()
 
         # after running this function we need to update the graph's to reflect the updated self.df, self.filter_df and self.datetimes_to_exclude values
-
-    # TODO Done
 
     def update_datetime_filters(
         self,
@@ -412,12 +420,9 @@ class Ops:
 
         for datetimes in self.datetimes_to_exclude:
             self.filter_df = self.filter_df.drop(datetimes)
-
         for feature in self.session_data_features:
-            if (
-                self.session_data_features[feature].feature_name
-                not in self.filter_df.columns.to_list()
-            ):
+            
+            if self.session_data_features[feature].feature_name not in self.filter_df.columns.to_list():
                 self.filter_df[self.session_data_features[feature].feature_name] = (
                     self.create_custom_feature_column(
                         self.filter_df.copy(), self.session_data_features[feature]
@@ -460,6 +465,7 @@ class Ops:
         local_dict = {
             var: df[feature].values for var, feature in variable_map.items()
         }  # TODO does not work with filter_df_implementation when trying to recalculate cumulative features because it always calculates based on the self.df, not the self.filter_df
+        #print("EQUATION",equation, "LOCAL DICT",local_dict)
         result = ne.evaluate(equation, local_dict)
         if session_feature_obj.cumulative:
             np.nan_to_num(result, nan=0, copy=False)

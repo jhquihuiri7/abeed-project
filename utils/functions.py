@@ -111,7 +111,7 @@ def ops_to_json(session: Ops):
     return json.dumps(filtered_data, default=default_serializer, indent=4)
 
 
-def json_to_ops(json_data):
+def json_to_ops(json_data, db_features_json = {}):
     # Ensure `json_data` is parsed into a dictionary
     if isinstance(json_data, str):  # If it's a string, parse it
         data = json.loads(json_data)
@@ -121,7 +121,7 @@ def json_to_ops(json_data):
         raise TypeError("Input data must be a JSON string or dictionary.")
 
     # Create a new instance of Ops
-    ops_instance = Ops()
+    ops_instance = Ops(db_features_json=db_features_json)
 
     # Parse start_date and end_date as date objects
     date_format = "%Y-%m-%d"  # Adjust this format to match the input date strings
@@ -200,7 +200,7 @@ def ops_to_json_upload(session: Ops):
     return json.dumps(filtered_data, indent=4)
 
 
-def json_to_ops_upload(json_data):
+def json_to_ops_upload(json_data, db_features_json = {}):
     # Ensure `json_data` is parsed into a dictionary
     if isinstance(json_data, str):  # If it's a string, parse it
         data = json.loads(json_data)
@@ -221,7 +221,7 @@ def json_to_ops_upload(json_data):
         raise TypeError("Input data must be a JSON string or dictionary.")
 
     # Create a new instance of Ops
-    ops_instance = Ops()
+    ops_instance = Ops(db_features_json=db_features_json)
 
     session_dict = data.get("session_data_features")
     session_features_dict: dict[str, session_features] = {}

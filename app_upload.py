@@ -17,8 +17,6 @@ from components.dropdown_components import (
     delete_features_dropdown,
 )
 
-
-# Utilities
 from utils.restore_session import restore_session_upload
 from utils.logic_functions import (
     validateFeatureFilterData,
@@ -29,16 +27,13 @@ from utils.logic_functions import (
     validate_add_features,
 )
 from utils.functions import ops_to_json_upload, json_to_ops_upload, list_feature_filter
-
-# Backend
 from backend.Class import Ops, session_features
-
-# Styles
 from utils.styles import button_style
 
 # React version setting
 _dash_renderer._set_react_version("18.2.0")
 
+ops = Ops()
 
 def create_dash_upload_app(server):
 
@@ -47,7 +42,6 @@ def create_dash_upload_app(server):
 
     external_scripts = ["https://cdn.tailwindcss.com"]
 
-    ops = Ops()
     # Initialize the Dash app
     app = Dash(
         __name__,
@@ -127,8 +121,23 @@ def create_dash_upload_app(server):
             ),
             dcc.Store(id="client", data=ops_to_json_upload(ops)),
             dcc.Store(id="init_columns", data=[]),
+            dcc.Store(id="init_flag", data=False),
         ]
     )
+
+    @app.callback(
+        Output("init_flag", "data"),
+        Output("main_dropdown", "options", allow_duplicate=True),
+        Input("client", "data"),
+        State("init_flag", "data"),
+        prevent_initial_call='initil_duplicate'
+    )
+    def initial_call(client, init_flag):
+        global ops, books
+        if init_flag:  
+            raise exceptions.PreventUpdate
+        ops = Ops(load_features=True)
+        return True, [item for item in ops.display_features_dict]
 
     @app.callback(
         Output("main_dropdown", "options"),
@@ -142,12 +151,10 @@ def create_dash_upload_app(server):
         ctx = callback_context
         if not ctx.triggered:
             raise exceptions.PreventUpdate
-        options = ops.available_readable_names
+        options = [item for item in ops.display_features_dict]
         if n_clicks % 2 == 1:
             if expandable_text_primary["display"] == "block":
-                options = list(
-                    set(ops.available_readable_names) | set(ops.available_db_names)
-                )
+                options = list(set(options) | set([item for item in ops.db_name_dict]))
             return options, {"display": "block"}, "Collapse Feature Menu"
         return options, {"display": "none"}, "Expand Feature Menu"
 
@@ -157,12 +164,14 @@ def create_dash_upload_app(server):
         prevent_initial_call=True,
     )
     def toggle_all_features(value):
+        global ops
         ctx = callback_context
         if not ctx.triggered:
             raise exceptions.PreventUpdate
-        options = ops.available_readable_names
+        options = [item for item in ops.display_features_dict]
+        ops.a
         if value != []:
-            options = list(set(options) | set(ops.available_db_names))
+            options = list(set(options) | set(ops.db_name_dict))
         return options
 
     @app.callback(
@@ -171,7 +180,9 @@ def create_dash_upload_app(server):
         prevent_initial_call=True,
     )
     def update_apply_filters(collapse_expand_filter):
-
+        ctx = callback_context
+        if not ctx.triggered:
+            raise exceptions.PreventUpdate
         return "Collapse" if collapse_expand_filter else "Expand"
 
     @app.callback(
@@ -182,7 +193,8 @@ def create_dash_upload_app(server):
     )
     def update_date_filter(select_all_datefilter, datefilter_dropdown):
         ctx = callback_context
-
+        if not ctx.triggered:
+            raise exceptions.PreventUpdate
         triggered_id = (
             ctx.triggered[0]["prop_id"].split(".")[0] if ctx.triggered else None
         )
@@ -268,7 +280,7 @@ def create_dash_upload_app(server):
 
     @app.callback(Output("cumulative_dropdown", "options"), Input("client", "data"))
     def cumulative_dropdown(data):
-        client = json_to_ops_upload(data)
+        client = json_to_ops_upload(data, db_features_json=ops.db_features_json)
         cumulative = [col for col in client.df.columns if "∑" in col]
         return [
             col
@@ -280,7 +292,7 @@ def create_dash_upload_app(server):
         Output("delete_features_dropdown", "options"), Input("client", "data")
     )
     def delete_feature_dropdown(data):
-        client = json_to_ops_upload(data)
+        client = json_to_ops_upload(data, db_features_json=ops.db_features_json)
         return client.df.columns
 
     @app.callback(
@@ -363,7 +375,7 @@ def create_dash_upload_app(server):
         delete_features_dropdown,
     ):
 
-        client = json_to_ops_upload(data)
+        client = json_to_ops_upload(data, db_features_json=ops.db_features_json)
         notification = []
         ctx = callback_context
         triggered_id = (
@@ -379,22 +391,26 @@ def create_dash_upload_app(server):
         if triggered_id == "add_feature_button":
             is_valid, message = validate_add_features(features)
             if is_valid:
-                client.add_db_data_features_button(
-                    features, overwrite_df=True, init_columns=init_columns
-                )
-                print(client.df.columns)
-                currentFigure = bar_chart(
-                    client,
-                    None,
-                    apply_filters_state != [],
-                    collapse_expand_filter_state,
-                )
-                currentChildren = multi_chart(
-                    client, apply_filters_state != [], collapse_expand_filter_state
-                )
-                feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(
-                    client, is_upload=True
-                )
+                try:
+                    client.add_db_data_features_button(
+                        features, overwrite_df=True, init_columns=init_columns
+                    )
+                    currentFigure = bar_chart(
+                        client,
+                        None,
+                        apply_filters_state != [],
+                        collapse_expand_filter_state,
+                    )
+                    currentChildren = multi_chart(
+                        client, apply_filters_state != [], collapse_expand_filter_state
+                    )
+                    feature_filter_dropdown_opts = get_feature_filter_dropdown_opts(
+                        client, is_upload=True
+                    )
+                except ValueError as e:
+                    message = str(e)
+                    notification = show_notification(message)
+                
             else:
                 notification = show_notification(message)
 
