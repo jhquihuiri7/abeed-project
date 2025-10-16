@@ -303,12 +303,24 @@ class Ops:
         # after running this function we need to update the component that displays all the graphs in the self.graphs value
 
     def update_db_data_features(self, overwrite_df=False, init_columns=[]):
+
+        current_df = self.df.copy()
+
+        features_to_remove = []
+        for feature in self.session_data_features:
+            if feature in self.display_features_dict:
+                if self.display_features_dict[feature].db_name in self.session_data_features:
+                    features_to_remove.append(self.display_features_dict[feature].db_name)
+                    
+        for feature in features_to_remove:
+            del self.session_data_features[feature]
+
         db_session_features = [
             value.db_name
             for value in self.session_data_features.values()
             if value.equation == ""
         ]
-        current_df = self.df.copy()
+
         self.df = simple_feature_request(
             self.start_date, self.end_date, db_session_features
         )[0]
@@ -317,7 +329,7 @@ class Ops:
         for feature in self.session_data_features:
             if feature in self.display_features_dict:
                 rename_dict[self.display_features_dict[feature].db_name] = feature
-        #self.db_name_to_display_names_dict
+
         self.df.rename(columns=rename_dict, inplace=True)
         if overwrite_df:
             init_columns = list(
