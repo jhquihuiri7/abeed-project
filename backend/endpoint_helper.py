@@ -11,7 +11,7 @@ import os
 
 
 def simple_feature_request(
-    start_date: str, end_date: str, features: List[str], parse: bool = True
+    start_date: str, end_date: str, features: List[str], freq: str, parse: bool = True
 ):
     """
     Requests feature data for a specified date range and features.
@@ -24,7 +24,7 @@ def simple_feature_request(
     Returns:
         pd.DataFrame: A dataframe containing the requested feature data.
     """
-    fv_request = FeatureRequest(start_date, end_date, features)
+    fv_request = FeatureRequest(start_date, end_date, features, freq)
     meta_payload = MetaPayload([fv_request])
     base_url = "https://quantum-zero-dev-eu8cy.ondigitalocean.app"
     endpoint = "/bulk/policies"
@@ -254,16 +254,19 @@ class FeatureRequest:
         features (List[str]): A list of features to be requested.
     """
 
-    def __init__(self, start_date: str, end_date: str, features: List[str]):
+    def __init__(self, start_date: str, end_date: str, features: List[str], freq: str = "h"):
         self.start_date = start_date
         self.end_date = end_date
         self.features = features
+        self.freq = freq
+        if freq not in ["h", "5min"]:
+            raise ValueError("Frequency must be 'h' for hourly or '5min' for 5-minute intervals.")
 
     def to_dict(self) -> Dict[str, List[str]]:
         datetimes = pd.date_range(
             start=self.start_date,
             end=pd.to_datetime(self.end_date) + pd.Timedelta(hours=23),
-            freq="h",
+            freq=self.freq,
         )
         datetimes_as_string = [
             datetime.strftime("%Y-%m-%dT%H:%M:%S%z")

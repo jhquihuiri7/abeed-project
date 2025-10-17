@@ -322,7 +322,7 @@ class Ops:
         ]
 
         self.df = simple_feature_request(
-            self.start_date, self.end_date, db_session_features
+            self.start_date, self.end_date, db_session_features, 'h'
         )[0]
 
         rename_dict = {}
