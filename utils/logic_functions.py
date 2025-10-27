@@ -30,6 +30,8 @@ def contains_both_axis(client: Ops, cols):
     units = []
     for column in cols:
         unit = get_unit(client, column)  # get_unit(client, column)
+        if unit == "CAD":
+            unit = "USD"
         units.append(unit)
     # Extract unique units from the feature_units_dict for the given columns
     units = set(units)
