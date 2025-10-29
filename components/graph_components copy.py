@@ -66,13 +66,12 @@ def bar_chart(
         max_val = max(data[column])
         unit = get_unit(client, column)
 
-        units = next(
-            (getattr(d.get(column), "units", None) for d in (client.db_name_dict, client.display_features_dict) if getattr(d.get(column), "units", None) == "CAD"),
-            None
-        )
-
-        if units == "CAD":
-            continue
+        try:
+            if client.db_name_dict[column].units == "CAD" or client.display_features_dict[column].units == "CAD":
+                colname = column + " (USD)"
+                unit = "USD"
+        except:
+            pass
 
         # Append the value to the appropriate axis based on the feature's unit
         (

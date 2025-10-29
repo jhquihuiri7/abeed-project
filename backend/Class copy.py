@@ -209,7 +209,7 @@ class Ops:
 
         if cumulative_input:
             custom_name_input = f"({custom_name_input})∑"
-        
+
         self.create_custom_feature(
             equation_input, alias_map_input, custom_name_input, cumulative_input
         )
@@ -248,6 +248,7 @@ class Ops:
 
         # after running this function we need to update the graph's to reflect the updated self.filter_df and self.datetimes_to_exclude values
 
+    # TODO Done
     def add_feature_filter_button(
         self, feature_name: str, lower_bound: float, upper_bound: float
     ):
@@ -270,6 +271,7 @@ class Ops:
         # after running this function we need to update the graph's to reflect the updated self.filter_df and self.datetimes_to_exclude values
         #   - Also need to update the list of feature filters displayed on the feature filter tab
 
+    # TODO Done
     def remove_feature_filter_button(self, target_uuid: str):
         self.feature_filters = [
             filters
@@ -282,6 +284,7 @@ class Ops:
         # after running this function we need to update the graph's to reflect the updated self.filter_df and self.datetimes_to_exclude values
         #   - Also need to update the list of feature filters displayed on the feature filter tab
 
+    # TODO Done
     def add_graph_button(self, features_list: list[str]):
         new_graph = {
             "graph_uid": str(uuid.uuid4()),
@@ -291,6 +294,7 @@ class Ops:
 
         # after running this function we need to update the component that displays all the graphs in the self.graphs value
 
+    # TODO Done
     def remove_graph_button(self, target_uuid: str):
         self.graphs = [
             graphs for graphs in self.graphs if graphs["graph_uid"] != target_uuid
@@ -316,33 +320,31 @@ class Ops:
             for value in self.session_data_features.values()
             if value.equation == ""
         ]
+        print(db_session_features)
         self.df = simple_feature_request(
-            self.start_date, self.end_date, db_session_features, 'h'
+            self.start_date, self.end_date, db_session_features
         )[0]
         
+        #exchange_rate = self.df["fx_usd_cad"]
+        #self.df = self.df.drop("fx_usd_cad", axis=1)
+        
+        features_to_convert = []
+        for feature in db_session_features:
+            try:
+                if self.db_name_dict[feature].units == "CAD":
+                    features_to_convert.append(feature)
+            except:
+                pass
+
         rename_dict = {}
-        custom_features_to_add = []
         for feature in self.session_data_features:
-            for source_dict in (self.db_name_dict, self.display_features_dict):
-                units = getattr(source_dict.get(feature), "units", None)
-                if units == "CAD":
-                    feature_obj = session_features()
-                    feature_obj.read_data(
-                        f"{feature} (USD)",
-                        None,
-                        None,
-                        [feature],
-                        f"{feature}",
-                        {feature:feature},
-                        "USD",
-                        False
-                    )
-                    custom_features_to_add.append(feature_obj)
             if feature in self.display_features_dict:
                 rename_dict[self.display_features_dict[feature].db_name] = feature
-        for feature_obj in custom_features_to_add:
-            self.session_data_features[feature_obj.feature_name] = feature_obj
-
+        
+        for feature in features_to_convert:
+            new_feature = f"{feature} (USD)"
+            #self.session_data_features[new_feature].units = "USD"
+            
         self.df.rename(columns=rename_dict, inplace=True)
         if overwrite_df:
             init_columns = list(
@@ -350,6 +352,8 @@ class Ops:
             )
             self.df = pd.concat([current_df[init_columns], self.df], axis=1)
         
+        print(self.df)
+
         features_to_remove = set([feature for feature in self.session_data_features]) - set(self.df.columns.tolist())
         features_to_remove = [feature for feature in features_to_remove if self.session_data_features[feature].equation == ""]
         if features_to_remove:
@@ -488,12 +492,6 @@ class Ops:
             variable_map[new_key] = feature
             equation = equation.replace(alias, new_key)
 
-        for source_dict in (self.db_name_dict, self.display_features_dict):
-                units = getattr(source_dict.get(feature), "units", None)
-                if units == "CAD":
-                    converted_df = conversion_rate_features(df_features=self.df, columns_to_convert=[feature])
-                    df[feature] = converted_df[feature]
-
         local_dict = {
             var: df[feature].values for var, feature in variable_map.items()
         }  # TODO does not work with filter_df_implementation when trying to recalculate cumulative features because it always calculates based on the self.df, not the self.filter_df
@@ -501,7 +499,7 @@ class Ops:
         result = ne.evaluate(equation, local_dict)
         if session_feature_obj.cumulative:
             np.nan_to_num(result, nan=0, copy=False)
-            result = result.cumsum()   
+            result = result.cumsum()
 
         return result
 

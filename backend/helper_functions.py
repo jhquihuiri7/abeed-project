@@ -1,11 +1,50 @@
 import pandas as pd
-from datetime import datetime
+from datetime import timedelta
+
 from backend.db_dictionaries import feature_units_dict
 import numpy as np
 from scipy.stats import linregress
 import plotly.express as px
 import plotly.graph_objects as go
+from backend.endpoint_helper import simple_feature_request
 
+def fill_missing_days(df: pd.DataFrame, start_date: str, end_date: str) -> pd.DataFrame:
+    first_dt = df.index[0]
+    time = first_dt.time()
+    tz = first_dt.tz
+    
+    full_days = pd.date_range(start=start_date, end=end_date, freq="D")
+    full_range = [
+        pd.Timestamp.combine(d.date(), time).tz_localize(tz)
+        for d in full_days
+    ]
+    df_filled = df.reindex(full_range).ffill()
+    return df_filled
+
+def conversion_rate_features(df_features, columns_to_convert):
+    start_date = (df_features.index.min() - timedelta(days=5)).strftime("%Y-%m-%d")
+    end_date = df_features.index.max().strftime("%Y-%m-%d")
+    df_conversion = simple_feature_request(start_date, end_date, ["fx_usd_cad"], freq="5min", parse=True)[0]
+    df_conversion = fill_missing_days(df_conversion, start_date, end_date)
+    df_features = df_features.copy()
+    df_conversion.index = pd.to_datetime(df_conversion.index)
+    df_features.index = pd.to_datetime(df_features.index)
+    
+    df_conversion['date'] = df_conversion.index.date
+    df_features['date'] = df_features.index.date
+    
+    fx_col = df_conversion.columns[0]
+    merged = df_features.merge(df_conversion[['date', fx_col]], on='date', how='left')
+    
+    converted = merged.copy()
+    for col in columns_to_convert:
+        if col in converted.columns:
+            converted[col] = converted[col] / converted[fx_col]
+    
+    converted.index = df_features.index
+    converted = converted.drop(columns=['date','fx_usd_cad'])
+    
+    return converted
 
 def convert_df_to_dict(df):
     """
